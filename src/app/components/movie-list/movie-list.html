@@ -1,0 +1,41 @@
+<section class="movie-list">
+  <h1>Películas</h1>
+
+  <input
+    type="text"
+    placeholder="Buscar películas..."
+    [value]="searchTerm()"
+    (input)="searchTerm.set($any($event.target).value)"
+  >
+
+  <select
+    [value]="selectedGenre()"
+    (change)="selectedGenre.set($any($event.target).value)"
+  >
+    @for (genre of genres(); track genre) {
+      <option [value]="genre">{{ genre }}</option>
+    }
+  </select>
+
+  <select
+    [value]="sortOrder()"
+    (change)="sortOrder.set($any($event.target).value)"
+    aria-label="Ordenar películas por año">
+    
+    <option value="newest">Más recientes primero</option>
+    <option value="oldest">Más antiguas primero</option>
+  </select>
+
+  <div class="movie-grid">
+    @for (movie of filteredMovies(); track movie.id) {
+      <app-movie-card
+        [id]="movie.id"
+        [title]="movie.title"
+        [poster]="movie.poster"
+        [alt]="movie.alt"
+        [year]="movie.year"
+        (selected)="openMovie($event)"
+      />
+    }
+  </div>
+</section>

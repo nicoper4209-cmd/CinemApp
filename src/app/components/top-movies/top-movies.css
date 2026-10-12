@@ -1,0 +1,114 @@
+
+.top-movies {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 56px 32px;
+  color: #242424;
+}
+
+.top-header {
+  margin-bottom: 48px;
+}
+
+.eyebrow,
+.top-label {
+  color: #888;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+}
+
+.top-header h1 {
+  margin: 12px 0;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  line-height: 1.1;
+  letter-spacing: -2px;
+}
+
+.subtitle {
+  color: #777;
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.top-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 32px;
+}
+
+.top-card {
+  position: relative;
+  min-width: 0;
+}
+
+.top-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 10px;
+  background: #eee;
+}
+
+.ranking {
+  position: absolute;
+  z-index: 1;
+  top: 12px;
+  left: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #fff;
+  color: #242424;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.top-info {
+  padding-top: 16px;
+}
+
+.top-label {
+  margin: 0 0 8px;
+}
+
+.top-info h2 {
+  margin: 0 0 8px;
+  font-size: 1.35rem;
+  letter-spacing: -0.5px;
+}
+
+.movie-year {
+  margin: 0 0 12px;
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.movie-overview {
+  margin: 0;
+  color: #666;
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+@media (max-width: 800px) {
+  .top-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+}
+
+@media (max-width: 520px) {
+  .top-movies {
+    padding: 32px 20px;
+  }
+
+  .top-grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+
+  .top-card img {
+    max-height: 480px;
+  }
+}

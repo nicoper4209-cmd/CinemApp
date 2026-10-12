@@ -1,0 +1,61 @@
+.movie-list {
+  padding: 24px;
+}
+
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 24px;
+}
+
+
+/* Buscador y filtros */
+.movie-list > input,
+.movie-list > select {
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  box-sizing: border-box;
+  margin: 16px 0;
+  padding: 12px 16px;
+
+  border: 1px solid #d6d6d6;
+  border-radius: 8px;
+
+  background-color: #fff;
+  color: #242424;
+
+  font-family: inherit;
+  font-size: 0.95rem;
+
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* Buscador */
+.movie-list > input::placeholder {
+  color: #999;
+}
+
+/* Selector de género */
+.movie-list > select {
+  max-width: 260px;
+  cursor: pointer;
+}
+
+/* Estado de foco */
+.movie-list > input:focus,
+.movie-list > select:focus {
+  border-color: #555;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
+}
+
+/* Adaptación para móviles */
+@media (max-width: 600px) {
+  .movie-list > input,
+  .movie-list > select {
+    max-width: 100%;
+  }
+}

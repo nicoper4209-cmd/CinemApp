@@ -1,0 +1,28 @@
+<main class="top-movies">
+  <header class="top-header">
+    <p class="eyebrow">MI SELECCIÓN PERSONAL</p>
+    <h1>Las 3 mejores películas</h1>
+    <p class="subtitle">
+      Tres películas que merecen un lugar especial.
+    </p>
+  </header>
+
+  <section class="top-grid">
+    @for (movie of topMovies; track movie.id; let i = $index) {
+      <article class="top-card">
+        <span class="ranking">0{{ i + 1 }}</span>
+
+        <img [src]="movie.poster" [alt]="movie.alt">
+
+        <div class="top-info">
+          <p class="top-label">PUESTO {{ i + 1 }}</p>
+          <h2>{{ movie.title }}</h2>
+          <p class="movie-year">
+            {{ movie.year }} · {{ movie.genre }}
+          </p>
+          <p class="movie-overview">{{ movie.overview }}</p>
+        </div>
+      </article>
+    }
+  </section>
+</main>

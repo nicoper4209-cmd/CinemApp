@@ -1,0 +1,22 @@
+@if (movie(); as movie) {
+  <main class="movie-detail">
+    <img [src]="movie.poster" [alt]="movie.alt">
+
+    <section>
+    <h1>{{ movie.title }}</h1>
+    <div class="movie-meta">
+      <span>{{ movie.year }}</span>
+      <span>{{ movie.genre }}</span>
+      <span class="movie-rating">
+        {{ movie.rating.toFixed(1) }}
+      </span>
+    </div>
+    <p class="movie-overview">{{ movie.overview }}</p>
+    <a routerLink="/movies">Volver al catálogo</a>
+    </section>
+
+  </main>
+} @else {
+  <p>Película no encontrada.</p>
+  <a routerLink="/movies">Volver al catálogo</a>
+}
