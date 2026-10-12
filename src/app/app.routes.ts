@@ -7,6 +7,6 @@ export const routes: Routes = [
     {path:'top',component:TopMovies},
     {path:'movies',component:MovieList},
     {path:'movies/:id',component:MovieDetail},
-    {path:'',redirectTo:'movies',pathMatch:'full'},
-    {path:'**',redirectTo:'movies'}
+    {path:'',redirectTo:'top',pathMatch:'full'},
+    {path:'**',redirectTo:'top'}
 ];
