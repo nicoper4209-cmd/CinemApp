@@ -19,11 +19,11 @@
 
   <select
     [value]="sortOrder()"
-    (change)="sortOrder.set($any($event.target).value)"
-    aria-label="Ordenar películas por año">
-    
-    <option value="newest">Más recientes primero</option>
-    <option value="oldest">Más antiguas primero</option>
+    (change)="sortOrder.set($any($event.target).value)">
+    <option value="newest">Más recientes</option>
+    <option value="oldest">Más antiguas</option>
+    <option value="alphabetical">Alfabético (A–Z)</option>
+    <option value="alphabetical-reverse">Alfabético (Z–A)</option>
   </select>
 
   <div class="movie-grid">

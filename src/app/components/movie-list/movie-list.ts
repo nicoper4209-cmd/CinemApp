@@ -37,15 +37,22 @@ export class MovieList {
           genre === 'Todos' || movie.genre === genre;
 
         return matchesTitle && matchesGenre;
-      })
-      .sort((a, b) => {
-        const yearA = Number(a.year);
-        const yearB = Number(b.year);
+      })      
+  .sort((a, b) => {
+    if (order === 'alphabetical') {
+      return a.title.localeCompare(b.title);
+    }else if(order === 'alphabetical-reverse'){
+      return b.title.localeCompare(a.title);
+    }
 
-        return order === 'newest'
-          ? yearB - yearA
-          : yearA - yearB;
-      });
+    const yearA = Number(a.year);
+    const yearB = Number(b.year);
+
+    return order === 'newest'
+      ? yearB - yearA
+      : yearA - yearB;
+  });
+
   });
 
   // Abrir pelicula
