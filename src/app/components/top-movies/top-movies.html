@@ -1,28 +1,29 @@
-<main class="top-movies">
-  <header class="top-header">
-    <p class="eyebrow">MI SELECCIÓN PERSONAL</p>
-    <h1>Las 3 mejores películas</h1>
-    <p class="subtitle">
-      Tres películas que merecen un lugar especial.
-    </p>
+<div class="top-layout">
+  <aside class="side-menu">
+    <span class="brand-mark">C</span>
+  </aside>
+
+  <main class="top-content">
+    <!-- Primer bloque: título y botones -->
+    <header class="nav-block">
+    <span class="eyebrow">CINEMAPP / SELECCIÓN</span>
+
+    <h1>Top 3 películas</h1>
   </header>
 
-  <section class="top-grid">
+    <!-- Tres bloques restantes: películas -->
     @for (movie of topMovies; track movie.id; let i = $index) {
-      <article class="top-card">
-        <span class="ranking">0{{ i + 1 }}</span>
+      <a class="movie-block" [routerLink]="['/movies', movie.id]">
+        <img [src]="movie.poster" [alt]="movie.alt" />
 
-        <img [src]="movie.poster" [alt]="movie.alt">
+        <div class="movie-overlay">
 
-        <div class="top-info">
-          <p class="top-label">PUESTO {{ i + 1 }}</p>
-          <h2>{{ movie.title }}</h2>
-          <p class="movie-year">
-            {{ movie.year }} · {{ movie.genre }}
-          </p>
-          <p class="movie-overview">{{ movie.overview }}</p>
+          <div class="movie-info">
+            <h2>{{ movie.title }}</h2>
+            <p>{{ movie.year }} / {{ movie.genre }}</p>
+          </div>
         </div>
-      </article>
+      </a>
     }
-  </section>
-</main>
+  </main>
+</div>

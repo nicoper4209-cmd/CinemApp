@@ -1,15 +1,15 @@
 import { Component } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MOVIES } from '../../data/movies';
 
 @Component({
-  imports: [],
   selector: 'app-top-movies',
-  styleUrl: './top-movies.css',
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './top-movies.html',
+  styleUrl: './top-movies.css',
 })
 export class TopMovies {
-  topMovies = MOVIES.filter(movie =>
-    [3, 1, 2].includes(movie.id)
-  );
-  
+  topMovies = [3, 1, 2]
+    .map(id => MOVIES.find(movie => movie.id === id))
+    .filter(movie => movie !== undefined);
 }

@@ -1,114 +1,250 @@
+:host {
+  display: block;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
 
-.top-movies {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 56px 32px;
+.top-layout {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background: #f7f6f2;
   color: #242424;
 }
 
-.top-header {
-  margin-bottom: 48px;
+/* Barra lateral */
+.side-menu {
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 24px 0;
+  border-right: 1px solid #e5e3dc;
+  background: #f7f6f2;
 }
 
-.eyebrow,
-.top-label {
-  color: #888;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 2px;
-}
-
-.top-header h1 {
-  margin: 12px 0;
-  font-size: clamp(2.2rem, 5vw, 4rem);
-  line-height: 1.1;
-  letter-spacing: -2px;
-}
-
-.subtitle {
-  color: #777;
-  font-size: 1rem;
-  line-height: 1.7;
-}
-
-.top-grid {
+.brand-mark {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 32px;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #242424;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 
-.top-card {
-  position: relative;
+.side-caption {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  color: #777;
+  font-size: 0.65rem;
+  letter-spacing: 3px;
+}
+
+/* Cuadrícula: navegación + tres películas */
+.top-content {
   min-width: 0;
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  overflow: hidden;
 }
 
-.top-card img {
+.nav-block {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(24px, 4vw, 48px);
+  background: #eeece5;
+}
+
+.nav-block h1 {
+  max-width: 340px;
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 4.5rem);
+  line-height: 0.98;
+}
+
+.top-nav {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.top-nav p {
+  padding-bottom: 5px;
+  border-bottom: 1px solid transparent;
+  color: #77746c;
+  text-decoration: none;
+  font-size: 2.5rem;
+}
+
+/* Bloques de películas */
+.movie-block {
+  position: relative;
   display: block;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #dedbd2;
+  color: white;
+  text-decoration: none;
+  isolation: isolate;
+}
+
+.movie-block img {
+  position: absolute;
+  z-index: -2;
+  inset: 0;
   width: 100%;
-  aspect-ratio: 2 / 3;
+  height: 100%;
   object-fit: cover;
-  border-radius: 10px;
-  background: #eee;
+  transition: transform 400ms ease;
+}
+
+.movie-block::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgb(0 0 0 / 8%) 0%,
+    transparent 35%,
+    rgb(0 0 0 / 78%) 100%
+  );
+}
+
+.movie-block:hover img {
+  transform: scale(1.04);
 }
 
 .ranking {
   position: absolute;
-  z-index: 1;
-  top: 12px;
-  left: 12px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  background: #fff;
-  color: #242424;
-  font-size: 0.85rem;
-  font-weight: 700;
+  top: 22px;
+  left: 22px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 2px;
 }
 
-.top-info {
-  padding-top: 16px;
-}
-
-.top-label {
-  margin: 0 0 8px;
-}
-
-.top-info h2 {
-  margin: 0 0 8px;
-  font-size: 1.35rem;
-  letter-spacing: -0.5px;
+.movie-info {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  left: 24px;
 }
 
 .movie-year {
-  margin: 0 0 12px;
-  color: #888;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  color: rgb(255 255 255 / 75%);
 }
 
-.movie-overview {
+.movie-info h2 {
+  margin: 8px 0;
+  font-size: clamp(1.5rem, 2.5vw, 2.7rem);
+  line-height: 1.05;
+  letter-spacing: -1px;
+}
+
+.movie-info p {
   margin: 0;
-  color: #666;
-  font-size: 0.92rem;
-  line-height: 1.7;
+  color: rgb(255 255 255 / 75%);
+  font-size: 0.8rem;
 }
 
-@media (max-width: 800px) {
-  .top-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 24px;
+.movie-arrow {
+  position: absolute;
+  right: 22px;
+  top: 18px;
+  font-size: 1.4rem;
+  transition: transform 200ms ease;
+}
+
+.movie-block:hover .movie-arrow {
+  transform: translate(3px, -3px);
+}
+
+.movie-block:focus-visible,
+.top-nav a:focus-visible {
+  outline: 2px solid #242424;
+  outline-offset: -4px;
+}
+
+@media (max-width: 760px) {
+  .top-layout {
+    grid-template-columns: 52px minmax(0, 1fr);
+  }
+
+  .top-content {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) repeat(3, minmax(0, 1fr));
+  }
+
+  .nav-block {
+    padding: 16px;
+  }
+
+  .nav-block h1 {
+    margin: 12px 0;
+    font-size: clamp(1.5rem, 5vw, 2.5rem);
+  }
+
+  .top-nav a {
+    font-size: clamp(1.2rem, 5vw, 2rem);
+  }
+
+  .movie-info h2 {
+    font-size: clamp(1.2rem, 5vw, 2rem);
   }
 }
 
-@media (max-width: 520px) {
-  .top-movies {
-    padding: 32px 20px;
+@media (prefers-reduced-motion: reduce) {
+  .movie-block img,
+  .movie-arrow {
+    transition: none;
   }
+}
 
-  .top-grid {
-    grid-template-columns: 1fr;
-    gap: 36px;
-  }
+.nav-block,
+.movie-block {
+  min-width: 0;
+  min-height: 0;
+  box-sizing: border-box;
+}
 
-  .top-card img {
-    max-height: 480px;
-  }
+.nav-block {
+  overflow: hidden;
+}
+
+.top-nav {
+  min-height: 0;
+  gap: clamp(8px, 2vh, 18px);
+}
+
+.top-nav a {
+  font-size: clamp(1.2rem, 3vw, 2.5rem);
+}
+
+.movie-info {
+  right: 12px;
+  bottom: 12px;
+  left: 12px;
+}
+
+.movie-info h2 {
+  font-size: clamp(1rem, 2.5vw, 2.7rem);
 }

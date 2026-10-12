@@ -1,7 +1,6 @@
 import { Component, computed, inject } from '@angular/core';
-import { MOVIES } from '../../data/movies';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-
+import { MovieService } from '../../services/movie';
 
 @Component({
   imports: [RouterLink],
@@ -11,10 +10,9 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 })
 export class MovieDetail {
   private route = inject(ActivatedRoute)
+  private movieService = inject(MovieService)
 
   id = computed(() => Number(this.route.snapshot.paramMap.get('id')));
 
-  movie = computed(() => 
-    MOVIES.find(movie => movie.id === this.id())
-  )
+  movie = computed(() => this.movieService.getById(this.id()));
 }

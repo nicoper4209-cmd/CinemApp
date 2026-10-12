@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { MovieCard } from '../../components/movie-card/movie-card';
 import { Router } from '@angular/router';
-import { MOVIES } from '../../data/movies';
+import { MovieService } from '../../services/movie';
 
 @Component({
   selector: 'app-movie-list',
@@ -12,8 +12,9 @@ import { MOVIES } from '../../data/movies';
 
 export class MovieList {
   private router = inject(Router);
+  private movieService = inject(MovieService)
 
-  movies = MOVIES;
+  movies = this.movieService.getAll();
 
   // Buscador
   searchTerm = signal('');

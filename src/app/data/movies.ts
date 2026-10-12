@@ -77,6 +77,7 @@ export const MOVIES: Movie[] = [
     overview:
       'Dos hermanos intentan sobrevivir durante los últimos meses de la Segunda Guerra Mundial en Japón.',
     rating: 8.5,
+    status:'available'
   },
   {
     id: 8,
@@ -88,6 +89,7 @@ export const MOVIES: Movie[] = [
     overview:
       'Una mujer adulta viaja al campo y reflexiona sobre sus recuerdos de infancia y sus decisiones.',
     rating: 7.6,
+    status:'available'
   },
   {
     id: 9,
@@ -99,6 +101,7 @@ export const MOVIES: Movie[] = [
     overview:
       'Un piloto convertido en cerdo combate a piratas aéreos en el mar Adriático.',
     rating: 7.7,
+    status:'upcoming'
   },
   {
     id: 10,
@@ -110,6 +113,7 @@ export const MOVIES: Movie[] = [
     overview:
       'Una joven solitaria conoce a una misteriosa chica durante el verano y descubre secretos que cambiarán su vida.',
     rating: 7.6,
+    status:'available'
   },
   {
     id: 11,
@@ -121,6 +125,7 @@ export const MOVIES: Movie[] = [
     overview:
       'Un grupo de tanukis utiliza sus poderes de transformación para proteger su hábitat de la urbanización.',
     rating: 7.3,
+    status:'available'
   },
   {
     id: 12,
@@ -132,6 +137,7 @@ export const MOVIES: Movie[] = [
     overview:
       'Una joven amante de los libros descubre su vocación mientras conoce a un chico que sueña con fabricar violines.',
     rating: 7.9,
+    status:'upcoming'
   },
   {
     id: 13,
@@ -143,6 +149,7 @@ export const MOVIES: Movie[] = [
     overview:
       'Una niña descubierta dentro de un tallo de bambú crece hasta convertirse en una joven extraordinaria que debe enfrentarse a su destino.',
     rating: 8.0,
+    status:'available'
   },
   {
     id: 14,
@@ -154,6 +161,7 @@ export const MOVIES: Movie[] = [
     overview:
       'Una familia japonesa vive pequeñas situaciones cotidianas narradas mediante episodios humorísticos.',
     rating: 7.1,
+    status:'upcoming'
   },
   {
     id: 15,
@@ -165,6 +173,7 @@ export const MOVIES: Movie[] = [
     overview:
       'Una adolescente que salva a un gato termina involucrada en una aventura dentro de un reino felino.',
     rating: 7.2,
+    status:'available'
   },
   {
     id: 16,
@@ -176,6 +185,7 @@ export const MOVIES: Movie[] = [
     overview:
       'Una joven transformada en anciana encuentra refugio en el castillo ambulante de un misterioso mago.',
     rating: 8.0,
+    status:'upcoming'
   },
   {
     id: 17,
@@ -187,6 +197,7 @@ export const MOVIES: Movie[] = [
     overview:
       'Un príncipe y un mago recorren un mundo en crisis mientras intentan descubrir el origen de un desequilibrio.',
     rating: 6.4,
+    status:'available'
   },
   {
     id: 18,
@@ -198,6 +209,7 @@ export const MOVIES: Movie[] = [
     overview:
       'Un niño entabla amistad con una pequeña criatura marina que desea convertirse en humana.',
     rating: 7.6,
+    status:'available'
   },
   {
     id: 19,
@@ -209,6 +221,7 @@ export const MOVIES: Movie[] = [
     overview:
       'Una diminuta joven que vive escondida bajo una casa entabla una amistad con un niño humano.',
     rating: 7.6,
+    status:'upcoming'
   },
   {
     id: 20,
@@ -220,5 +233,6 @@ export const MOVIES: Movie[] = [
     overview:
       'Dos estudiantes se unen para salvar el antiguo club de su escuela mientras descubren secretos familiares.',
     rating: 7.4,
+    status:'available'
   },
 ];
