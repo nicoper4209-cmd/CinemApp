@@ -1,0 +1,56 @@
+<section class="movie-list">
+
+  <input
+    type="text"
+    placeholder="Buscar películas..."
+    [value]="searchTerm()"
+    (input)="searchTerm.set($any($event.target).value)"
+  >
+
+  <select
+    [value]="selectedGenre()"
+    (change)="selectedGenre.set($any($event.target).value)"
+  >
+    @for (genre of genres(); track genre) {
+      <option [value]="genre">{{ genre }}</option>
+    }
+  </select>
+
+  <select
+    [value]="sortOrder()"
+    (change)="sortOrder.set($any($event.target).value)"
+  >
+    <option value="newest">Más recientes</option>
+    <option value="oldest">Más antiguas</option>
+    <option value="alphabetical">Alfabético (A–Z)</option>
+    <option value="alphabetical-reverse">Alfabético (Z–A)</option>
+  </select>
+
+</section>
+
+<div class="movie-grid">
+  @for (movie of filteredMovies(); track movie.id) {
+    <article class="movie-card">
+
+      <button
+        type="button"
+        class="favorite-button"
+        [class.is-favorite]="isFavorite(movie.id)"
+        [attr.aria-pressed]="isFavorite(movie.id)"
+        [attr.aria-label]="isFavorite(movie.id)
+          ? 'Quitar de favoritos'
+          : 'Agregar a favoritos'"
+        (click)="toggleFavorite(movie.id)"
+      >
+        {{ isFavorite(movie.id) ? '♥' : '♡' }}
+      </button>
+
+      <a [routerLink]="['/movies', movie.id]">
+        <img [src]="movie.poster" [alt]="movie.title">
+        <h2>{{ movie.title }}</h2>
+        <p>{{ movie.year }}</p>
+      </a>
+
+    </article>
+  }
+</div>

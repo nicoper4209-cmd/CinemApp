@@ -11,6 +11,7 @@ export const MOVIES: Movie[] = [
     overview:
       'Un joven apasionado por la aviación persigue su sueño de diseñar aviones mientras atraviesa los cambios de una época turbulenta.',
     rating: 7.8,
+    status:'available'
   },
   {
     id: 2,
@@ -22,6 +23,7 @@ export const MOVIES: Movie[] = [
     overview:
       'La historia narra el violento conflicto entre la civilización industrial y los guardianes sobrenaturales de la naturaleza.',
     rating: 8.0,
+    status:'available'
   },
   {
     id: 3,
@@ -33,6 +35,7 @@ export const MOVIES: Movie[] = [
     overview:
       'Una niña llega a un mundo sobrenatural y debe encontrar la manera de salvar a sus padres y regresar a casa.',
     rating: 8.6,
+    status:'upcoming'
   },
   {
     id: 4,
@@ -44,6 +47,7 @@ export const MOVIES: Movie[] = [
     overview:
       'Dos hermanas se mudan al campo y descubren criaturas mágicas que habitan el bosque.',
     rating: 8.2,
+    status:'available'
   },
   {
     id: 5,
@@ -55,6 +59,7 @@ export const MOVIES: Movie[] = [
     overview:
       'Una joven bruja comienza una nueva vida en una ciudad costera y emprende un servicio de entregas.',
     rating: 7.8,
+    status:'available'
   },
   {
     id: 6,
@@ -66,6 +71,7 @@ export const MOVIES: Movie[] = [
     overview:
       'Dos jóvenes buscan una legendaria ciudad flotante mientras escapan de piratas y agentes del gobierno.',
     rating: 8.0,
+    status:'available'
   },
   {
     id: 7,
