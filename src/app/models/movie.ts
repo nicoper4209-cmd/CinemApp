@@ -1,11 +1,14 @@
 export interface Movie {
   id: number;
   title: string;
+  synopsis: string;
+  duration: number;
+  genre: string;
+  ageRating: string;
   poster: string;
   alt: string;
   year: string;
-  genre: string;
-  overview: string;
   rating: number;
+  trailer: string
   status: 'available' | 'upcoming';
 }

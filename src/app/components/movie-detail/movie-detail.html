@@ -3,20 +3,85 @@
     <img [src]="movie.poster" [alt]="movie.alt">
 
     <section>
-    <h1>{{ movie.title }}</h1>
-    <div class="movie-meta">
-      <span>{{ movie.year }}</span>
-      <span>{{ movie.genre }}</span>
-      <span class="movie-rating">
-        {{ movie.rating.toFixed(1) }}
-      </span>
-    </div>
-    <p class="movie-overview">{{ movie.overview }}</p>
-    <a routerLink="/movies">Volver al catálogo</a>
-    </section>
+      <h1>{{ movie.title }}</h1>
 
+      <div class="movie-meta">
+        <span>{{ movie.year }}</span>
+        <span>{{ movie.genre }}</span>
+        <span>{{ movie.duration }} min</span>
+        <span class="movie-age-rating">
+          {{ movie.ageRating }}
+        </span>
+        <span class="movie-rating">
+          ★ {{ movie.rating.toFixed(1) }}
+        </span>
+      </div>
+
+      <p class="movie-overview">
+        {{ movie.synopsis }}
+      </p>
+
+      <!-- Detalle de la funcion --->
+      <section class="showtimes">
+        <h2>Funciones disponibles</h2>
+
+        @if (showtimes().length > 0) {
+          <div class="showtime-list">
+            @for (showtime of showtimes(); track showtime.id) {
+              <article class="showtime-card">
+                <div>
+                  <p>{{ showtime.date }}</p>
+                  <h3>{{ showtime.time }}</h3>
+                  <p>{{ showtime.room }}</p>
+                </div>
+
+                <div>
+                  <p>${{ showtime.price }}</p>
+                  <button type="button">
+                    Seleccionar función
+                  </button>
+                </div>
+              </article>
+            }
+          </div>
+        } @else {
+          <p>No hay funciones programadas para esta película.</p>
+        }
+      </section>
+
+    @if (movie.trailer) {
+      <a
+        [href]="movie.trailer"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="detail-link"
+      >
+        Ver tráiler
+      </a>
+    }
+
+    <button
+      type="button"
+      class="favorite"
+      [class.is-favorite]="isFavorite(movie.id)"
+      [attr.aria-pressed]="isFavorite(movie.id)"
+      [attr.aria-label]="isFavorite(movie.id)
+        ? 'Quitar de favoritos'
+        : 'Agregar a favoritos'"
+      (click)="toggleFavorite(movie.id)"
+    >
+      {{ isFavorite(movie.id) ? 'Quitar favorito' : 'Añadir favorito' }}
+    </button>
+
+<a routerLink="/movies" class="detail-link">
+  Volver al catálogo
+</a>
+    </section>
   </main>
 } @else {
-  <p>Película no encontrada.</p>
-  <a routerLink="/movies">Volver al catálogo</a>
+  <main class="movie-detail">
+    <h1>Película no encontrada</h1>
+    <p>La película que buscás no existe o no está disponible.</p>
+    <a routerLink="/movies">Volver al catálogo</a>
+  </main>
 }

@@ -4,241 +4,281 @@ export const MOVIES: Movie[] = [
   {
     id: 1,
     title: 'The Wind Rises',
+    synopsis: 'Un joven apasionado por la aviación persigue su sueño de diseñar aviones mientras atraviesa los cambios de una época turbulenta.',
+    duration: 126,
+    genre: 'Drama',
+    ageRating: '+13',
     poster: 'https://image.tmdb.org/t/p/w500/a1DKL2yPyxoZthv0du5gcAWA0gw.jpg',
     alt: 'The Wind Rises poster',
     year: '2013',
-    genre: 'Drama',
-    overview:
-      'Un joven apasionado por la aviación persigue su sueño de diseñar aviones mientras atraviesa los cambios de una época turbulenta.',
     rating: 7.8,
-    status:'available'
+    trailer: 'https://www.youtube.com/results?search_query=The+Wind+Rises+official+trailer',
+    status: 'available'
   },
   {
     id: 2,
     title: 'Princess Mononoke',
+    synopsis: 'La historia narra el violento conflicto entre la civilización industrial y los guardianes sobrenaturales de la naturaleza.',
+    duration: 134,
+    genre: 'Adventure',
+    ageRating: '+13',
     poster: 'https://image.tmdb.org/t/p/w500/xP466sdt19CPLVljpRwI7luEgFn.jpg',
     alt: 'Princess Mononoke poster',
     year: '1997',
-    genre: 'Adventure',
-    overview:
-      'La historia narra el violento conflicto entre la civilización industrial y los guardianes sobrenaturales de la naturaleza.',
     rating: 8.0,
-    status:'available'
+    trailer: 'https://www.youtube.com/results?search_query=Princess+Mononoke+official+trailer',
+    status: 'available'
   },
   {
     id: 3,
     title: 'Spirited Away',
+    synopsis: 'Una niña llega a un mundo sobrenatural y debe encontrar la manera de salvar a sus padres y regresar a casa.',
+    duration: 125,
+    genre: 'Fantasy',
+    ageRating: '+13',
     poster: 'https://image.tmdb.org/t/p/w500/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg',
     alt: 'Spirited Away poster',
     year: '2001',
-    genre: 'Fantasy',
-    overview:
-      'Una niña llega a un mundo sobrenatural y debe encontrar la manera de salvar a sus padres y regresar a casa.',
     rating: 8.6,
-    status:'upcoming'
+    trailer: 'https://www.youtube.com/results?search_query=Spirited+Away+official+trailer',
+    status: 'upcoming'
   },
   {
     id: 4,
     title: 'My Neighbor Totoro',
+    synopsis: 'Dos hermanas se mudan al campo y descubren criaturas mágicas que habitan el bosque.',
+    duration: 86,
+    genre: 'Fantasy',
+    ageRating: 'ATP',
     poster: 'https://image.tmdb.org/t/p/w500/rtGDOeG9LzoerkDGZF9dnVeLppL.jpg',
     alt: 'My Neighbor Totoro poster',
     year: '1988',
-    genre: 'Fantasy',
-    overview:
-      'Dos hermanas se mudan al campo y descubren criaturas mágicas que habitan el bosque.',
     rating: 8.2,
-    status:'available'
+    trailer: 'https://www.youtube.com/results?search_query=My+Neighbor+Totoro+official+trailer',
+    status: 'available'
   },
   {
     id: 5,
     title: "Kiki's Delivery Service",
+    synopsis: 'Una joven bruja comienza una nueva vida en una ciudad costera y emprende un servicio de entregas.',
+    duration: 103,
+    genre: 'Fantasy',
+    ageRating: 'ATP',
     poster: 'https://image.tmdb.org/t/p/w500/Aufa4YdZIv4AXpR9rznwVA5SEfd.jpg',
     alt: "Kiki's Delivery Service poster",
     year: '1989',
-    genre: 'Fantasy',
-    overview:
-      'Una joven bruja comienza una nueva vida en una ciudad costera y emprende un servicio de entregas.',
     rating: 7.8,
-    status:'available'
+    trailer: 'https://www.youtube.com/results?search_query=Kikis+Delivery+Service+official+trailer',
+    status: 'available'
   },
   {
     id: 6,
     title: 'Castle in the Sky',
+    synopsis: 'Dos jóvenes buscan una legendaria ciudad flotante mientras escapan de piratas y agentes del gobierno.',
+    duration: 124,
+    genre: 'Adventure',
+    ageRating: 'ATP',
     poster: 'https://image.tmdb.org/t/p/w500/npOnzAbLh6VOIu3naU5QaEcTepo.jpg',
     alt: 'Castle in the Sky poster',
     year: '1986',
-    genre: 'Adventure',
-    overview:
-      'Dos jóvenes buscan una legendaria ciudad flotante mientras escapan de piratas y agentes del gobierno.',
     rating: 8.0,
-    status:'available'
+    trailer: 'https://www.youtube.com/results?search_query=Castle+in+the+Sky+official+trailer',
+    status: 'available'
   },
   {
     id: 7,
     title: 'Grave of the Fireflies',
+    synopsis: 'Dos hermanos intentan sobrevivir durante los últimos meses de la Segunda Guerra Mundial en Japón.',
+    duration: 89,
+    genre: 'Drama',
+    ageRating: '+13',
     poster: 'https://image.tmdb.org/t/p/w500/k9tv1rXZbOhH7eiCk378x61kNQ1.jpg',
     alt: 'Grave of the Fireflies poster',
     year: '1988',
-    genre: 'Drama',
-    overview:
-      'Dos hermanos intentan sobrevivir durante los últimos meses de la Segunda Guerra Mundial en Japón.',
     rating: 8.5,
-    status:'available'
+    trailer: 'https://www.youtube.com/results?search_query=Grave+of+the+Fireflies+official+trailer',
+    status: 'available'
   },
   {
     id: 8,
     title: 'Only Yesterday',
+    synopsis: 'Una mujer adulta viaja al campo y reflexiona sobre sus recuerdos de infancia y sus decisiones.',
+    duration: 118,
+    genre: 'Drama',
+    ageRating: 'ATP',
     poster: 'https://image.tmdb.org/t/p/w500/xjJU6rwzLX7Jk8HFQfVW6H5guMC.jpg',
     alt: 'Only Yesterday poster',
     year: '1991',
-    genre: 'Drama',
-    overview:
-      'Una mujer adulta viaja al campo y reflexiona sobre sus recuerdos de infancia y sus decisiones.',
     rating: 7.6,
-    status:'available'
+    trailer: 'https://www.youtube.com/results?search_query=Only+Yesterday+Studio+Ghibli+official+trailer',
+    status: 'available'
   },
   {
     id: 9,
     title: 'Porco Rosso',
+    synopsis: 'Un piloto convertido en cerdo combate a piratas aéreos en el mar Adriático.',
+    duration: 94,
+    genre: 'Adventure',
+    ageRating: 'ATP',
     poster: 'https://image.tmdb.org/t/p/original/vyCevwQl24NIUlUc3ifHQgV9QYl.jpg',
     alt: 'Porco Rosso poster',
     year: '1992',
-    genre: 'Adventure',
-    overview:
-      'Un piloto convertido en cerdo combate a piratas aéreos en el mar Adriático.',
     rating: 7.7,
-    status:'upcoming'
+    trailer: 'https://www.youtube.com/results?search_query=Porco+Rosso+official+trailer',
+    status: 'upcoming'
   },
   {
     id: 10,
     title: 'When Marnie Was There',
+    synopsis: 'Una joven solitaria conoce a una misteriosa chica durante el verano y descubre secretos que cambiarán su vida.',
+    duration: 103,
+    genre: 'Drama',
+    ageRating: 'ATP',
     poster: 'https://image.tmdb.org/t/p/w500/vug1dvDI1tSa60Z8qjCuUE7ntkO.jpg',
     alt: 'When Marnie Was There poster',
     year: '2014',
-    genre: 'Drama',
-    overview:
-      'Una joven solitaria conoce a una misteriosa chica durante el verano y descubre secretos que cambiarán su vida.',
     rating: 7.6,
-    status:'available'
+    trailer: 'https://www.youtube.com/results?search_query=When+Marnie+Was+There+official+trailer',
+    status: 'available'
   },
   {
     id: 11,
     title: 'Pom Poko',
+    synopsis: 'Un grupo de tanukis utiliza sus poderes de transformación para proteger su hábitat de la urbanización.',
+    duration: 119,
+    genre: 'Fantasy',
+    ageRating: 'ATP',
     poster: 'https://image.tmdb.org/t/p/w500/kowo9E1e1JcWLXj9cCvAOFZcy5n.jpg',
     alt: 'Pom Poko poster',
     year: '1994',
-    genre: 'Fantasy',
-    overview:
-      'Un grupo de tanukis utiliza sus poderes de transformación para proteger su hábitat de la urbanización.',
     rating: 7.3,
-    status:'available'
+    trailer: 'https://www.youtube.com/results?search_query=Pom+Poko+official+trailer',
+    status: 'available'
   },
   {
     id: 12,
     title: 'Whisper of the Heart',
+    synopsis: 'Una joven amante de los libros descubre su vocación mientras conoce a un chico que sueña con fabricar violines.',
+    duration: 111,
+    genre: 'Romance',
+    ageRating: 'ATP',
     poster: 'https://image.tmdb.org/t/p/w500/5E3Hvbu0bg38ouYf6chGftVGqZ7.jpg',
     alt: 'Whisper of the Heart poster',
     year: '1995',
-    genre: 'Romance',
-    overview:
-      'Una joven amante de los libros descubre su vocación mientras conoce a un chico que sueña con fabricar violines.',
     rating: 7.9,
-    status:'upcoming'
+    trailer: 'https://www.youtube.com/results?search_query=Whisper+of+the+Heart+official+trailer',
+    status: 'upcoming'
   },
   {
     id: 13,
     title: 'The Tale of the Princess Kaguya',
+    synopsis: 'Una niña descubierta dentro de un tallo de bambú crece hasta convertirse en una joven extraordinaria que debe enfrentarse a su destino.',
+    duration: 137,
+    genre: 'Drama',
+    ageRating: 'ATP',
     poster: 'https://image.tmdb.org/t/p/w500/mWRQNlWXYYfd2z4FRm99MsgHgiA.jpg',
     alt: 'The Tale of the Princess Kaguya poster',
     year: '2013',
-    genre: 'Drama',
-    overview:
-      'Una niña descubierta dentro de un tallo de bambú crece hasta convertirse en una joven extraordinaria que debe enfrentarse a su destino.',
     rating: 8.0,
-    status:'available'
+    trailer: 'https://www.youtube.com/results?search_query=The+Tale+of+the+Princess+Kaguya+official+trailer',
+    status: 'available'
   },
   {
     id: 14,
     title: 'My Neighbors the Yamadas',
+    synopsis: 'Una familia japonesa vive pequeñas situaciones cotidianas narradas mediante episodios humorísticos.',
+    duration: 104,
+    genre: 'Comedy',
+    ageRating: 'ATP',
     poster: 'https://image.tmdb.org/t/p/w500/wTGuHmMIBBgKakY80J1D52VvQKI.jpg',
     alt: 'My Neighbors the Yamadas poster',
     year: '1999',
-    genre: 'Comedy',
-    overview:
-      'Una familia japonesa vive pequeñas situaciones cotidianas narradas mediante episodios humorísticos.',
     rating: 7.1,
-    status:'upcoming'
+    trailer: 'https://www.youtube.com/results?search_query=My+Neighbors+the+Yamadas+official+trailer',
+    status: 'upcoming'
   },
   {
     id: 15,
     title: 'The Cat Returns',
+    synopsis: 'Una adolescente que salva a un gato termina involucrada en una aventura dentro de un reino felino.',
+    duration: 75,
+    genre: 'Fantasy',
+    ageRating: 'ATP',
     poster: 'https://image.tmdb.org/t/p/original/gqtdSLSuTmpPAQISIcCKH1ChBec.jpg',
     alt: 'The Cat Returns poster',
     year: '2002',
-    genre: 'Fantasy',
-    overview:
-      'Una adolescente que salva a un gato termina involucrada en una aventura dentro de un reino felino.',
     rating: 7.2,
-    status:'available'
+    trailer: 'https://www.youtube.com/results?search_query=The+Cat+Returns+official+trailer',
+    status: 'available'
   },
   {
     id: 16,
     title: "Howl's Moving Castle",
+    synopsis: 'Una joven transformada en anciana encuentra refugio en el castillo ambulante de un misterioso mago.',
+    duration: 119,
+    genre: 'Fantasy',
+    ageRating: 'ATP',
     poster: 'https://image.tmdb.org/t/p/w500/6pZgH10jhpToPcf0uvyTCPFhWpI.jpg',
     alt: "Howl's Moving Castle poster",
     year: '2004',
-    genre: 'Fantasy',
-    overview:
-      'Una joven transformada en anciana encuentra refugio en el castillo ambulante de un misterioso mago.',
     rating: 8.0,
-    status:'upcoming'
+    trailer: 'https://www.youtube.com/results?search_query=Howls+Moving+Castle+official+trailer',
+    status: 'upcoming'
   },
   {
     id: 17,
     title: 'Tales from Earthsea',
+    synopsis: 'Un príncipe y un mago recorren un mundo en crisis mientras intentan descubrir el origen de un desequilibrio.',
+    duration: 115,
+    genre: 'Fantasy',
+    ageRating: '+13',
     poster: 'https://image.tmdb.org/t/p/w500/67yYwCPq7NbxSF6BIIXCMD34sY0.jpg',
     alt: 'Tales from Earthsea poster',
     year: '2006',
-    genre: 'Fantasy',
-    overview:
-      'Un príncipe y un mago recorren un mundo en crisis mientras intentan descubrir el origen de un desequilibrio.',
     rating: 6.4,
-    status:'available'
+    trailer: 'https://www.youtube.com/results?search_query=Tales+from+Earthsea+official+trailer',
+    status: 'available'
   },
   {
     id: 18,
     title: 'Ponyo',
+    synopsis: 'Un niño entabla amistad con una pequeña criatura marina que desea convertirse en humana.',
+    duration: 101,
+    genre: 'Fantasy',
+    ageRating: 'ATP',
     poster: 'https://image.tmdb.org/t/p/w500/yp8vEZflGynlEylxEesbYasc06i.jpg',
     alt: 'Ponyo poster',
     year: '2008',
-    genre: 'Fantasy',
-    overview:
-      'Un niño entabla amistad con una pequeña criatura marina que desea convertirse en humana.',
     rating: 7.6,
-    status:'available'
+    trailer: 'https://www.youtube.com/results?search_query=Ponyo+official+trailer',
+    status: 'available'
   },
   {
     id: 19,
     title: 'The Secret World of Arrietty',
+    synopsis: 'Una diminuta joven que vive escondida bajo una casa entabla una amistad con un niño humano.',
+    duration: 94,
+    genre: 'Fantasy',
+    ageRating: 'ATP',
     poster: 'https://image.tmdb.org/t/p/w500/oc2OB2KDmSRDMelKEAA1n4YRQL0.jpg',
     alt: 'The Secret World of Arrietty poster',
     year: '2010',
-    genre: 'Fantasy',
-    overview:
-      'Una diminuta joven que vive escondida bajo una casa entabla una amistad con un niño humano.',
     rating: 7.6,
-    status:'upcoming'
+    trailer: 'https://www.youtube.com/results?search_query=The+Secret+World+of+Arrietty+official+trailer',
+    status: 'upcoming'
   },
   {
     id: 20,
     title: 'From Up on Poppy Hill',
+    synopsis: 'Dos estudiantes se unen para salvar el antiguo club de su escuela mientras descubren secretos familiares.',
+    duration: 91,
+    genre: 'Romance',
+    ageRating: 'ATP',
     poster: 'https://image.tmdb.org/t/p/w500/rRLYX4RZIyloHSJwvZKAhphAjiB.jpg',
     alt: 'From Up on Poppy Hill poster',
     year: '2011',
-    genre: 'Romance',
-    overview:
-      'Dos estudiantes se unen para salvar el antiguo club de su escuela mientras descubren secretos familiares.',
     rating: 7.4,
-    status:'available'
+    trailer: 'https://www.youtube.com/results?search_query=From+Up+on+Poppy+Hill+official+trailer',
+    status: 'available'
   },
 ];

@@ -1,1 +1,8 @@
-<app-movie-catalog [movies]="favoriteMovies()" />
+<section class="favorites-page">
+  @if (favoriteMovies().length > 0) {
+      <app-movie-catalog [movies]="favoriteMovies()" />
+  } @else {
+    <h1>Mis favoritos</h1>
+    <p>Todavía no agregaste películas a tus favoritos.</p>
+  }
+</section>
