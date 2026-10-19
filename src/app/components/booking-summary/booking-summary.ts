@@ -2,6 +2,7 @@ import { Component, computed, inject } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Movie } from '../../models/movie';
 import { Showtime } from '../../models/showtime';
+import { BookingService } from '../../services/booking';
 
 interface BookingData {
   movie: Movie;
@@ -19,6 +20,7 @@ interface BookingData {
 export class BookingSummary {
   private router = inject(Router);
   private bookingData = history.state as BookingData;
+  private bookingService = inject(BookingService);
 
   movie = this.bookingData?.movie;
   showtime = this.bookingData?.showtime;
@@ -47,4 +49,23 @@ export class BookingSummary {
 
     return isVip ? basePrice * 2 : basePrice;
   }
+
+  // Confirmar compra
+  confirmBooking(): void {
+  if (!this.bookingAvailable()) {
+    return;
+  }
+
+  const booking = this.bookingService.create({
+    movie: this.movie!,
+    showtime: this.showtime!,
+    seats: [...this.seats],
+    total: this.total,
+  });
+
+  this.router.navigate([
+    '/booking-confirmation',
+    booking.id,
+  ]);
+}
 }

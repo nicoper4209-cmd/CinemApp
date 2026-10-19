@@ -1,0 +1,56 @@
+<main class="confirmation-page">
+  @if (booking(); as purchase) {
+    <section class="confirmation-card">
+      <div class="success-icon">✓</div>
+
+      <p class="eyebrow">CINEMAPP / COMPRA</p>
+      <h1>¡Compra confirmada!</h1>
+      <p class="description">
+        Tu entrada de prueba se generó correctamente.
+      </p>
+
+      <div class="ticket">
+        <p class="eyebrow">CÓDIGO DE COMPRA</p>
+        <h2>{{ purchase.id }}</h2>
+
+        <hr />
+
+        <h3>{{ purchase.movie.title }}</h3>
+
+        <p>{{ formatDate(purchase.showtime.date) }}</p>
+        <p>Horario: {{ purchase.showtime.time }}</p>
+        <p>Sala: {{ purchase.showtime.room }}</p>
+
+        <div class="seats">
+          <span>Butacas</span>
+          <strong>{{ purchase.seats.join(', ') }}</strong>
+        </div>
+
+        <div class="total">
+          <span>Total</span>
+          <strong>${{ purchase.total }}</strong>
+        </div>
+      </div>
+
+      <p class="disclaimer">
+        Esta es una compra simulada. No se realizó ningún cobro
+        y la entrada todavía no es válida para ingresar al cine.
+      </p>
+
+      <a routerLink="/movies" class="home-button">
+        Volver a cartelera
+      </a>
+    </section>
+  } @else {
+    <section class="confirmation-card">
+      <h1>Compra no disponible</h1>
+      <p>
+        No encontramos esta compra. Puede que la aplicación se haya
+        recargado o que hayas ingresado directamente a esta página.
+      </p>
+      <a routerLink="/movies" class="home-button">
+        Volver a cartelera
+      </a>
+    </section>
+  }
+</main>

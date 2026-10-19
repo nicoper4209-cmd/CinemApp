@@ -1,0 +1,125 @@
+.confirmation-page {
+  width: min(100% - 32px, 600px);
+  margin: 48px auto;
+  color: #242424;
+}
+
+.confirmation-card {
+  padding: 32px;
+  border: 1px solid #e2e2e2;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.success-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 20px;
+  border: 1px solid #54866a;
+  border-radius: 50%;
+  color: #54866a;
+  font-size: 26px;
+}
+
+.eyebrow {
+  color: #777;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+}
+
+h1 {
+  font-size: clamp(26px, 5vw, 36px);
+  font-weight: 500;
+}
+
+.description,
+.disclaimer {
+  color: #777;
+  line-height: 1.6;
+}
+
+.ticket {
+  margin: 28px 0;
+  padding: 24px;
+  border: 1px dashed #cfcfcf;
+  text-align: left;
+}
+
+.ticket h2 {
+  font-size: 21px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.ticket h3 {
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.ticket p {
+  color: #666;
+  line-height: 1.5;
+}
+
+.ticket hr {
+  border: 0;
+  border-top: 1px solid #e5e5e5;
+  margin: 22px 0;
+}
+
+.seats,
+.total {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.seats strong {
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.total {
+  padding-top: 18px;
+  border-top: 1px solid #e5e5e5;
+  font-size: 18px;
+}
+
+.total strong {
+  font-size: 23px;
+}
+
+.disclaimer {
+  font-size: 12px;
+}
+
+.home-button {
+  display: inline-flex;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 12px 18px;
+  border-radius: 3px;
+  background: #242424;
+  color: white;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+@media (max-width: 480px) {
+  .confirmation-page {
+    margin: 24px auto;
+  }
+
+  .confirmation-card {
+    padding: 20px;
+  }
+
+  .ticket {
+    padding: 16px;
+  }
+}
