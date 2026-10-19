@@ -1,6 +1,6 @@
 
 import { Component, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ShowtimeService } from '../../services/showtime';
 import { MovieService } from '../../services/movie';
 
@@ -26,6 +26,7 @@ export class SeatSelection {
   private route = inject(ActivatedRoute);
   private showtimeService = inject(ShowtimeService);
   private movieService = inject(MovieService);
+  private router = inject(Router);
 
   showtimeId = computed(() =>
     Number(this.route.snapshot.paramMap.get('id'))
@@ -134,4 +135,24 @@ export class SeatSelection {
       timeZone: 'UTC',
     }).format(new Date(`${date}T12:00:00Z`));
   }
+
+  // Resumen de compra
+  continueToSummary(): void {
+  const showtime = this.showtime();
+  const movie = this.movie();
+  const seats = this.selectedSeats();
+
+  if (!showtime || !movie || seats.length === 0) {
+    return;
+  }
+
+  this.router.navigate(['/booking-summary'], {
+    state: {
+      showtime,
+      movie,
+      seats,
+      total: this.total(),
+    },
+  });
+}
 }

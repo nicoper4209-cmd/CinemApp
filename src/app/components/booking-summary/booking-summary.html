@@ -1,0 +1,100 @@
+
+<main class="summary-page">
+  <header class="page-header">
+    <p class="eyebrow">CINEMAPP / COMPRA</p>
+    <h1>Resumen de compra</h1>
+    <p>Revisá los detalles antes de continuar.</p>
+  </header>
+
+  @if (bookingAvailable()) {
+    <section class="summary-card">
+      <div class="movie-info">
+        <img
+          [src]="movie!.poster"
+          [alt]="movie!.alt"
+          class="movie-poster"
+        />
+
+        <div>
+          <p class="eyebrow">PELÍCULA</p>
+          <h2>{{ movie!.title }}</h2>
+          <p>{{ movie!.duration }} min · {{ movie!.ageRating }}</p>
+        </div>
+      </div>
+
+      <hr />
+
+      <div class="section">
+        <p class="eyebrow">FUNCIÓN</p>
+
+        <div class="detail-row">
+          <span>Fecha</span>
+          <strong>{{ formatDate(showtime!.date) }}</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>Horario</span>
+          <strong>{{ showtime!.time }}</strong>
+        </div>
+
+        <div class="detail-row">
+          <span>Sala</span>
+          <strong>{{ showtime!.room }}</strong>
+        </div>
+      </div>
+
+      <hr />
+
+      <div class="section">
+        <p class="eyebrow">BUTACAS</p>
+
+        @for (seatId of seats; track seatId) {
+          <div class="detail-row">
+            <span>
+              Fila {{ seatId.split('-')[0] }} · Asiento
+              {{ seatId.split('-')[2] }}
+
+              @if (['R', 'S', 'T'].includes(seatId.split('-')[0])) {
+                <span class="vip-label">VIP</span>
+              }
+            </span>
+
+            <strong>${{ getSeatPrice(seatId) }}</strong>
+          </div>
+        }
+      </div>
+
+      <hr />
+
+      <div class="total-row">
+        <span>Total</span>
+        <strong>${{ total }}</strong>
+      </div>
+
+      <p class="disclaimer">
+        Esta es una compra de prueba. Todavía no se realizará ningún cobro.
+      </p>
+
+      <div class="actions">
+        <a
+          [routerLink]="['/seats', showtime!.id]"
+          class="secondary-button"
+        >
+          Volver a las butacas
+        </a>
+
+        <button type="button" disabled>
+          Confirmar compra
+        </button>
+      </div>
+    </section>
+  } @else {
+    <section class="empty-state">
+      <h2>No hay una compra para mostrar</h2>
+      <p>Seleccioná una función y sus butacas para ver el resumen.</p>
+      <a routerLink="/movies" class="secondary-button">
+        Volver a cartelera
+      </a>
+    </section>
+  }
+</main>

@@ -114,6 +114,7 @@
           type="button"
           class="continue-button"
           [disabled]="selectedSeats().length === 0"
+          (click)="continueToSummary()"
         >
           Continuar
         </button>
