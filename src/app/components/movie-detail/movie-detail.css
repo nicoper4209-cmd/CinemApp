@@ -402,3 +402,108 @@
     transition: none;
   }
 }
+
+
+/* Selección de fecha */
+
+.date-instruction {
+  margin: 0 0 14px;
+  font-size: 0.85rem !important;
+}
+
+.date-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.date-option {
+  min-width: 92px;
+  padding: 12px 14px;
+
+  border: 1px solid #dedbd4;
+  border-radius: 4px;
+
+  background: transparent;
+  color: #55514b;
+
+  font: inherit;
+  font-size: 0.82rem;
+  text-transform: capitalize;
+
+  cursor: pointer;
+  transition:
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.date-option:hover {
+  border-color: #252525;
+}
+
+.date-option.is-selected {
+  border-color: #252525;
+  background: #252525;
+  color: #fff;
+}
+
+.date-option:focus-visible {
+  outline: 2px solid #77746f;
+  outline-offset: 3px;
+}
+
+.date-hint {
+  margin: 18px 0 0;
+  font-size: 0.85rem !important;
+}
+
+.selected-day {
+  margin-top: 28px;
+}
+
+.selected-day > h3 {
+  margin: 0 0 16px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.selected-day .showtime-list {
+  display: grid;
+  gap: 10px;
+}
+
+.selected-day .showtime-card {
+  margin-bottom: 10px;
+}
+
+.showtime-card h4 {
+  margin: 0 0 5px;
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+
+.showtime-action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.showtime-action p {
+  margin: 0;
+  color: #252525;
+  font-weight: 600;
+}
+
+@media (max-width: 400px) {
+  .date-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .date-option {
+    min-width: 0;
+  }
+}

@@ -22,32 +22,56 @@
       </p>
 
       <!-- Detalle de la funcion --->
-      <section class="showtimes">
-        <h2>Funciones disponibles</h2>
 
-        @if (showtimes().length > 0) {
-          <div class="showtime-list">
-            @for (showtime of showtimes(); track showtime.id) {
+    <section class="showtimes">
+      <h2>Funciones disponibles</h2>
+
+      @if (availableDates().length > 0) {
+        <p class="date-instruction">Elegí el día de tu visita</p>
+
+        <div class="date-list">
+          @for (date of availableDates(); track date) {
+            <button
+              type="button"
+              class="date-option"
+              [class.is-selected]="selectedDate() === date"
+              [attr.aria-pressed]="selectedDate() === date"
+              (click)="selectDate(date)"
+            >
+              {{ formatDate(date) }}
+            </button>
+          }
+        </div>
+
+        @if (selectedDate(); as date) {
+          <div class="selected-day">
+            <h3>{{ formatSelectedDate(date) }}</h3>
+
+            @for (showtime of selectedShowtimes(); track showtime.id) {
               <article class="showtime-card">
                 <div>
-                  <p>{{ showtime.date }}</p>
-                  <h3>{{ showtime.time }}</h3>
+                  <h4>{{ showtime.time }}</h4>
                   <p>{{ showtime.room }}</p>
                 </div>
 
-                <div>
+                <div class="showtime-action">
                   <p>${{ showtime.price }}</p>
                   <button type="button">
-                    Seleccionar función
+                    Seleccionar
                   </button>
                 </div>
               </article>
             }
           </div>
         } @else {
-          <p>No hay funciones programadas para esta película.</p>
+          <p class="date-hint">
+            Seleccioná una fecha para consultar los horarios.
+          </p>
         }
-      </section>
+      } @else {
+        <p>No hay funciones futuras programadas para esta película.</p>
+      }
+    </section>
 
     @if (movie.trailer) {
       <a
