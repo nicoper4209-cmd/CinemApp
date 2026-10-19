@@ -25,14 +25,98 @@
         </div>
       </section>
 
-      <section class="seat-map">
-        <div class="screen">
-          PANTALLA
+      <section class="seat-section">
+        <div class="legend">
+          <span><i class="seat-example"></i> Disponible</span>
+          <span><i class="seat-example selected-example"></i> Seleccionada</span>
+          <span><i class="seat-example occupied-example"></i> Ocupada</span>
+          <span><i class="seat-example vip-example"></i> VIP</span>
         </div>
 
-        <p class="seat-placeholder">
-          El mapa de butacas estará disponible próximamente.
+        <div class="screen">PANTALLA</div>
+
+        <div class="seat-map-scroll">
+          <div class="seat-map">
+            @for (row of rows(); track row.label) {
+              <div class="seat-row">
+                <span class="row-label">{{ row.label }}</span>
+
+                @for (section of row.sections; track $index) {
+                  <div
+                    class="seat-group"
+                    [class.left-section]="$index === 0"
+                    [class.middle-section]="$index === 1"
+                    [class.right-section]="$index === 2"
+                  >
+                    @for (seat of section; track seat.id) {
+                      <button
+                        type="button"
+                        class="seat"
+                        [class.is-selected]="isSelected(seat.id)"
+                        [class.is-occupied]="isOccupied(seat.id)"
+                        [class.is-vip]="row.isVip"
+                        [class.is-accessible]="row.isAccessible"
+                        [disabled]="isOccupied(seat.id)"
+                        [attr.aria-pressed]="isSelected(seat.id)"
+                        [attr.aria-label]="'Fila ' + row.label + ', asiento ' + seat.label + (row.isAccessible ? ', accesible' : '') + (row.isVip ? ', VIP' : '')"
+                        [title]="'Fila ' + row.label + ' · Asiento ' + seat.label"
+                        (click)="toggleSeat(seat.id)"
+                      >
+                        {{ seat.label }}
+                      </button>
+                    }
+                  </div>
+                }
+
+                <span class="row-label">{{ row.label }}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <p class="map-hint">
+          @if (selectedSeats().length === 0) {
+            Seleccioná una o más butacas.
+          } @else {
+            {{ selectedSeats().length }}
+            {{ selectedSeats().length === 1 ? 'butaca seleccionada' : 'butacas seleccionadas' }}
+          }
         </p>
+      </section>
+
+      <section class="purchase-summary">
+        <div>
+          <p class="summary-label">Butacas elegidas</p>
+          <div class="selected-list">
+            @if (selectedSeats().length > 0) {
+                @for (seatId of selectedSeats(); track seatId) {
+                <p>
+                    {{ seatId.split('-')[0] }} · Asiento
+                    {{ seatId.split('-')[2] }}
+                    — ${{ getSeatPrice(seatId) }}
+                    @if (['R', 'S', 'T'].includes(seatId.split('-')[0])) {
+                    <span class="vip-label">VIP</span>
+                    }
+                </p>
+                }
+            } @else {
+                <p>Ninguna</p>
+            }
+        </div>
+        </div>
+
+        <div class="total-price">
+          <span>Total</span>
+          <strong>${{ total() }}</strong>
+        </div>
+
+        <button
+          type="button"
+          class="continue-button"
+          [disabled]="selectedSeats().length === 0"
+        >
+          Continuar
+        </button>
       </section>
     </main>
   }
