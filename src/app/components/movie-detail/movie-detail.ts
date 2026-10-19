@@ -35,15 +35,15 @@ export class MovieDetail {
   // Fechas de funciones
   selectedDate = signal<string | null>(null);
 
-  availableDates = computed(() => [ ...new Set(this.showtimes().map(showtime => showtime.date))]);
+  availableDates = computed(() => [ ...new Set(this.showtimes().map(showtime => showtime.date))]); // obtener fechas sin repetir
 
-  selectedShowtimes = computed(() =>
+  selectedShowtimes = computed(() => // elegir funciones de x dia
     this.showtimes().filter(
       showtime => showtime.date === this.selectedDate()
     )
   );
 
-  selectDate(date: string): void {
+  selectDate(date: string): void { // guardo dia que eligio el usuario
     this.selectedDate.set(date);
   }
 

@@ -68,6 +68,9 @@ export class ShowtimeService {
       showtime => showtime.movieId === movieId
     );
   }
+  getById(id: number): Showtime | undefined {
+  return SHOWTIMES.find(showtime => showtime.id === id);
+}
 }
 
 

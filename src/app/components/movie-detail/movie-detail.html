@@ -56,9 +56,12 @@
 
                 <div class="showtime-action">
                   <p>${{ showtime.price }}</p>
-                  <button type="button">
-                    Seleccionar
-                  </button>
+                <a
+                  [routerLink]="['/seats', showtime.id]"
+                  class="detail-link"
+                >
+                  Seleccionar
+                </a>
                 </div>
               </article>
             }

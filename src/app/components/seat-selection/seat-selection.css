@@ -1,0 +1,112 @@
+
+:host {
+  display: block;
+  min-height: 100%;
+  background: #faf9f6;
+  color: #252525;
+}
+
+.seat-selection {
+  width: min(100% - 40px, 960px);
+  margin: 0 auto;
+  padding: 40px 0 72px;
+}
+
+.back-link {
+  color: #555;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.page-header {
+  margin: 48px 0 32px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: #777;
+}
+
+.page-header h1 {
+  margin: 12px 0;
+  font-size: clamp(30px, 5vw, 44px);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+}
+
+.page-header > p:last-child,
+.showtime-summary p {
+  color: #777;
+  line-height: 1.6;
+}
+
+.showtime-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  padding: 24px 0;
+  border-top: 1px solid #dedbd4;
+  border-bottom: 1px solid #dedbd4;
+}
+
+.showtime-summary h2 {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.showtime-summary p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.price {
+  display: grid;
+  gap: 6px;
+  text-align: right;
+}
+
+.price span {
+  color: #777;
+  font-size: 12px;
+}
+
+.price strong {
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.seat-map {
+  margin-top: 48px;
+  text-align: center;
+}
+
+.screen {
+  width: 75%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 12px;
+  border-top: 3px solid #aaa69c;
+  color: #777;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+}
+
+.seat-placeholder {
+  margin-top: 48px;
+  color: #777;
+  font-size: 14px;
+}
+
+@media (max-width: 500px) {
+  .showtime-summary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .price {
+    text-align: left;
+  }
+}

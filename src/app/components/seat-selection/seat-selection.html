@@ -1,1 +1,45 @@
-<p>seat-selection works!</p>
+
+@if (showtime(); as showtime) {
+  @if (movie(); as movie) {
+    <main class="seat-selection">
+      <a routerLink="/movies" class="back-link">
+        ← Volver al catálogo
+      </a>
+
+      <header class="page-header">
+        <p class="eyebrow">CINEMAPP / COMPRA DE ENTRADAS</p>
+        <h1>Elegí tus butacas</h1>
+        <p>Seleccioná los asientos para continuar con tu compra.</p>
+      </header>
+
+      <section class="showtime-summary">
+        <div>
+          <h2>{{ movie.title }}</h2>
+          <p>{{ formatDate(showtime.date) }}</p>
+          <p>{{ showtime.time }} · {{ showtime.room }}</p>
+        </div>
+
+        <div class="price">
+          <span>Precio por entrada</span>
+          <strong>${{ showtime.price }}</strong>
+        </div>
+      </section>
+
+      <section class="seat-map">
+        <div class="screen">
+          PANTALLA
+        </div>
+
+        <p class="seat-placeholder">
+          El mapa de butacas estará disponible próximamente.
+        </p>
+      </section>
+    </main>
+  }
+} @else {
+  <main class="seat-selection">
+    <h1>Función no encontrada</h1>
+    <p>La función solicitada no existe.</p>
+    <a routerLink="/movies">Volver al catálogo</a>
+  </main>
+}
