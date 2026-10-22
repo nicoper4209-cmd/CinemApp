@@ -1,0 +1,149 @@
+<main class="my-movies-page">
+  <header class="page-header">
+    <p class="eyebrow">CINEMAPP / MI ESPACIO</p>
+    <h1>Mis películas</h1>
+    <p>Todo lo que guardaste y las entradas que compraste.</p>
+  </header>
+
+  <nav class="section-tabs" aria-label="Secciones de mis películas">
+    <button
+      type="button"
+      [class.active]="activeSection() === 'favorites'"
+      [attr.aria-pressed]="activeSection() === 'favorites'"
+      (click)="setSection('favorites')"
+    >
+      Favoritas
+      <span>{{ favoriteMovies().length }}</span>
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeSection() === 'upcoming'"
+      [attr.aria-pressed]="activeSection() === 'upcoming'"
+      (click)="setSection('upcoming')"
+    >
+      Próximas funciones
+      <span>{{ upcomingBookings().length }}</span>
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activeSection() === 'tickets'"
+      [attr.aria-pressed]="activeSection() === 'tickets'"
+      (click)="setSection('tickets')"
+    >
+      Entradas compradas
+      <span>{{ bookings().length }}</span>
+    </button>
+  </nav>
+
+  @if (activeSection() === 'favorites') {
+    <section class="content-section">
+      <h2>Mis favoritas</h2>
+
+      @if (favoriteMovies().length > 0) {
+        <div class="movie-grid">
+          @for (movie of favoriteMovies(); track movie.id) {
+            <article class="movie-card">
+              <a [routerLink]="['/movies', movie.id]">
+                <img [src]="movie.poster" [alt]="movie.alt" />
+              </a>
+
+              <div class="card-info">
+                <h3>
+                  <a [routerLink]="['/movies', movie.id]">
+                    {{ movie.title }}
+                  </a>
+                </h3>
+
+                <p>{{ movie.year }} · {{ movie.genre }}</p>
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="empty-state">
+          <h3>Todavía no tenés favoritas</h3>
+          <p>Guardá películas con el botón de favoritos para encontrarlas acá.</p>
+          <a routerLink="/movies" class="text-link">Explorar cartelera</a>
+        </div>
+      }
+    </section>
+  }
+
+  @if (activeSection() === 'upcoming') {
+    <section class="content-section">
+      <h2>Próximas funciones</h2>
+
+      @if (upcomingBookings().length > 0) {
+        <div class="booking-list">
+          @for (booking of upcomingBookings(); track booking.id) {
+            <article class="booking-card">
+              <img
+                [src]="booking.movie.poster"
+                [alt]="booking.movie.alt"
+              />
+
+              <div class="booking-info">
+                <h3>{{ booking.movie.title }}</h3>
+                <p>{{ formatDate(booking.showtime.date) }}</p>
+                <p>
+                  {{ booking.showtime.time }} · Sala
+                  {{ booking.showtime.room }}
+                </p>
+                <p>Butacas: {{ booking.seats.join(', ') }}</p>
+                <span class="booking-code">{{ booking.id }}</span>
+              </div>
+
+              <strong class="booking-price">${{ booking.total }}</strong>
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="empty-state">
+          <h3>No tenés funciones próximas</h3>
+          <p>Cuando compres entradas para funciones futuras, aparecerán acá.</p>
+          <a routerLink="/movies" class="text-link">Ver cartelera</a>
+        </div>
+      }
+    </section>
+  }
+
+  @if (activeSection() === 'tickets') {
+    <section class="content-section">
+      <h2>Entradas compradas</h2>
+
+      @if (bookings().length > 0) {
+        <div class="booking-list">
+          @for (booking of bookings(); track booking.id) {
+            <article class="booking-card">
+              <img
+                [src]="booking.movie.poster"
+                [alt]="booking.movie.alt"
+              />
+
+              <div class="booking-info">
+                <h3>{{ booking.movie.title }}</h3>
+                <p>{{ formatDate(booking.showtime.date) }}</p>
+                <p>
+                  {{ booking.showtime.time }} · Sala
+                  {{ booking.showtime.room }}
+                </p>
+                <p>Butacas: {{ booking.seats.join(', ') }}</p>
+                <span class="booking-code">{{ booking.id }}</span>
+              </div>
+
+              <strong class="booking-price">${{ booking.total }}</strong>
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="empty-state">
+          <h3>Todavía no compraste entradas</h3>
+          <p>Cuando confirmes una compra, podrás consultarla en esta sección.</p>
+          <a routerLink="/movies" class="text-link">Explorar cartelera</a>
+        </div>
+      }
+    </section>
+  }
+</main>
