@@ -87,7 +87,9 @@
       </a>
     }
 
-    <button
+    @if (authService.initialized()) {
+    @if (authService.user()) {
+        <button
       type="button"
       class="favorite"
       [class.is-favorite]="isFavorite(movie.id)"
@@ -99,6 +101,8 @@
     >
       {{ isFavorite(movie.id) ? 'Quitar favorito' : 'Añadir favorito' }}
     </button>
+    }}
+
 
 <a routerLink="/movies" class="detail-link">
   Volver al catálogo

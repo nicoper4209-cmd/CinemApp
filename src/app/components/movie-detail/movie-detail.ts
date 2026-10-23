@@ -3,6 +3,8 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MovieService } from '../../services/movie';
 import { FavoriteService } from '../../services/favorites';
 import { ShowtimeService } from '../../services/showtime';
+import { AuthService } from '../../services/auth';
+
 
 @Component({
   imports: [RouterLink],
@@ -15,6 +17,7 @@ export class MovieDetail {
   private movieService = inject(MovieService);
   private favoriteService = inject(FavoriteService);
   private showtimeService = inject(ShowtimeService);
+  authService = inject(AuthService);
 
   id = computed(() => Number(this.route.snapshot.paramMap.get('id')));
 

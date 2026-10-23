@@ -8,6 +8,7 @@ import { BookingSummary } from './components/booking-summary/booking-summary';
 import { BookingConfirmation } from './components/booking-confirmation/booking-confirmation';
 import { MyMovies } from './components/my-movies/my-movies';
 import { Auth } from './components/auth/auth';
+import { authGuard } from './guards/auth-guard';
 
 export const routes: Routes = [
     {path:'top',component:TopMovies}, // Top 3 peliculas
@@ -17,7 +18,7 @@ export const routes: Routes = [
     {path:'seats/:id',component: SeatSelection}, // Butaca detalle
     {path:'booking-summary',component: BookingSummary}, // Resumen compra
     {path:'booking-confirmation/:id',component: BookingConfirmation}, // Confirmación compra
-    {path:'my-movies', component: MyMovies }, // Sección mis peliculas
+    {path:'my-movies', component: MyMovies,canActivate: [authGuard]}, // Sección mis peliculas
     {path:'login',component:Auth}, // Pantalla login
     {path:'register',component:Auth}, // Pantalla registrarse
     {path:'',redirectTo:'top',pathMatch:'full'},

@@ -16,3 +16,10 @@
 .main-nav a.active {
   color: #242424;
 }
+
+.main-nav button {
+  color: #77746c;
+  border: none;
+  background: none;
+  font-size: 1rem;
+}
