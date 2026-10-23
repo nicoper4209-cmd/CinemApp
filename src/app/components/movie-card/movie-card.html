@@ -1,8 +1,8 @@
-<article class="movie-card" (click)="onSelect()">
-  <img [src]="poster()" [alt]="alt()">
 
-  <div class="movie-info">
+<article class="movie-card">
+  <a [routerLink]="['/movies', id()]">
+    <img [src]="poster()" [alt]="alt() || title()">
     <h2>{{ title() }}</h2>
     <p>{{ year() }}</p>
-  </div>
+  </a>
 </article>

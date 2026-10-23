@@ -2,9 +2,10 @@ import { Component, computed, inject, input, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { Movie } from '../../models/movie';
 import { FavoriteService } from '../../services/favorites';
+import { MovieCard } from '../movie-card/movie-card';
 
 @Component({
-  imports: [RouterLink],
+  imports: [RouterLink,MovieCard],
   selector: 'app-movie-catalog',
   styleUrl: './movie-catalog.css',
   templateUrl: './movie-catalog.html',

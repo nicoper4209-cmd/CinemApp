@@ -30,27 +30,12 @@
 
 <div class="movie-grid">
   @for (movie of filteredMovies(); track movie.id) {
-    <article class="movie-card">
-
-      <button
-        type="button"
-        class="favorite-button"
-        [class.is-favorite]="isFavorite(movie.id)"
-        [attr.aria-pressed]="isFavorite(movie.id)"
-        [attr.aria-label]="isFavorite(movie.id)
-          ? 'Quitar de favoritos'
-          : 'Agregar a favoritos'"
-        (click)="toggleFavorite(movie.id)"
-      >
-        {{ isFavorite(movie.id) ? '♥' : '♡' }}
-      </button>
-
-      <a [routerLink]="['/movies', movie.id]">
-        <img [src]="movie.poster" [alt]="movie.title">
-        <h2>{{ movie.title }}</h2>
-        <p>{{ movie.year }}</p>
-      </a>
-
-    </article>
+    <app-movie-card
+      [id]="movie.id"
+      [title]="movie.title"
+      [poster]="movie.poster"
+      [alt]="movie.alt"
+      [year]="movie.year"
+    />
   }
 </div>
