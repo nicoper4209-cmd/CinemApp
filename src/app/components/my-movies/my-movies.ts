@@ -1,10 +1,11 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Movie } from '../../models/movie';
 import { FavoriteService } from '../../services/favorites';
 import { MovieService } from '../../services/movie';
 import { BookingService } from '../../services/booking';
 import { Booking } from '../../models/booking';
+import { AuthService } from '../../services/auth';
 
 type MyMoviesSection = 'favorites' | 'upcoming' | 'tickets';
 
@@ -15,11 +16,25 @@ type MyMoviesSection = 'favorites' | 'upcoming' | 'tickets';
   styleUrl: './my-movies.css',
 })
 export class MyMovies {
-  private favoriteService = inject(FavoriteService);
   private movieService = inject(MovieService);
   private bookingService = inject(BookingService);
 
+  private authService = inject(AuthService);
+  private favoriteService = inject(FavoriteService);
+
   activeSection = signal<MyMoviesSection>('favorites');
+  favoriteError = signal('');
+
+  constructor() {
+    effect(() => {
+      if (!this.authService.initialized()) return;
+
+      void this.favoriteService.loadFavorites().catch(error => {
+        console.error('Error al cargar favoritos:', error);
+        this.favoriteError.set('No se pudieron cargar los favoritos.');
+      });
+    });
+  }
 
   favoriteMovies = computed(() =>
     this.favoriteService.favoriteIds()
@@ -27,7 +42,6 @@ export class MyMovies {
       .filter((movie): movie is Movie => movie !== undefined)
   );
 
-  // Se actualizan al entrar nuevamente a esta pantalla.
   bookings = signal<Booking[]>(this.bookingService.getAll());
 
   upcomingBookings = computed(() =>

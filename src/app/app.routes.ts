@@ -9,6 +9,7 @@ import { BookingConfirmation } from './components/booking-confirmation/booking-c
 import { MyMovies } from './components/my-movies/my-movies';
 import { Auth } from './components/auth/auth';
 import { authGuard } from './guards/auth-guard';
+import { guestGuard } from './guards/guest-guard';
 
 export const routes: Routes = [
     {path:'top',component:TopMovies}, // Top 3 peliculas
@@ -19,8 +20,8 @@ export const routes: Routes = [
     {path:'booking-summary',component: BookingSummary}, // Resumen compra
     {path:'booking-confirmation/:id',component: BookingConfirmation}, // Confirmación compra
     {path:'my-movies', component: MyMovies,canActivate: [authGuard]}, // Sección mis peliculas
-    {path:'login',component:Auth}, // Pantalla login
-    {path:'register',component:Auth}, // Pantalla registrarse
+    {path:'login',component:Auth, canActivate: [guestGuard]}, // Pantalla login
+    {path:'register',component:Auth, canActivate: [guestGuard]}, // Pantalla registrarse
     {path:'',redirectTo:'top',pathMatch:'full'},
     {path:'**',redirectTo:'top'}
 ];

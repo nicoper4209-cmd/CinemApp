@@ -1,10 +1,9 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MovieService } from '../../services/movie';
 import { FavoriteService } from '../../services/favorites';
 import { ShowtimeService } from '../../services/showtime';
 import { AuthService } from '../../services/auth';
-
 
 @Component({
   imports: [RouterLink],
@@ -15,38 +14,70 @@ import { AuthService } from '../../services/auth';
 export class MovieDetail {
   private route = inject(ActivatedRoute);
   private movieService = inject(MovieService);
-  private favoriteService = inject(FavoriteService);
   private showtimeService = inject(ShowtimeService);
+
+  favoriteService = inject(FavoriteService);
   authService = inject(AuthService);
+
+  favoriteError = signal('');
+
+  constructor() {
+    effect(() => {
+      if (!this.authService.initialized()) return;
+
+      void this.favoriteService.loadFavorites().catch(error => {
+        console.error('Error al cargar favoritos:', error);
+        this.favoriteError.set('No se pudieron cargar los favoritos.');
+      });
+    });
+  }
 
   id = computed(() => Number(this.route.snapshot.paramMap.get('id')));
 
   movie = computed(() => this.movieService.getById(this.id()));
 
-  showtimes = computed(() => this.showtimeService.getByMovie(this.id()).filter(showtime => {
-        const dateTime = new Date(`${showtime.date}T${showtime.time}:00`);
+  showtimes = computed(() =>
+    this.showtimeService.getByMovie(this.id())
+      .filter(showtime => {
+        const dateTime = new Date(
+          `${showtime.date}T${showtime.time}:00`
+        );
+
         return dateTime.getTime() > Date.now();
       })
-      .sort((a, b) => `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`))
+      .sort((a, b) =>
+        `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`)
+      )
   );
 
-  // Favoritos
-  isFavorite(id: number): boolean { return this.favoriteService.isFavorite(id);}
+  isFavorite(id: number): boolean {
+    return this.favoriteService.isFavorite(id);
+  }
 
-  toggleFavorite(id: number): void { this.favoriteService.toggleFavorite(id);}
+  async toggleFavorite(id: number): Promise<void> {
+    this.favoriteError.set('');
 
-  // Fechas de funciones
+    try {
+      await this.favoriteService.toggleFavorite(id);
+    } catch (error) {
+      console.error('Error al actualizar favorito:', error);
+      this.favoriteError.set('No se pudo actualizar el favorito. Intentá nuevamente.');
+    }
+  }
+
   selectedDate = signal<string | null>(null);
 
-  availableDates = computed(() => [ ...new Set(this.showtimes().map(showtime => showtime.date))]); // obtener fechas sin repetir
+  availableDates = computed(() => [
+    ...new Set(this.showtimes().map(showtime => showtime.date))
+  ]);
 
-  selectedShowtimes = computed(() => // elegir funciones de x dia
+  selectedShowtimes = computed(() =>
     this.showtimes().filter(
       showtime => showtime.date === this.selectedDate()
     )
   );
 
-  selectDate(date: string): void { // guardo dia que eligio el usuario
+  selectDate(date: string): void {
     this.selectedDate.set(date);
   }
 
