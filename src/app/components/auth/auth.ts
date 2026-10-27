@@ -20,6 +20,7 @@ export class Auth {
   errorMessage = signal('');
   successMessage = signal('');
 
+  
   async submit(): Promise<void> {
     if (this.loading()) return;
 
@@ -43,7 +44,18 @@ export class Auth {
           this.password()
         );
 
-        await this.router.navigate(['/']);
+        const returnUrl =
+          this.router.parseUrl(this.router.url)
+            .queryParams['returnUrl'];
+
+        const destination =
+          typeof returnUrl === 'string' &&
+          returnUrl.startsWith('/') &&
+          !returnUrl.startsWith('//')
+            ? returnUrl
+            : '/';
+
+        await this.router.navigateByUrl(destination);
       }
     } catch (error: unknown) {
       this.errorMessage.set(
@@ -55,6 +67,7 @@ export class Auth {
       this.loading.set(false);
     }
   }
+
 
   toggleMode(): void {
     this.isRegistering.update(value => !value);
