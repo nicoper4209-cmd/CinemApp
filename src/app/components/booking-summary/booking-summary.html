@@ -69,7 +69,18 @@
       <div class="total-row">
         <span>Total</span>
         <strong>${{ total }}</strong>
-      </div>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="error-message" role="alert">
+        {{ errorMessage() }}
+      </p>
+    }
+
+    <p class="disclaimer">
+      Wendingo
+      Esta es una compra de prueba. Todavía no se realizará ningún cobro.
+    </p>
 
       <p class="disclaimer">
         Esta es una compra de prueba. Todavía no se realizará ningún cobro.
@@ -84,12 +95,14 @@
         </a>
 
         <button
-            type="button"
-            (click)="confirmBooking()"
-            >
-            Confirmar compra
+          type="button"
+          (click)="confirmBooking()"
+          [disabled]="confirming()"
+        >
+          {{ confirming() ? 'Procesando...' : 'Confirmar compra' }}
         </button>
       </div>
+
     </section>
   } @else {
     <section class="empty-state">

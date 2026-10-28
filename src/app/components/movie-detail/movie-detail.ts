@@ -1,10 +1,10 @@
-
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MovieService } from '../../services/movie';
 import { FavoriteService } from '../../services/favorites';
 import { ShowtimeService } from '../../services/showtime';
 import { AuthService } from '../../services/auth';
+import { Movie } from '../../models/movie';
 import { Showtime } from '../../models/showtime';
 
 @Component({
@@ -21,8 +21,10 @@ export class MovieDetail {
   favoriteService = inject(FavoriteService);
   authService = inject(AuthService);
 
-  favoriteError = signal('');
+  movie = signal<Movie | undefined>(undefined);
+  movieError = signal('');
   showtimeError = signal('');
+  favoriteError = signal('');
   loadingShowtimes = signal(false);
   allShowtimes = signal<Showtime[]>([]);
 
@@ -39,9 +41,30 @@ export class MovieDetail {
     effect(() => {
       const movieId = this.id();
 
+      this.movie.set(undefined);
+      this.movieError.set('');
+
+      void this.movieService.getById(movieId)
+        .then(movie => {
+          this.movie.set(movie);
+
+          if (!movie) {
+            this.movieError.set('No se encontró la película.');
+          }
+        })
+        .catch(error => {
+          console.error('Error al cargar película:', error);
+          this.movieError.set('No se pudo cargar la película. Intentá nuevamente.');
+        });
+    });
+
+    effect(() => {
+      const movieId = this.id();
+
       this.allShowtimes.set([]);
       this.showtimeError.set('');
       this.loadingShowtimes.set(true);
+      this.selectedDate.set(null);
 
       void this.showtimeService.getByMovie(movieId)
         .then(showtimes => {
@@ -60,8 +83,6 @@ export class MovieDetail {
   }
 
   id = computed(() => Number(this.route.snapshot.paramMap.get('id')));
-
-  movie = computed(() => this.movieService.getById(this.id()));
 
   showtimes = computed(() =>
     this.allShowtimes()

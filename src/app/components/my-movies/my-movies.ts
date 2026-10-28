@@ -24,12 +24,15 @@ export class MyMovies {
 
   activeSection = signal<MyMoviesSection>('favorites');
   favoriteError = signal('');
+  bookingError = signal('');
 
   constructor() {
   effect(() => {
     if (!this.authService.initialized()) return;
 
     void this.loadFavoriteMovies();
+
+    void this.loadBookings();
   });
 }
 
@@ -56,7 +59,19 @@ private async loadFavoriteMovies(): Promise<void> {
 
   favoriteMovies = signal<Movie[]>([]);
 
-  bookings = signal<Booking[]>(this.bookingService.getAll());
+  bookings = signal<Booking[]>([]);
+
+  private async loadBookings(): Promise<void> {
+  try {
+    const bookings = await this.bookingService.getAll();
+
+    this.bookings.set(bookings);
+    this.bookingError.set('');
+  } catch (error) {
+    console.error('Error al cargar reservas:', error);
+    this.bookingError.set('No se pudieron cargar las reservas.');
+  }
+}
 
   upcomingBookings = computed(() =>
     this.bookings()
