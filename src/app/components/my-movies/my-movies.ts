@@ -26,21 +26,35 @@ export class MyMovies {
   favoriteError = signal('');
 
   constructor() {
-    effect(() => {
-      if (!this.authService.initialized()) return;
+  effect(() => {
+    if (!this.authService.initialized()) return;
 
-      void this.favoriteService.loadFavorites().catch(error => {
-        console.error('Error al cargar favoritos:', error);
-        this.favoriteError.set('No se pudieron cargar los favoritos.');
-      });
-    });
+    void this.loadFavoriteMovies();
+  });
+}
+
+private async loadFavoriteMovies(): Promise<void> {
+  try {
+    await this.favoriteService.loadFavorites();
+
+    const favoriteIds = this.favoriteService.favoriteIds();
+
+    const movies = await Promise.all(
+      favoriteIds.map(id => this.movieService.getById(id))
+    );
+
+    this.favoriteMovies.set(
+      movies.filter((movie): movie is Movie => movie !== undefined)
+    );
+
+    this.favoriteError.set('');
+  } catch (error) {
+    console.error('Error al cargar favoritos:', error);
+    this.favoriteError.set('No se pudieron cargar los favoritos.');
   }
+}
 
-  favoriteMovies = computed(() =>
-    this.favoriteService.favoriteIds()
-      .map(id => this.movieService.getById(id))
-      .filter((movie): movie is Movie => movie !== undefined)
-  );
+  favoriteMovies = signal<Movie[]>([]);
 
   bookings = signal<Booking[]>(this.bookingService.getAll());
 

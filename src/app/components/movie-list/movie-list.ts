@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { Movie } from '../../models/movie';
 import { MovieService } from '../../services/movie';
 import { MovieCatalog } from '../movie-catalog/movie-catalog';
 
@@ -8,9 +9,21 @@ import { MovieCatalog } from '../movie-catalog/movie-catalog';
   templateUrl: './movie-list.html',
   styleUrl: './movie-list.css',
 })
-
 export class MovieList {
-  private movieService = inject(MovieService)
+  private movieService = inject(MovieService);
 
-  movies = this.movieService.getAvailable();
+  movies = signal<Movie[]>([]);
+
+  constructor() {
+    void this.loadMovies();
+  }
+
+  private async loadMovies(): Promise<void> {
+    try {
+      const movies = await this.movieService.getAvailable();
+      this.movies.set(movies);
+    } catch (error) {
+      console.error('Error al cargar la cartelera:', error);
+    }
+  }
 }

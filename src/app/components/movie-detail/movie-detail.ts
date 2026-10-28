@@ -1,9 +1,11 @@
+
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MovieService } from '../../services/movie';
 import { FavoriteService } from '../../services/favorites';
 import { ShowtimeService } from '../../services/showtime';
 import { AuthService } from '../../services/auth';
+import { Showtime } from '../../models/showtime';
 
 @Component({
   imports: [RouterLink],
@@ -20,6 +22,9 @@ export class MovieDetail {
   authService = inject(AuthService);
 
   favoriteError = signal('');
+  showtimeError = signal('');
+  loadingShowtimes = signal(false);
+  allShowtimes = signal<Showtime[]>([]);
 
   constructor() {
     effect(() => {
@@ -30,6 +35,28 @@ export class MovieDetail {
         this.favoriteError.set('No se pudieron cargar los favoritos.');
       });
     });
+
+    effect(() => {
+      const movieId = this.id();
+
+      this.allShowtimes.set([]);
+      this.showtimeError.set('');
+      this.loadingShowtimes.set(true);
+
+      void this.showtimeService.getByMovie(movieId)
+        .then(showtimes => {
+          this.allShowtimes.set(showtimes);
+        })
+        .catch(error => {
+          console.error('Error al cargar funciones:', error);
+          this.showtimeError.set(
+            'No se pudieron cargar las funciones. Intentá nuevamente.'
+          );
+        })
+        .finally(() => {
+          this.loadingShowtimes.set(false);
+        });
+    });
   }
 
   id = computed(() => Number(this.route.snapshot.paramMap.get('id')));
@@ -37,7 +64,7 @@ export class MovieDetail {
   movie = computed(() => this.movieService.getById(this.id()));
 
   showtimes = computed(() =>
-    this.showtimeService.getByMovie(this.id())
+    this.allShowtimes()
       .filter(showtime => {
         const dateTime = new Date(
           `${showtime.date}T${showtime.time}:00`
@@ -61,7 +88,9 @@ export class MovieDetail {
       await this.favoriteService.toggleFavorite(id);
     } catch (error) {
       console.error('Error al actualizar favorito:', error);
-      this.favoriteError.set('No se pudo actualizar el favorito. Intentá nuevamente.');
+      this.favoriteError.set(
+        'No se pudo actualizar el favorito. Intentá nuevamente.'
+      );
     }
   }
 

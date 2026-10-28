@@ -281,4 +281,18 @@ export const MOVIES: Movie[] = [
     trailer: 'https://www.youtube.com/results?search_query=From+Up+on+Poppy+Hill+official+trailer',
     status: 'available'
   },
+  {
+    id: 21,
+    title: 'Puedo escuchar el mar',
+    synopsis: 'Una chica de Tokio acaba de ser trasladada a una de las escuelas superiores de la ciudad de Kochi. Es guapa, buena en los deportes y en los estudios, pero de algún modo no consigue adaptarse a la vida social de la escuela. A ese mismo colegio pertenecen Taku Morisaki y Yukata Matsuno, dos grandes amigos, el primero de los cuales empieza a interesarse visiblemente por la recién llegada Muto.',
+    duration: 70,
+    genre: 'Romance',
+    ageRating: 'ATP',
+    poster: 'https://www.themoviedb.org/t/p/w600_and_h900_face/c1yxP5Hp8pw22vzLxjBt9hSuifv.jpg',
+    alt: 'Puedo escuchar el mar',
+    year: '1993',
+    rating: 10,
+    trailer: 'https://www.youtube.com/results?search_query=From+Ocean+Waves+official+trailer',
+    status: 'available'
+  }
 ];
