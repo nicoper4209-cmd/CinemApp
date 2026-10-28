@@ -84,6 +84,29 @@
   font-weight: 500;
 }
 
+.availability-message,
+.availability-error {
+  margin: 20px 0 0;
+  padding: 12px 16px;
+  border: 1px solid #dedbd4;
+  border-radius: 3px;
+  font-size: 13px;
+}
+
+.availability-message {
+  color: #666;
+}
+
+.availability-error {
+  border-color: #d7b6ac;
+  background: #f8eeeb;
+  color: #7a3021;
+}
+
+.availability-error p {
+  margin: 0;
+}
+
 .seat-section {
   margin-top: 40px;
   padding: 28px 0;

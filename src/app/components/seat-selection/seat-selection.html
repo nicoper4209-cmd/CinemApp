@@ -1,4 +1,3 @@
-
 @if (showtime(); as showtime) {
   @if (movie(); as movie) {
     <main class="seat-selection">
@@ -24,6 +23,18 @@
           <strong>${{ showtime.price }}</strong>
         </div>
       </section>
+
+      @if (loadingOccupiedSeats()) {
+        <p class="availability-message">
+          Consultando disponibilidad de butacas...
+        </p>
+      }
+
+      @if (seatError() || seatConflict()) {
+        <div class="availability-error" role="alert">
+          <p>{{ seatError() || seatConflict() }}</p>
+        </div>
+      }
 
       <section class="seat-section">
         <div class="legend">
@@ -56,9 +67,19 @@
                         [class.is-occupied]="isOccupied(seat.id)"
                         [class.is-vip]="row.isVip"
                         [class.is-accessible]="row.isAccessible"
-                        [disabled]="isOccupied(seat.id)"
+                        [disabled]="
+                          loadingOccupiedSeats() ||
+                          !!seatError() ||
+                          isOccupied(seat.id)
+                        "
                         [attr.aria-pressed]="isSelected(seat.id)"
-                        [attr.aria-label]="'Fila ' + row.label + ', asiento ' + seat.label + (row.isAccessible ? ', accesible' : '') + (row.isVip ? ', VIP' : '')"
+                        [attr.aria-label]="
+                          'Fila ' + row.label +
+                          ', asiento ' + seat.label +
+                          (row.isAccessible ? ', accesible' : '') +
+                          (row.isVip ? ', VIP' : '') +
+                          (isOccupied(seat.id) ? ', ocupada' : '')
+                        "
                         [title]="'Fila ' + row.label + ' · Asiento ' + seat.label"
                         (click)="toggleSeat(seat.id)"
                       >
@@ -75,11 +96,17 @@
         </div>
 
         <p class="map-hint">
-          @if (selectedSeats().length === 0) {
+          @if (loadingOccupiedSeats()) {
+            Actualizando disponibilidad...
+          } @else if (selectedSeats().length === 0) {
             Seleccioná una o más butacas.
           } @else {
             {{ selectedSeats().length }}
-            {{ selectedSeats().length === 1 ? 'butaca seleccionada' : 'butacas seleccionadas' }}
+            {{
+              selectedSeats().length === 1
+                ? 'butaca seleccionada'
+                : 'butacas seleccionadas'
+            }}
           }
         </p>
       </section>
@@ -87,22 +114,24 @@
       <section class="purchase-summary">
         <div>
           <p class="summary-label">Butacas elegidas</p>
+
           <div class="selected-list">
             @if (selectedSeats().length > 0) {
-                @for (seatId of selectedSeats(); track seatId) {
+              @for (seatId of selectedSeats(); track seatId) {
                 <p>
-                    {{ seatId.split('-')[0] }} · Asiento
-                    {{ seatId.split('-')[2] }}
-                    — ${{ getSeatPrice(seatId) }}
-                    @if (['R', 'S', 'T'].includes(seatId.split('-')[0])) {
+                  {{ seatId.split('-')[0] }} · Asiento
+                  {{ seatId.split('-')[2] }}
+                  — ${{ getSeatPrice(seatId) }}
+
+                  @if (['R', 'S', 'T'].includes(seatId.split('-')[0])) {
                     <span class="vip-label">VIP</span>
-                    }
+                  }
                 </p>
-                }
+              }
             } @else {
-                <p>Ninguna</p>
+              <p>Ninguna</p>
             }
-        </div>
+          </div>
         </div>
 
         <div class="total-price">
@@ -113,18 +142,29 @@
         <button
           type="button"
           class="continue-button"
-          [disabled]="selectedSeats().length === 0"
+          [disabled]="
+            selectedSeats().length === 0 ||
+            loadingOccupiedSeats() ||
+            !!seatError() ||
+            !!seatConflict()
+          "
           (click)="continueToSummary()"
         >
-          Continuar
+          {{ loadingOccupiedSeats() ? 'Verificando...' : 'Continuar' }}
         </button>
       </section>
+    </main>
+  } @else {
+    <main class="seat-selection">
+      <h1>No se encontró la película</h1>
+      <p>No se pudieron cargar los datos de la película de esta función.</p>
+      <a routerLink="/movies">Volver al catálogo</a>
     </main>
   }
 } @else {
   <main class="seat-selection">
     <h1>Función no encontrada</h1>
-    <p>La función solicitada no existe.</p>
+    <p>La función solicitada no existe o todavía se está cargando.</p>
     <a routerLink="/movies">Volver al catálogo</a>
   </main>
 }

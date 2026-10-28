@@ -26,7 +26,20 @@ interface BookingRow {
 })
 export class BookingService {
   private movieService = inject(MovieService);
-private showtimeService = inject(ShowtimeService);
+  private showtimeService = inject(ShowtimeService);
+  private recentlyBookedSeats = new Map<number, Set<string>>();
+
+  getRecentlyBookedSeats(showtimeId: number): string[] {
+    return [...(this.recentlyBookedSeats.get(showtimeId) ?? [])];
+  }
+
+  private rememberBookedSeats(showtimeId: number, seats: string[]): void {
+    const bookedSeats =
+      this.recentlyBookedSeats.get(showtimeId) ?? new Set<string>();
+
+    seats.forEach(seat => bookedSeats.add(seat));
+    this.recentlyBookedSeats.set(showtimeId, bookedSeats);
+  }
 
   async create(data: NewBooking): Promise<Booking> {
     const { data: result, error } = await supabase.rpc(
@@ -46,6 +59,7 @@ private showtimeService = inject(ShowtimeService);
       seats: string[];
       total: number;
     };
+    this.rememberBookedSeats(data.showtime.id, created.seats);
 
     return {
       id: created.id,
