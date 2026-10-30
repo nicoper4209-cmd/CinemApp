@@ -337,6 +337,46 @@ hr {
   line-height: 1.5;
 }
 
+.candy-cart-summary .detail-row {
+  gap: 12px;
+}
+
+.candy-cart-row small {
+  color: #777;
+}
+
+.candy-quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.candy-quantity-controls button {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid #cfcfcf;
+  border-radius: 3px;
+  background: #fff;
+  color: #242424;
+  font: inherit;
+  cursor: pointer;
+}
+
+.candy-quantity-controls .remove-candy {
+  margin-left: 3px;
+  border-color: #d7aaaa;
+  color: #a3332f;
+}
+
+.edit-candy-link {
+  display: inline-block;
+  margin-top: 10px;
+  color: #555;
+  font-size: 13px;
+}
+
 .vip-confirmation {
   margin-top: 22px;
   padding: 18px;

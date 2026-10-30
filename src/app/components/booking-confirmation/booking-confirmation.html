@@ -6,7 +6,7 @@
       <p class="eyebrow">CINEMAPP / COMPRA</p>
       <h1>¡Compra confirmada!</h1>
       <p class="description">
-        Tu entrada de prueba se generó correctamente.
+        Tu compra de prueba se generó correctamente.
       </p>
 
       <div class="ticket">
@@ -18,41 +18,65 @@
 
         <hr />
 
-        <h3>{{ purchase.movie.title }}</h3>
+        @if (purchase.movie && purchase.showtime) {
+          <h3>{{ purchase.movie.title }}</h3>
+          <p>{{ formatDate(purchase.showtime.date) }}</p>
+          <p>Horario: {{ purchase.showtime.time }}</p>
+          <p>Sala: {{ purchase.showtime.room }}</p>
 
-        <p>{{ formatDate(purchase.showtime.date) }}</p>
-        <p>Horario: {{ purchase.showtime.time }}</p>
-        <p>Sala: {{ purchase.showtime.room }}</p>
+          @if (minorNotice) {
+            <p class="minor-notice" role="note">
+              Clasificación {{ purchase.movie.ageRating }}: los menores deben concurrir acompañados por un adulto.
+            </p>
+          }
 
-        @if (minorNotice) {
-          <p class="minor-notice" role="note">
-            Clasificación {{ purchase.movie.ageRating }}: los menores deben concurrir acompañados por un adulto.
-          </p>
+          <div class="seats">
+            <span>Butacas</span>
+            <strong>{{ purchase.seats.join(', ') }}</strong>
+          </div>
+
+          @if (purchase.tickets?.length) {
+            <hr />
+            <h3>Entradas individuales</h3>
+            @for (ticket of purchase.tickets ?? []; track ticket.qrCode) {
+              <article class="admission-ticket">
+                <div class="admission-details">
+                  <p class="eyebrow">ENTRADA · {{ seatTypeLabel(ticket.seatType) }}</p>
+                  <h4>Butaca {{ ticket.seatLabel }}</h4>
+                  <p>Precio: ${{ ticket.price }}</p>
+                  <p class="manual-code">Código manual: <strong>{{ ticket.manualCode }}</strong></p>
+                </div>
+                @if (ticket.qrDataUrl) {
+                  <img class="ticket-qr" [src]="ticket.qrDataUrl"
+                    [alt]="'Código QR de la entrada para la butaca ' + ticket.seatLabel" />
+                } @else {
+                  <p class="field-hint">Preparando código QR...</p>
+                }
+              </article>
+            }
+          }
         }
 
-        <div class="seats">
-          <span>Butacas</span>
-          <strong>{{ purchase.seats.join(', ') }}</strong>
-        </div>
-
-        <hr />
-
-        <h3>Entradas individuales</h3>
-        @for (ticket of purchase.tickets ?? []; track ticket.qrCode) {
-          <article class="admission-ticket">
-            <div class="admission-details">
-              <p class="eyebrow">ENTRADA · {{ seatTypeLabel(ticket.seatType) }}</p>
-              <h4>Butaca {{ ticket.seatLabel }}</h4>
-              <p>Precio: ${{ ticket.price }}</p>
-              <p class="manual-code">Código manual: <strong>{{ ticket.manualCode }}</strong></p>
+        @if (purchase.candyItems?.length) {
+          <hr />
+          <h3>Pedido Candy</h3>
+          @for (item of purchase.candyItems ?? []; track item.productId) {
+            <div class="candy-confirmation-row">
+              <span>{{ item.name }} ×{{ item.quantity }}</span>
+              <strong>${{ (item.unitPrice * item.quantity).toFixed(2) }}</strong>
             </div>
-            @if (ticket.qrDataUrl) {
-              <img class="ticket-qr" [src]="ticket.qrDataUrl"
-                [alt]="'Código QR de la entrada para la butaca ' + ticket.seatLabel" />
-            } @else {
+          }
+          <div class="candy-pickup">
+            <p class="eyebrow">CÓDIGO DE RETIRO</p>
+            @if (purchase.candyCode) {
+              <p class="manual-code"><strong>{{ purchase.candyCode }}</strong></p>
+            }
+            @if (purchase.candyQrDataUrl) {
+              <img class="ticket-qr" [src]="purchase.candyQrDataUrl" alt="Código QR para retirar el pedido Candy" />
+            } @else if (purchase.candyQr) {
               <p class="field-hint">Preparando código QR...</p>
             }
-          </article>
+          </div>
         }
         @if (qrError()) {
           <p class="inline-error" role="alert">{{ qrError() }}</p>
@@ -65,17 +89,21 @@
       </div>
 
       <p class="disclaimer">
-        El pago se procesa en modo de prueba. Presentá el QR individual de cada entrada al ingresar.
+        El pago se procesa en modo de prueba.
+        @if (purchase.tickets?.length) { Presentá el QR individual de cada entrada al ingresar. }
+        @if (purchase.candyCode) { Presentá el QR o código manual para retirar tu pedido Candy. }
       </p>
 
       @if (pdfError()) {
         <p class="inline-error" role="alert">{{ pdfError() }}</p>
       }
 
-      <button class="pdf-button" type="button" (click)="downloadPdf()"
-        [disabled]="generatingPdf() || !canDownloadPdf()">
-        {{ generatingPdf() ? 'Generando PDF...' : 'Descargar entradas en PDF' }}
-      </button>
+      @if (purchase.tickets?.length) {
+        <button class="pdf-button" type="button" (click)="downloadPdf()"
+          [disabled]="generatingPdf() || !canDownloadPdf()">
+          {{ generatingPdf() ? 'Generando PDF...' : 'Descargar entradas en PDF' }}
+        </button>
+      }
 
       <a routerLink="/movies" class="home-button">
         Volver a cartelera

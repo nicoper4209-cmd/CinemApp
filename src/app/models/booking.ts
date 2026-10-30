@@ -10,13 +10,29 @@ export interface BookingTicket {
   qrDataUrl?: string;
 }
 
+export interface BookingCandyItem {
+  productId: number;
+  name: string;
+  quantity: number;
+  unitPrice: number;
+}
+
 export interface Booking {
   id: string;
-  movie: Movie;
-  showtime: Showtime;
+  movie?: Movie | null;
+  showtime?: Showtime | null;
   seats: string[];
   total: number;
   createdAt: string;
   contactEmail?: string;
   tickets?: BookingTicket[];
+  candyItems?: BookingCandyItem[];
+  candyQr?: string;
+  candyCode?: string;
+  candyQrDataUrl?: string;
+}
+
+export interface TicketBooking extends Booking {
+  movie: Movie;
+  showtime: Showtime;
 }

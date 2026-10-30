@@ -1,6 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { CandyCategory } from '../../models/candy';
+import { CandyProduct } from '../../models/candy';
 import { CandyService } from '../../services/candy';
+import { CandyCartService } from '../../services/candy-cart';
 
 @Component({
   selector: 'app-candy-shop',
@@ -9,6 +12,8 @@ import { CandyService } from '../../services/candy';
 })
 export class CandyShop {
   private candyService = inject(CandyService);
+  private router = inject(Router);
+  cart = inject(CandyCartService);
 
   categories = signal<CandyCategory[]>([]);
   hasFeaturedProducts = computed(() =>
@@ -19,6 +24,7 @@ export class CandyShop {
   );
   loading = signal(true);
   errorMessage = signal('');
+  private returnToCheckout = (history.state as { checkout?: Record<string, unknown> } | null)?.checkout;
 
   constructor() {
     void this.loadCatalog();
@@ -44,5 +50,16 @@ export class CandyShop {
       currency: 'ARS',
       maximumFractionDigits: 2,
     }).format(price);
+  }
+
+  addToCart(product: CandyProduct): void {
+    this.cart.add(product);
+  }
+
+  checkout(): void {
+    if (this.cart.itemCount() === 0) return;
+    void this.router.navigate(['/booking-summary'], {
+      state: this.returnToCheckout ?? { candyOnly: true },
+    });
   }
 }

@@ -15,6 +15,13 @@
   } @else if (categories().length === 0) {
     <p class="status-message">Por el momento no hay productos disponibles.</p>
   } @else {
+    @if (cart.itemCount() > 0) {
+      <aside class="cart-strip" aria-label="Resumen del carrito">
+        <span>{{ cart.itemCount() }} producto(s) · {{ formatPrice(cart.subtotal()) }}</span>
+        <button type="button" (click)="checkout()">Continuar con Candy</button>
+      </aside>
+    }
+
     @if (hasFeaturedProducts() || hasCombos()) {
       <div class="candy-highlights" aria-label="Promociones del menú">
         @if (hasCombos()) { <span>Combos para compartir</span> }
@@ -52,6 +59,9 @@
                   <p class="product-description">{{ product.description }}</p>
                 }
                 <strong class="product-price">{{ formatPrice(product.price) }}</strong>
+                <button class="add-button" type="button" (click)="addToCart(product)">
+                  Agregar al carrito
+                </button>
               </div>
             </article>
           }

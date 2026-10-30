@@ -9,12 +9,14 @@ import { AuthService } from '../../services/auth';
 import { SeatHoldService } from '../../services/seat-hold';
 import { PricingService, TicketPriceEstimate } from '../../services/pricing';
 import { getSeatContiguityError } from '../../utils/seat-validation';
+import { CandyCartService } from '../../services/candy-cart';
 
 interface BookingData {
-  movie: Movie;
-  showtime: Showtime;
+  movie?: Movie;
+  showtime?: Showtime;
   seats: string[];
   total: number;
+  candyOnly?: boolean;
 }
 
 @Component({
@@ -30,9 +32,10 @@ export class BookingSummary {
   authService = inject(AuthService);
   seatHoldService = inject(SeatHoldService);
   private pricingService = inject(PricingService);
+  cart = inject(CandyCartService);
 
   movie = this.bookingData?.movie;
-  showtime = this.bookingData?.showtime;
+  showtime = this.bookingData?.showtime ?? null;
   seats = this.bookingData?.seats ?? [];
   total = this.bookingData?.total ?? 0;
   priceEstimate = signal<TicketPriceEstimate | null>(null);
@@ -77,10 +80,11 @@ export class BookingSummary {
   errorMessage = signal('');
 
   bookingAvailable = computed(() =>
-    !!this.movie &&
-    !!this.showtime &&
-    this.seats.length > 0
+    (!!this.movie && !!this.showtime && this.seats.length > 0) ||
+    (!this.movie && !this.showtime && this.cart.items().length > 0)
   );
+  hasTickets = computed(() => !!this.movie && !!this.showtime && this.seats.length > 0);
+  isCandyOnly = computed(() => !this.hasTickets() && this.cart.items().length > 0);
 
   guestDetailsValid = computed(() =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.contactEmail().trim()) &&
@@ -95,7 +99,17 @@ export class BookingSummary {
   hasVip = computed(() =>
     this.seats.some(seat => ['R', 'S', 'T'].includes(seat.split('-')[0]))
   );
-  estimatedTotal = computed(() => this.priceEstimate()?.total ?? 0);
+  estimatedTotal = computed(() => (this.priceEstimate()?.total ?? 0) + this.cart.subtotal());
+
+  get checkoutContext(): BookingData {
+    return {
+      movie: this.movie,
+      showtime: this.showtime ?? undefined,
+      seats: [...this.seats],
+      total: this.total,
+      candyOnly: !this.hasTickets(),
+    };
+  }
 
   constructor() {
     if (this.movie && this.showtime) void this.loadPriceEstimate();
@@ -168,15 +182,20 @@ export class BookingSummary {
 
       const isAnonymous = session?.user.is_anonymous ?? true;
       const bookingId = await this.bookingService.purchase({
-        movie: this.movie!,
-        showtime: this.showtime!,
+        movie: this.movie,
+        showtime: this.showtime,
         seats: [...this.seats],
+        candy: this.cart.items().map(item => ({
+          product_id: item.product.id,
+          qty: item.quantity,
+        })),
         contactEmail: isAnonymous
           ? this.contactEmail().trim()
           : session?.user.email ?? null,
         birthDate: isAnonymous ? this.birthDate() : null,
       });
 
+      this.cart.clear();
       await this.router.navigate([
         '/booking-confirmation',
         bookingId,
@@ -192,6 +211,14 @@ export class BookingSummary {
     } finally {
       this.confirming.set(false);
     }
+  }
+
+  formatPrice(price: number): string {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      maximumFractionDigits: 2,
+    }).format(price);
   }
 
   get contactEmailValue(): string { return this.contactEmail(); }

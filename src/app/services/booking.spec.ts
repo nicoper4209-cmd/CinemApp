@@ -72,4 +72,41 @@ describe('BookingService purchase contract', () => {
     expect(supabaseMock.rpc).not.toHaveBeenCalled();
     expect(completePurchase).not.toHaveBeenCalled();
   });
+
+  it('supports a candy-only purchase without creating or completing a seat hold', async () => {
+    supabaseMock.rpc.mockResolvedValue({ data: 'candy-booking-uuid', error: null });
+    const candyOrder = {
+      showtime: null,
+      seats: [],
+      candy: [{ product_id: 12, qty: 2 }],
+      contactEmail: 'guest@example.com',
+      birthDate: '2000-02-03',
+    };
+
+    await expect(createService().purchase(candyOrder)).resolves.toBe('candy-booking-uuid');
+    expect(updateHold).not.toHaveBeenCalled();
+    expect(completePurchase).not.toHaveBeenCalled();
+    expect(supabaseMock.rpc).toHaveBeenCalledWith('purchase_tickets', expect.objectContaining({
+      p_showtime_id: null,
+      p_seats: [],
+      p_candy: [{ product_id: 12, qty: 2 }],
+    }));
+  });
+
+  it('sends candy and held seats together in the same atomic RPC call', async () => {
+    supabaseMock.rpc.mockResolvedValue({ data: 'mixed-booking-uuid', error: null });
+    const mixedOrder = {
+      ...purchaseData,
+      candy: [{ product_id: 7, qty: 1 }, { product_id: 12, qty: 2 }],
+    };
+
+    await expect(createService().purchase(mixedOrder)).resolves.toBe('mixed-booking-uuid');
+    expect(updateHold).toHaveBeenCalledWith(23, purchaseData.seats);
+    expect(supabaseMock.rpc).toHaveBeenCalledWith('purchase_tickets', expect.objectContaining({
+      p_showtime_id: 23,
+      p_seats: purchaseData.seats,
+      p_candy: mixedOrder.candy,
+    }));
+    expect(completePurchase).toHaveBeenCalledWith(23);
+  });
 });

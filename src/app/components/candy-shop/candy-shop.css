@@ -43,6 +43,34 @@
   font-size: 13px;
 }
 
+.cart-strip {
+  position: sticky;
+  z-index: 2;
+  top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding: 14px 16px;
+  border: 1px solid #d8c49e;
+  border-radius: 5px;
+  background: #fffaf0;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 7%);
+}
+
+.cart-strip button,
+.add-button {
+  padding: 10px 14px;
+  border: 1px solid #242424;
+  border-radius: 3px;
+  background: #242424;
+  color: white;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
 .candy-category {
   margin-top: 38px;
 }
@@ -138,8 +166,14 @@
 }
 
 .product-price {
+  display: block;
   font-size: 16px;
   font-weight: 600;
+}
+
+.add-button {
+  width: 100%;
+  margin-top: 14px;
 }
 
 .error-message {

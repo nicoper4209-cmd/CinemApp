@@ -4,7 +4,7 @@ import { Movie } from '../../models/movie';
 import { FavoriteService } from '../../services/favorites';
 import { MovieService } from '../../services/movie';
 import { BookingService } from '../../services/booking';
-import { Booking } from '../../models/booking';
+import { TicketBooking } from '../../models/booking';
 import { AuthService } from '../../services/auth';
 
 type MyMoviesSection = 'favorites' | 'upcoming' | 'tickets';
@@ -59,7 +59,7 @@ private async loadFavoriteMovies(): Promise<void> {
 
   favoriteMovies = signal<Movie[]>([]);
 
-  bookings = signal<Booking[]>([]);
+  bookings = signal<TicketBooking[]>([]);
 
   private async loadBookings(): Promise<void> {
   try {

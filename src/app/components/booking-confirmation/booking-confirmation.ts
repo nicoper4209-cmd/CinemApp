@@ -1,7 +1,7 @@
 
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { Booking, BookingTicket } from '../../models/booking';
+import { Booking, BookingCandyItem, BookingTicket } from '../../models/booking';
 import { MovieService } from '../../services/movie';
 import { ShowtimeService } from '../../services/showtime';
 import { supabase } from '../../supabase.client';
@@ -35,7 +35,7 @@ export class BookingConfirmation {
     try {
       const { data: row, error } = await supabase
         .from('bookings')
-        .select('id, movie_id, showtime_id, total, created_at, contact_email')
+        .select('id, movie_id, showtime_id, total, created_at, contact_email, candy_qr, candy_code')
         .eq('id', this.bookingId)
         .single();
 
@@ -44,11 +44,11 @@ export class BookingConfirmation {
       }
 
       const [movie, showtime] = await Promise.all([
-        this.movieService.getById(row.movie_id),
-        this.showtimeService.getById(row.showtime_id),
+        row.movie_id ? this.movieService.getById(row.movie_id) : Promise.resolve(undefined),
+        row.showtime_id ? this.showtimeService.getById(row.showtime_id) : Promise.resolve(undefined),
       ]);
 
-      if (!movie || !showtime) {
+      if (row.showtime_id && (!movie || !showtime)) {
         throw new Error('No se encontraron los datos de la película o función.');
       }
 
@@ -62,12 +62,24 @@ export class BookingConfirmation {
         throw seatsError;
       }
 
+      const { data: candyRows, error: candyError } = await supabase
+        .from('booking_candy_items')
+        .select('product_id,quantity,unit_price,candy_products(name)')
+        .eq('booking_id', this.bookingId);
+      if (candyError) throw candyError;
+
       const tickets: BookingTicket[] = (seatRows ?? []).map(seat => ({
         seatLabel: seat.seat_label,
         seatType: seat.seat_type,
         price: Number(seat.price),
         qrCode: seat.qr_code,
         manualCode: seat.manual_code,
+      }));
+      const candyItems: BookingCandyItem[] = (candyRows ?? []).map(item => ({
+        productId: item.product_id,
+        name: item.candy_products?.[0]?.name ?? `Producto ${item.product_id}`,
+        quantity: item.quantity,
+        unitPrice: Number(item.unit_price),
       }));
 
       this.booking.set({
@@ -79,19 +91,29 @@ export class BookingConfirmation {
         createdAt: row.created_at,
         contactEmail: row.contact_email,
         tickets,
+        candyItems,
+        candyQr: row.candy_qr ?? undefined,
+        candyCode: row.candy_code ?? undefined,
       });
 
       try {
         const QRCode = await import('qrcode');
-        const ticketsWithQr = await Promise.all(tickets.map(async ticket => ({
+        const [ticketsWithQr, candyQrDataUrl] = await Promise.all([
+          Promise.all(tickets.map(async ticket => ({
           ...ticket,
           qrDataUrl: await QRCode.toDataURL(ticket.qrCode, {
             errorCorrectionLevel: 'M',
             margin: 1,
             width: 220,
           }),
-        })));
-        this.booking.update(purchase => purchase ? { ...purchase, tickets: ticketsWithQr } : purchase);
+          }))),
+          row.candy_qr
+            ? QRCode.toDataURL(row.candy_qr, { errorCorrectionLevel: 'M', margin: 1, width: 220 })
+            : Promise.resolve(undefined),
+        ]);
+        this.booking.update(purchase => purchase
+          ? { ...purchase, tickets: ticketsWithQr, candyQrDataUrl }
+          : purchase);
       } catch (error) {
         console.error('No se pudieron generar los QR de las entradas:', error);
         this.qrError.set('No se pudieron mostrar los QR. Podés usar los códigos manuales de cada entrada.');
@@ -120,7 +142,7 @@ export class BookingConfirmation {
   }
 
   get minorNotice(): boolean {
-    const rating = this.booking()?.movie.ageRating;
+    const rating = this.booking()?.movie?.ageRating;
     return requiresAccompanyingAdult(rating);
   }
 
@@ -134,13 +156,14 @@ export class BookingConfirmation {
 
   canDownloadPdf(): boolean {
     const tickets = this.booking()?.tickets;
-    return !!tickets?.length && tickets.every(ticket => !!ticket.qrDataUrl);
+    const purchase = this.booking();
+    return !!purchase?.movie && !!purchase.showtime && !!tickets?.length && tickets.every(ticket => !!ticket.qrDataUrl);
   }
 
   async downloadPdf(): Promise<void> {
     const purchase = this.booking();
     const tickets = purchase?.tickets;
-    if (!purchase || !tickets?.length || !this.canDownloadPdf()) {
+    if (!purchase?.movie || !purchase.showtime || !tickets?.length || !this.canDownloadPdf()) {
       this.pdfError.set('Las entradas todavía no están listas para generar el PDF.');
       return;
     }
@@ -156,10 +179,10 @@ export class BookingConfirmation {
         pdf.setFontSize(10);
         pdf.text('CINEMAPP · ENTRADA', 20, 20);
         pdf.setFontSize(19);
-        pdf.text(purchase.movie.title, 20, 34, { maxWidth: 165 });
+        pdf.text(purchase.movie!.title, 20, 34, { maxWidth: 165 });
         pdf.setFontSize(11);
-        pdf.text(this.formatDate(purchase.showtime.date), 20, 48);
-        pdf.text(`Horario: ${purchase.showtime.time} · Sala ${purchase.showtime.room}`, 20, 56);
+        pdf.text(this.formatDate(purchase.showtime!.date), 20, 48);
+        pdf.text(`Horario: ${purchase.showtime!.time} · Sala ${purchase.showtime!.room}`, 20, 56);
         pdf.text(`Butaca: ${ticket.seatLabel} · ${this.seatTypeLabel(ticket.seatType)}`, 20, 68);
         pdf.text(`Precio de esta entrada: $${ticket.price.toFixed(2)}`, 20, 76);
         pdf.text(`Reserva: ${purchase.id}`, 20, 88, { maxWidth: 165 });

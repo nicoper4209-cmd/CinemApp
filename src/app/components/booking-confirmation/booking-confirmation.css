@@ -104,6 +104,32 @@ h1 {
   letter-spacing: 0.08em;
 }
 
+.candy-confirmation-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  color: #555;
+  font-size: 14px;
+}
+
+.candy-pickup {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  padding: 14px;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+}
+
+.candy-pickup .eyebrow,
+.candy-pickup p {
+  margin: 0;
+}
+
 .ticket-qr {
   width: 112px;
   height: 112px;

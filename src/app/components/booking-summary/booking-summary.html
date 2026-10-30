@@ -8,67 +8,63 @@
 
   @if (bookingAvailable()) {
     <section class="summary-card">
-      <div class="movie-info">
-        <img
-          [src]="movie!.poster"
-          [alt]="movie!.alt"
-          class="movie-poster"
-        />
-
-        <div>
-          <p class="eyebrow">PELÍCULA</p>
-          <h2>{{ movie!.title }}</h2>
-          <p>{{ movie!.duration }} min · {{ movie!.ageRating }}</p>
-        </div>
-      </div>
-
-      <hr />
-
-      <div class="section">
-        <p class="eyebrow">FUNCIÓN</p>
-
-        <div class="detail-row">
-          <span>Fecha</span>
-          <strong>{{ formatDate(showtime!.date) }}</strong>
-        </div>
-
-        <div class="detail-row">
-          <span>Horario</span>
-          <strong>{{ showtime!.time }}</strong>
-        </div>
-
-        <div class="detail-row">
-          <span>Sala</span>
-          <strong>{{ showtime!.room }}</strong>
-        </div>
-      </div>
-
-      <hr />
-
-      <div class="section">
-        <p class="eyebrow">BUTACAS</p>
-
-        @for (seatId of seats; track seatId) {
-          <div class="detail-row">
-            <span>
-              Fila {{ seatId.split('-')[0] }} · Asiento
-              {{ seatId.split('-')[2] }}
-
-              @if (['R', 'S', 'T'].includes(seatId.split('-')[0])) {
-                <span class="vip-label">VIP</span>
-              }
-            </span>
-
-            <strong>${{ getSeatPrice(seatId) }}</strong>
+      @if (hasTickets()) {
+        <div class="movie-info">
+          <img [src]="movie!.poster" [alt]="movie!.alt" class="movie-poster" />
+          <div>
+            <p class="eyebrow">PELÍCULA</p>
+            <h2>{{ movie!.title }}</h2>
+            <p>{{ movie!.duration }} min · {{ movie!.ageRating }}</p>
           </div>
-        }
-      </div>
+        </div>
 
-      <hr />
+        <hr />
 
-      @if (priceEstimateLoading()) {
+        <div class="section">
+          <p class="eyebrow">FUNCIÓN</p>
+          <div class="detail-row"><span>Fecha</span><strong>{{ formatDate(showtime!.date) }}</strong></div>
+          <div class="detail-row"><span>Horario</span><strong>{{ showtime!.time }}</strong></div>
+          <div class="detail-row"><span>Sala</span><strong>{{ showtime!.room }}</strong></div>
+        </div>
+
+        <hr />
+
+        <div class="section">
+          <p class="eyebrow">BUTACAS</p>
+          @for (seatId of seats; track seatId) {
+            <div class="detail-row">
+              <span>Fila {{ seatId.split('-')[0] }} · Asiento {{ seatId.split('-')[2] }}
+                @if (['R', 'S', 'T'].includes(seatId.split('-')[0])) { <span class="vip-label">VIP</span> }
+              </span>
+              <strong>{{ formatPrice(getSeatPrice(seatId)) }}</strong>
+            </div>
+          }
+        </div>
+        <hr />
+      }
+
+      @if (cart.items().length > 0) {
+        <div class="section candy-cart-summary">
+          <p class="eyebrow">CANDY</p>
+          @for (item of cart.items(); track item.product.id) {
+            <div class="detail-row candy-cart-row">
+              <span>{{ item.product.name }} <small>×{{ item.quantity }}</small></span>
+              <span class="candy-quantity-controls" [attr.aria-label]="'Cantidad de ' + item.product.name">
+                <button type="button" (click)="cart.setQuantity(item.product.id, item.quantity - 1)" [attr.aria-label]="'Quitar una unidad de ' + item.product.name">−</button>
+                <strong>{{ formatPrice(item.product.price * item.quantity) }}</strong>
+                <button type="button" (click)="cart.setQuantity(item.product.id, item.quantity + 1)" [attr.aria-label]="'Agregar una unidad de ' + item.product.name">+</button>
+                <button type="button" class="remove-candy" (click)="cart.remove(item.product.id)" [attr.aria-label]="'Eliminar ' + item.product.name">×</button>
+              </span>
+            </div>
+          }
+          <a routerLink="/candy" [state]="{ checkout: checkoutContext }" class="edit-candy-link">Seguir eligiendo productos</a>
+        </div>
+        <hr />
+      }
+
+      @if (hasTickets() && priceEstimateLoading()) {
         <p class="field-hint" role="status">Calculando precio estimado...</p>
-      } @else if (priceEstimate(); as estimate) {
+      } @else if (hasTickets() && priceEstimate(); as estimate) {
         <p class="price-context">
           Estimación según {{ estimate.formatName }} (×{{ estimate.formatMultiplier }})
           @if (estimate.presale) { · Precio de preventa aplicado }
@@ -81,15 +77,15 @@
       </div>
       <p class="disclaimer">El importe definitivo se confirma al procesar la compra.</p>
 
-      @if (priceEstimateError()) {
+      @if (hasTickets() && priceEstimateError()) {
         <p class="error-message" role="alert">{{ priceEstimateError() }}</p>
       }
 
-      @if (contiguityError()) {
+      @if (hasTickets() && contiguityError()) {
         <p class="error-message" role="alert">{{ contiguityError() }}</p>
       }
 
-      @if (hasVip()) {
+      @if (hasTickets() && hasVip()) {
         <section class="vip-confirmation" aria-labelledby="vip-confirmation-title">
           <p class="eyebrow">BUTACAS VIP</p>
           <h2 id="vip-confirmation-title">Precio diferencial</h2>
@@ -162,7 +158,7 @@
         <span class="field-hint">La fecha se utiliza para validar las restricciones de edad.</span>
       </fieldset>
 
-      @if (movie!.ageRating !== 'ATP') {
+      @if (movie && movie.ageRating !== 'ATP') {
         <p class="age-notice" role="note">Para películas +13 y +18, los menores deben concurrir acompañados por un adulto.</p>
       }
     </section>
@@ -174,7 +170,7 @@
       </p>
     }
 
-    @if (seatHoldService.holdError()) {
+    @if (hasTickets() && seatHoldService.holdError()) {
       <p class="error-message" role="alert">
         {{ seatHoldService.holdError() }}. Al confirmar se volverá a verificar la disponibilidad.
       </p>
@@ -185,17 +181,16 @@
       </p>
 
       <div class="actions">
-        <a
-          [routerLink]="['/seats', showtime!.id]"
-          class="secondary-button"
-        >
-          Volver a las butacas
-        </a>
+        @if (hasTickets()) {
+          <a [routerLink]="['/seats', showtime!.id]" class="secondary-button">Volver a las butacas</a>
+        } @else {
+          <a routerLink="/candy" class="secondary-button">Volver al menú Candy</a>
+        }
 
         <button
           type="button"
           (click)="confirmBooking()"
-          [disabled]="!authService.initialized() || confirming() || priceEstimateLoading() || !!priceEstimateError() || !!contiguityError() || (hasVip() && !vipAcknowledged()) || (guestDetailsRequired() && !guestDetailsValid())"
+          [disabled]="!authService.initialized() || confirming() || priceEstimateLoading() || (hasTickets() && (!!priceEstimateError() || !!contiguityError() || (hasVip() && !vipAcknowledged()))) || (guestDetailsRequired() && !guestDetailsValid())"
         >
           {{ confirming() ? 'Procesando...' : 'Confirmar compra' }}
         </button>
@@ -205,10 +200,8 @@
   } @else {
     <section class="empty-state">
       <h2>No hay una compra para mostrar</h2>
-      <p>Seleccioná una función y sus butacas para ver el resumen.</p>
-      <a routerLink="/movies" class="secondary-button">
-        Volver a cartelera
-      </a>
+        <p>Agregá productos Candy o seleccioná una función y butacas.</p>
+      <a routerLink="/candy" class="secondary-button">Ir al menú Candy</a>
     </section>
   }
 </main>
