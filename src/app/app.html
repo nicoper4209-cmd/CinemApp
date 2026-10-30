@@ -2,14 +2,24 @@
     <a routerLink="/top" routerLinkActive="active">Top 3</a>
     <a routerLink="/movies" routerLinkActive="active">Cartelera</a>
     <a routerLink="/upcoming" routerLinkActive="active">Proximamente</a>
+    <a routerLink="/candy" routerLinkActive="active">Candy</a>
 
     @if (authService.initialized()) {
-    @if (authService.user()) {
+    @if (authService.user(); as currentUser) {
+      @if (!currentUser.is_anonymous) {
         <a routerLink="/my-movies">Mis películas</a>
 
         <button type="button" (click)="logout()">
         Cerrar sesión
         </button>
+      } @else {
+        <a routerLink="/login">Iniciar sesión</a>
+        <a routerLink="/register">Registrarse</a>
+        <span class="visitor-badge" role="status" aria-label="Sesión como visitante">
+          <span class="visitor-indicator" aria-hidden="true"></span>
+          Visitante
+        </span>
+      }
     } @else {
         <a routerLink="/login">Iniciar sesión</a>
         <a routerLink="/register">Registrarse</a>

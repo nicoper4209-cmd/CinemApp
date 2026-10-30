@@ -9,7 +9,7 @@ export const guestGuard: CanActivateFn = async () => {
   try {
     const session = await authService.getSession();
 
-    if (session) {
+    if (session && !session.user.is_anonymous) {
       return router.createUrlTree(['/']);
     }
 

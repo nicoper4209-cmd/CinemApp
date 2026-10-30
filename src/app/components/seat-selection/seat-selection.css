@@ -146,6 +146,11 @@
   background: #dedbd4;
 }
 
+.held-example {
+  border: 1px dashed #b99b65;
+  background: #f0e5d0;
+}
+
 .vip-example {
   border-color: #b99b65;
   background: #f0e5d0;
@@ -256,6 +261,18 @@
   cursor: not-allowed;
 }
 
+.seat.is-occupied.is-held {
+  border: 1px dashed #a7874d;
+  background: #f0e5d0;
+  color: #765d31;
+}
+
+.seat.is-selected.is-held {
+  border-color: #292929;
+  background: #292929;
+  color: #fff;
+}
+
 .seat.is-vip:not(.is-selected, .is-occupied) {
   border-color: #b99b65;
   background: #f0e5d0;
@@ -276,6 +293,31 @@
   color: #777;
   font-size: 13px;
   text-align: center;
+}
+
+.selection-warning,
+.vip-warning {
+  margin: 16px 0;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.selection-warning {
+  border-left: 3px solid #a94442;
+  background: #fbf1f0;
+  color: #8d302e;
+}
+
+.vip-warning {
+  border-left: 3px solid #b99b65;
+  background: #f8f3e9;
+  color: #66532f;
+}
+
+.showtime-summary .price small {
+  color: #777;
+  font-size: 11px;
 }
 
 .purchase-summary {

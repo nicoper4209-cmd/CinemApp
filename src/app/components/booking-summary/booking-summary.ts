@@ -6,6 +6,9 @@ import { Movie } from '../../models/movie';
 import { Showtime } from '../../models/showtime';
 import { BookingService } from '../../services/booking';
 import { AuthService } from '../../services/auth';
+import { SeatHoldService } from '../../services/seat-hold';
+import { PricingService, TicketPriceEstimate } from '../../services/pricing';
+import { getSeatContiguityError } from '../../utils/seat-validation';
 
 interface BookingData {
   movie: Movie;
@@ -24,13 +27,23 @@ export class BookingSummary {
   private router = inject(Router);
   private bookingData = history.state as BookingData;
   private bookingService = inject(BookingService);
-  private authService = inject(AuthService);
+  authService = inject(AuthService);
+  seatHoldService = inject(SeatHoldService);
+  private pricingService = inject(PricingService);
 
   movie = this.bookingData?.movie;
   showtime = this.bookingData?.showtime;
   seats = this.bookingData?.seats ?? [];
   total = this.bookingData?.total ?? 0;
+  priceEstimate = signal<TicketPriceEstimate | null>(null);
+  priceEstimateLoading = signal(false);
+  priceEstimateError = signal('');
+  vipAcknowledged = signal(false);
   contactEmail = signal('');
+  isRegisteredUser = computed(() => {
+    const user = this.authService.user();
+    return !!user && !user.is_anonymous;
+  });
   today = new Date().toISOString().slice(0, 10);
   birthDay = signal('');
   birthMonth = signal('');
@@ -75,6 +88,26 @@ export class BookingSummary {
     this.birthDays().includes(this.birthDay())
   );
 
+  guestDetailsRequired = computed(() =>
+    this.authService.initialized() && !this.isRegisteredUser()
+  );
+  contiguityError = computed(() => getSeatContiguityError(this.seats));
+  hasVip = computed(() =>
+    this.seats.some(seat => ['R', 'S', 'T'].includes(seat.split('-')[0]))
+  );
+  estimatedTotal = computed(() => this.priceEstimate()?.total ?? 0);
+
+  constructor() {
+    if (this.movie && this.showtime) void this.loadPriceEstimate();
+    if (this.showtime) {
+      void this.seatHoldService.restoreHold(this.showtime.id).catch(error => {
+        this.seatHoldService.holdError.set(
+          error instanceof Error ? error.message : 'No se pudo recuperar el bloqueo de butacas.'
+        );
+      });
+    }
+  }
+
   formatDate(date: string): string {
     return new Intl.DateTimeFormat('es-AR', {
       weekday: 'long',
@@ -86,14 +119,43 @@ export class BookingSummary {
   }
 
   getSeatPrice(seatId: string): number {
-    const isVip = ['R', 'S', 'T'].includes(seatId.split('-')[0]);
-    const basePrice = this.showtime?.price ?? 0;
+    const estimate = this.priceEstimate();
+    if (!estimate) return 0;
+    if (estimate.seatPrices[seatId] !== undefined) return estimate.seatPrices[seatId];
+    const row = seatId.split('-')[0];
+    if (row === 'J' || row === 'K') return estimate.accessiblePrice;
+    if (['R', 'S', 'T'].includes(row)) return estimate.vipPrice;
+    return estimate.standardPrice;
+  }
 
-    return isVip ? basePrice + 6500 : basePrice;
+  private async loadPriceEstimate(): Promise<void> {
+    if (!this.movie || !this.showtime) return;
+    this.priceEstimateLoading.set(true);
+    this.priceEstimateError.set('');
+    try {
+      this.priceEstimate.set(
+        await this.pricingService.estimateTickets(this.movie, this.showtime, this.seats)
+      );
+    } catch (error) {
+      this.priceEstimateError.set(
+        error instanceof Error ? error.message : 'No se pudo calcular el precio estimado.'
+      );
+    } finally {
+      this.priceEstimateLoading.set(false);
+    }
   }
 
   async confirmBooking(): Promise<void> {
-    if (!this.bookingAvailable() || !this.guestDetailsValid() || this.confirming()) {
+    if (
+      !this.bookingAvailable() ||
+      !this.authService.initialized() ||
+      this.priceEstimateLoading() ||
+      !!this.priceEstimateError() ||
+      !!this.contiguityError() ||
+      (this.hasVip() && !this.vipAcknowledged()) ||
+      (this.guestDetailsRequired() && !this.guestDetailsValid()) ||
+      this.confirming()
+    ) {
       return;
     }
 
@@ -101,18 +163,23 @@ export class BookingSummary {
     this.errorMessage.set('');
 
     try {
-      await this.authService.continueAsGuest();
-      const booking = await this.bookingService.purchase({
+      let session = await this.authService.getSession();
+      if (!session) session = await this.authService.continueAsGuest();
+
+      const isAnonymous = session?.user.is_anonymous ?? true;
+      const bookingId = await this.bookingService.purchase({
         movie: this.movie!,
         showtime: this.showtime!,
         seats: [...this.seats],
-        contactEmail: this.contactEmail().trim(),
-        birthDate: this.birthDate(),
+        contactEmail: isAnonymous
+          ? this.contactEmail().trim()
+          : session?.user.email ?? null,
+        birthDate: isAnonymous ? this.birthDate() : null,
       });
 
       await this.router.navigate([
         '/booking-confirmation',
-        booking.id,
+        bookingId,
       ]);
     } catch (error) {
       console.error('Error al crear la reserva:', error);
@@ -141,6 +208,8 @@ export class BookingSummary {
     this.birthYear.set(value);
     this.clampBirthDay();
   }
+  get vipAcknowledgedValue(): boolean { return this.vipAcknowledged(); }
+  set vipAcknowledgedValue(value: boolean) { this.vipAcknowledged.set(value); }
 
   private clampBirthDay(): void {
     const selectedDay = Number(this.birthDay());

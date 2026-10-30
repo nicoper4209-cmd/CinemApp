@@ -6,6 +6,7 @@ import { ShowtimeService } from '../../services/showtime';
 import { AuthService } from '../../services/auth';
 import { Movie } from '../../models/movie';
 import { Showtime } from '../../models/showtime';
+import { PricingService, TicketPriceEstimate } from '../../services/pricing';
 
 @Component({
   imports: [RouterLink],
@@ -17,6 +18,7 @@ export class MovieDetail {
   private route = inject(ActivatedRoute);
   private movieService = inject(MovieService);
   private showtimeService = inject(ShowtimeService);
+  private pricingService = inject(PricingService);
 
   favoriteService = inject(FavoriteService);
   authService = inject(AuthService);
@@ -27,6 +29,8 @@ export class MovieDetail {
   favoriteError = signal('');
   loadingShowtimes = signal(false);
   allShowtimes = signal<Showtime[]>([]);
+  showtimeEstimates = signal<Map<number, TicketPriceEstimate>>(new Map());
+  priceEstimateError = signal('');
 
   constructor() {
     effect(() => {
@@ -62,6 +66,8 @@ export class MovieDetail {
       const movieId = this.id();
 
       this.allShowtimes.set([]);
+      this.showtimeEstimates.set(new Map());
+      this.priceEstimateError.set('');
       this.showtimeError.set('');
       this.loadingShowtimes.set(true);
       this.selectedDate.set(null);
@@ -69,6 +75,7 @@ export class MovieDetail {
       void this.showtimeService.getByMovie(movieId)
         .then(showtimes => {
           this.allShowtimes.set(showtimes);
+          void this.loadPriceEstimates(movieId, showtimes);
         })
         .catch(error => {
           console.error('Error al cargar funciones:', error);
@@ -80,6 +87,24 @@ export class MovieDetail {
           this.loadingShowtimes.set(false);
         });
     });
+  }
+
+  private async loadPriceEstimates(movieId: number, showtimes: Showtime[]): Promise<void> {
+    try {
+      const movie = this.movie() ?? await this.movieService.getById(movieId);
+      if (!movie) return;
+      const estimates = await Promise.all(
+        showtimes.map(async showtime => [
+          showtime.id,
+          await this.pricingService.estimateTickets(movie, showtime, ['A-0-1']),
+        ] as const)
+      );
+      this.showtimeEstimates.set(new Map(estimates));
+    } catch (error) {
+      this.priceEstimateError.set(
+        error instanceof Error ? error.message : 'No se pudieron estimar los precios.'
+      );
+    }
   }
 
   id = computed(() => Number(this.route.snapshot.paramMap.get('id')));

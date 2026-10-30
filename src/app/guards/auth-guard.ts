@@ -8,7 +8,7 @@ export const authGuard: CanActivateFn = async (_route, state) => {
 
   const session = await authService.getSession();
 
-  if (session) {
+  if (session && !session.user.is_anonymous) {
     return true;
   }
 

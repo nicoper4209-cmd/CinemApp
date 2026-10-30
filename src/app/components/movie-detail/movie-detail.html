@@ -55,7 +55,15 @@
                 </div>
 
                 <div class="showtime-action">
-                  <p>${{ showtime.price }}</p>
+                  @if (showtimeEstimates().get(showtime.id); as estimate) {
+                    <p>Desde ${{ estimate.standardPrice }}</p>
+                    <small>{{ estimate.formatName }} · estimado</small>
+                    @if (estimate.presale) { <small>Preventa</small> }
+                  } @else if (priceEstimateError()) {
+                    <small>{{ priceEstimateError() }}</small>
+                  } @else {
+                    <small>Calculando precio...</small>
+                  }
                 <a
                   [routerLink]="['/seats', showtime.id]"
                   class="detail-link"

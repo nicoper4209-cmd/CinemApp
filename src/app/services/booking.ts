@@ -5,6 +5,7 @@ import { Movie } from '../models/movie';
 import { Showtime } from '../models/showtime';
 import { MovieService } from './movie';
 import { ShowtimeService } from './showtime';
+import { SeatHoldService } from './seat-hold';
 import { supabase } from '../supabase.client';
 
 interface NewBooking {
@@ -27,26 +28,10 @@ interface BookingRow {
 export class BookingService {
   private movieService = inject(MovieService);
   private showtimeService = inject(ShowtimeService);
-  private recentlyBookedSeats = new Map<number, Set<string>>();
+  private seatHoldService = inject(SeatHoldService);
 
-  getRecentlyBookedSeats(showtimeId: number): string[] {
-    return [...(this.recentlyBookedSeats.get(showtimeId) ?? [])];
-  }
-
-  private rememberBookedSeats(showtimeId: number, seats: string[]): void {
-    const bookedSeats =
-      this.recentlyBookedSeats.get(showtimeId) ?? new Set<string>();
-
-    seats.forEach(seat => bookedSeats.add(seat));
-    this.recentlyBookedSeats.set(showtimeId, bookedSeats);
-  }
-
-  async purchase(data: NewBooking & { contactEmail: string; birthDate: string }): Promise<Booking> {
-    const { error: holdError } = await supabase.rpc('hold_seats', {
-      p_showtime_id: data.showtime.id,
-      p_seats: data.seats,
-    });
-    if (holdError) throw new Error(holdError.message);
+  async purchase(data: NewBooking & { contactEmail: string | null; birthDate: string | null }): Promise<string> {
+    await this.seatHoldService.updateHold(data.showtime.id, data.seats);
 
     const { data: result, error } = await supabase.rpc('purchase_tickets', {
       p_showtime_id: data.showtime.id,
@@ -63,23 +48,8 @@ export class BookingService {
       throw new Error(error.message);
     }
 
-    const bookingId = result as string;
-    this.rememberBookedSeats(data.showtime.id, data.seats);
-
-    return {
-      id: bookingId,
-      movie: data.movie,
-      showtime: data.showtime,
-      seats: data.seats,
-      total: data.seats.reduce((total, seat) => total + this.estimatedSeatPrice(data.showtime, seat), 0),
-      createdAt: new Date().toISOString(),
-    };
-  }
-
-  private estimatedSeatPrice(showtime: Showtime, seat: string): number {
-    return ['R', 'S', 'T'].includes(seat.split('-')[0])
-      ? (showtime.price ?? 0) + 6500
-      : showtime.price ?? 0;
+    this.seatHoldService.completePurchase(data.showtime.id);
+    return result as string;
   }
 
   async getAll(): Promise<Booking[]> {

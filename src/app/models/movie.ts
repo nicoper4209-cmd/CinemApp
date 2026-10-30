@@ -11,4 +11,5 @@ export interface Movie {
   rating: number;
   trailer: string
   status: 'available' | 'upcoming';
+  releaseDate?: string | null;
 }

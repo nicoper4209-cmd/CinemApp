@@ -4,5 +4,7 @@ export interface Showtime {
   room: string;
   date: string;
   time: string;
-  price: number;
+  formatId?: number | null;
+  /** Legacy value only; pricing_config is the source for estimates. */
+  price?: number | null;
 }

@@ -1,0 +1,62 @@
+<main class="candy-page">
+  <header class="page-header">
+    <p class="eyebrow">CINEMAPP / CANDY</p>
+    <h1>Algo rico para la función</h1>
+    <p>Explorá el menú, los combos y las ofertas destacadas.</p>
+  </header>
+
+  @if (loading()) {
+    <p class="status-message" role="status">Cargando el menú...</p>
+  } @else if (errorMessage()) {
+    <div class="error-message" role="alert">
+      <p>{{ errorMessage() }}</p>
+      <button type="button" (click)="loadCatalog()">Intentar nuevamente</button>
+    </div>
+  } @else if (categories().length === 0) {
+    <p class="status-message">Por el momento no hay productos disponibles.</p>
+  } @else {
+    @if (hasFeaturedProducts() || hasCombos()) {
+      <div class="candy-highlights" aria-label="Promociones del menú">
+        @if (hasCombos()) { <span>Combos para compartir</span> }
+        @if (hasFeaturedProducts()) { <span>Ofertas destacadas</span> }
+      </div>
+    }
+
+    @for (category of categories(); track category.id) {
+      <section class="candy-category" [attr.aria-labelledby]="'candy-category-' + category.id">
+        <div class="category-heading">
+          <p class="eyebrow">MENÚ</p>
+          <h2 [id]="'candy-category-' + category.id">{{ category.name }}</h2>
+        </div>
+
+        <div class="product-grid">
+          @for (product of category.products; track product.id) {
+            <article class="product-card" [class.product-card-featured]="product.isFeatured">
+              @if (product.imageUrl) {
+                <img class="product-image" [src]="product.imageUrl" [alt]="product.name" loading="lazy" />
+              } @else {
+                <div class="product-image product-image-placeholder" aria-hidden="true">🍿</div>
+              }
+
+              <div class="product-copy">
+                <div class="product-badges">
+                  @if (product.isFeatured) {
+                    <span class="badge badge-featured">Destacado</span>
+                  }
+                  @if (product.isCombo) {
+                    <span class="badge badge-combo">Combo</span>
+                  }
+                </div>
+                <h3>{{ product.name }}</h3>
+                @if (product.description) {
+                  <p class="product-description">{{ product.description }}</p>
+                }
+                <strong class="product-price">{{ formatPrice(product.price) }}</strong>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+    }
+  }
+</main>

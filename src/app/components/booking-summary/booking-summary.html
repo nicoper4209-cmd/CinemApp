@@ -66,12 +66,54 @@
 
       <hr />
 
+      @if (priceEstimateLoading()) {
+        <p class="field-hint" role="status">Calculando precio estimado...</p>
+      } @else if (priceEstimate(); as estimate) {
+        <p class="price-context">
+          Estimación según {{ estimate.formatName }} (×{{ estimate.formatMultiplier }})
+          @if (estimate.presale) { · Precio de preventa aplicado }
+        </p>
+      }
+
       <div class="total-row">
         <span>Total estimado</span>
-        <strong>${{ total }}</strong>
+        <strong>${{ estimatedTotal() }}</strong>
       </div>
       <p class="disclaimer">El importe definitivo se confirma al procesar la compra.</p>
 
+      @if (priceEstimateError()) {
+        <p class="error-message" role="alert">{{ priceEstimateError() }}</p>
+      }
+
+      @if (contiguityError()) {
+        <p class="error-message" role="alert">{{ contiguityError() }}</p>
+      }
+
+      @if (hasVip()) {
+        <section class="vip-confirmation" aria-labelledby="vip-confirmation-title">
+          <p class="eyebrow">BUTACAS VIP</p>
+          <h2 id="vip-confirmation-title">Precio diferencial</h2>
+          <p>Las butacas VIP tienen un precio superior. El valor estimado por cada una es ${{ priceEstimate()?.vipPrice ?? 0 }}. El precio final lo confirma el servidor al procesar la compra.</p>
+          <label class="vip-acknowledgement">
+            <input type="checkbox" name="vipAcknowledged" [(ngModel)]="vipAcknowledgedValue" />
+            <span>Entiendo y acepto el precio estimado de las butacas VIP.</span>
+          </label>
+        </section>
+      }
+
+    @if (!authService.initialized()) {
+      <p class="field-hint" role="status">Verificando tu sesión...</p>
+    } @else if (isRegisteredUser()) {
+      <section class="guest-details account-checkout" aria-labelledby="account-checkout-title">
+        <p class="eyebrow">DATOS DEL COMPRADOR</p>
+        <h2 id="account-checkout-title">Compra con tu cuenta</h2>
+        <p>La compra quedará asociada a tu cuenta.</p>
+        <p class="account-email">
+          <span>Correo de contacto</span>
+          <strong>{{ authService.user()?.email || 'El correo guardado en tu perfil' }}</strong>
+        </p>
+      </section>
+    } @else {
     <section class="guest-details" aria-labelledby="guest-details-title">
       <div class="guest-details-heading">
         <p class="eyebrow">DATOS DEL COMPRADOR</p>
@@ -124,10 +166,17 @@
         <p class="age-notice" role="note">Para películas +13 y +18, los menores deben concurrir acompañados por un adulto.</p>
       }
     </section>
+    }
 
     @if (errorMessage()) {
       <p class="error-message" role="alert">
         {{ errorMessage() }}
+      </p>
+    }
+
+    @if (seatHoldService.holdError()) {
+      <p class="error-message" role="alert">
+        {{ seatHoldService.holdError() }}. Al confirmar se volverá a verificar la disponibilidad.
       </p>
     }
 
@@ -146,7 +195,7 @@
         <button
           type="button"
           (click)="confirmBooking()"
-          [disabled]="confirming() || !guestDetailsValid()"
+          [disabled]="!authService.initialized() || confirming() || priceEstimateLoading() || !!priceEstimateError() || !!contiguityError() || (hasVip() && !vipAcknowledged()) || (guestDetailsRequired() && !guestDetailsValid())"
         >
           {{ confirming() ? 'Procesando...' : 'Confirmar compra' }}
         </button>

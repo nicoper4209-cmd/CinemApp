@@ -16,6 +16,7 @@ interface MovieRow {
   rating: number | null;
   trailer: string;
   status: Movie['status'];
+  release_date: string | null;
 }
 
 @Injectable({
@@ -26,7 +27,7 @@ export class MovieService {
     const { data, error } = await supabase
       .from('movies')
       .select(
-        'id, title, synopsis, duration, genre, age_rating, poster, alt, year, rating, trailer, status'
+        'id, title, synopsis, duration, genre, age_rating, poster, alt, year, rating, trailer, status, release_date'
       )
       .order('id', { ascending: true });
 
@@ -42,7 +43,7 @@ export class MovieService {
     const { data, error } = await supabase
       .from('movies')
       .select(
-        'id, title, synopsis, duration, genre, age_rating, poster, alt, year, rating, trailer, status'
+        'id, title, synopsis, duration, genre, age_rating, poster, alt, year, rating, trailer, status, release_date'
       )
       .eq('id', id)
       .maybeSingle();
@@ -81,6 +82,7 @@ export class MovieService {
       rating: row.rating ?? 0,
       trailer: row.trailer,
       status: row.status,
+      releaseDate: row.release_date,
     };
   }
 }

@@ -8,7 +8,7 @@ interface ShowtimeRow {
   room: string;
   date: string;
   time: string;
-  price: number;
+  format_id: number | null;
 }
 
 @Injectable({
@@ -18,7 +18,7 @@ export class ShowtimeService {
   async getByMovie(movieId: number): Promise<Showtime[]> {
     const { data, error } = await supabase
       .from('showtimes')
-      .select('id, movie_id, room, date, time, price')
+      .select('id, movie_id, room, date, time, format_id')
       .eq('movie_id', movieId)
       .order('date', { ascending: true })
       .order('time', { ascending: true });
@@ -34,14 +34,14 @@ export class ShowtimeService {
       room: row.room,
       date: row.date,
       time: row.time.slice(0, 5),
-      price: Number(row.price),
+      formatId: row.format_id,
     }));
   }
 
   async getById(id: number): Promise<Showtime | undefined> {
     const { data, error } = await supabase
       .from('showtimes')
-      .select('id, movie_id, room, date, time, price')
+      .select('id, movie_id, room, date, time, format_id')
       .eq('id', id)
       .maybeSingle();
 
@@ -60,7 +60,7 @@ export class ShowtimeService {
       room: row.room,
       date: row.date,
       time: row.time.slice(0, 5),
-      price: Number(row.price),
+      formatId: row.format_id,
     };
   }
 }

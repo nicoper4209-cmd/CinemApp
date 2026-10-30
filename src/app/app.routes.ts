@@ -10,11 +10,13 @@ import { MyMovies } from './components/my-movies/my-movies';
 import { Auth } from './components/auth/auth';
 import { authGuard } from './guards/auth-guard';
 import { guestGuard } from './guards/guest-guard';
+import { CandyShop } from './components/candy-shop/candy-shop';
 
 export const routes: Routes = [
     {path:'top',component:TopMovies}, // Top 3 peliculas
     {path:'movies',component:MovieList}, // Cartelera
     {path:'upcoming',component:ComingSoon}, // Proximamente
+    {path:'candy',component:CandyShop},
     {path:'movies/:id',component:MovieDetail}, // Pelicula detalle
     {path:'seats/:id',component: SeatSelection}, // Butaca detalle
     {path:'booking-summary',component: BookingSummary}, // Resumen compra

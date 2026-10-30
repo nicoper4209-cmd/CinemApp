@@ -19,10 +19,22 @@
         </div>
 
         <div class="price">
-          <span>Precio por entrada</span>
-          <strong>${{ showtime.price }}</strong>
+          <span>Entrada estándar · estimado</span>
+          <strong>
+            @if (priceEstimateLoading()) { Calculando... } @else if (priceEstimate(); as estimate) {
+              ${{ estimate.standardPrice }}
+            } @else { — }
+          </strong>
+          @if (priceEstimate(); as estimate) {
+            <small>Formato {{ estimate.formatName }} · ×{{ estimate.formatMultiplier }}</small>
+            @if (estimate.presale) { <small>Precio de preventa</small> }
+          }
         </div>
       </section>
+
+      @if (priceEstimateError()) {
+        <div class="availability-error" role="alert"><p>{{ priceEstimateError() }}</p></div>
+      }
 
       @if (loadingOccupiedSeats()) {
         <p class="availability-message">
@@ -30,9 +42,9 @@
         </p>
       }
 
-      @if (seatError() || seatConflict()) {
+      @if (seatError() || seatConflict() || seatHoldService.holdError()) {
         <div class="availability-error" role="alert">
-          <p>{{ seatError() || seatConflict() }}</p>
+          <p>{{ seatError() || seatConflict() || seatHoldService.holdError() }}</p>
         </div>
       }
 
@@ -41,6 +53,7 @@
           <span><i class="seat-example"></i> Disponible</span>
           <span><i class="seat-example selected-example"></i> Seleccionada</span>
           <span><i class="seat-example occupied-example"></i> Ocupada</span>
+          <span><i class="seat-example held-example"></i> En proceso de compra</span>
           <span><i class="seat-example vip-example"></i> VIP</span>
         </div>
 
@@ -65,12 +78,14 @@
                         class="seat"
                         [class.is-selected]="isSelected(seat.id)"
                         [class.is-occupied]="isOccupied(seat.id)"
+                        [class.is-held]="isHeld(seat.id)"
                         [class.is-vip]="row.isVip"
                         [class.is-accessible]="row.isAccessible"
                         [disabled]="
                           loadingOccupiedSeats() ||
+                          updatingSeatHold() ||
                           !!seatError() ||
-                          isOccupied(seat.id)
+                          (isOccupied(seat.id) && !isSelected(seat.id))
                         "
                         [attr.aria-pressed]="isSelected(seat.id)"
                         [attr.aria-label]="
@@ -78,7 +93,7 @@
                           ', asiento ' + seat.label +
                           (row.isAccessible ? ', accesible' : '') +
                           (row.isVip ? ', VIP' : '') +
-                          (isOccupied(seat.id) ? ', ocupada' : '')
+                          ', ' + seatStateLabel(seat.id)
                         "
                         [title]="'Fila ' + row.label + ' · Asiento ' + seat.label"
                         (click)="toggleSeat(seat.id)"
@@ -111,6 +126,15 @@
         </p>
       </section>
 
+      @if (contiguityError()) {
+        <p class="selection-warning" role="alert">{{ contiguityError() }}</p>
+      }
+      @if (hasVipSelected()) {
+        <p class="vip-warning" role="note">
+          Seleccionaste butacas VIP. Tienen un precio superior; revisá el importe estimado antes de confirmar.
+        </p>
+      }
+
       <section class="purchase-summary">
         <div>
           <p class="summary-label">Butacas elegidas</p>
@@ -135,7 +159,7 @@
         </div>
 
         <div class="total-price">
-          <span>Total</span>
+          <span>Total estimado</span>
           <strong>${{ total() }}</strong>
         </div>
 
@@ -145,12 +169,16 @@
           [disabled]="
             selectedSeats().length === 0 ||
             loadingOccupiedSeats() ||
+            updatingSeatHold() ||
+            priceEstimateLoading() ||
+            !!priceEstimateError() ||
+            !!contiguityError() ||
             !!seatError() ||
             !!seatConflict()
           "
           (click)="continueToSummary()"
         >
-          {{ loadingOccupiedSeats() ? 'Verificando...' : 'Continuar' }}
+          {{ loadingOccupiedSeats() || updatingSeatHold() || priceEstimateLoading() ? 'Verificando...' : 'Continuar' }}
         </button>
       </section>
     </main>

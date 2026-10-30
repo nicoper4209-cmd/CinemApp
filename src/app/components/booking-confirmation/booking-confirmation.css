@@ -64,6 +64,77 @@ h1 {
   line-height: 1.5;
 }
 
+.minor-notice {
+  margin: 18px 0;
+  padding: 12px 14px;
+  border-left: 3px solid #b99b65;
+  background: #f8f3e9;
+  color: #66532f !important;
+  font-size: 13px;
+}
+
+.admission-ticket {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 14px;
+  padding: 16px;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  break-inside: avoid;
+}
+
+.admission-details .eyebrow {
+  margin: 0 0 8px;
+}
+
+.admission-details h4 {
+  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.admission-details p {
+  margin: 6px 0;
+}
+
+.manual-code strong {
+  color: #242424;
+  letter-spacing: 0.08em;
+}
+
+.ticket-qr {
+  width: 112px;
+  height: 112px;
+  flex: 0 0 auto;
+  image-rendering: pixelated;
+}
+
+.inline-error {
+  color: #a3332f;
+  font-size: 13px;
+}
+
+.pdf-button {
+  display: inline-flex;
+  justify-content: center;
+  margin: 18px 8px 0 0;
+  padding: 12px 18px;
+  border: 1px solid #242424;
+  border-radius: 3px;
+  background: #fff;
+  color: #242424;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.pdf-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .ticket hr {
   border: 0;
   border-top: 1px solid #e5e5e5;
@@ -121,5 +192,16 @@ h1 {
 
   .ticket {
     padding: 16px;
+  }
+
+  .admission-ticket {
+    align-items: flex-start;
+    flex-direction: column-reverse;
+  }
+
+  .ticket-qr {
+    width: 132px;
+    height: 132px;
+    align-self: center;
   }
 }

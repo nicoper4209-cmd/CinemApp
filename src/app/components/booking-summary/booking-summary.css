@@ -233,6 +233,36 @@ hr {
   margin: 0;
 }
 
+.account-checkout h2 {
+  margin: 8px 0;
+  font-size: 19px;
+  font-weight: 500;
+}
+
+.account-checkout > p:not(.eyebrow) {
+  color: #777;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.account-email {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin: 18px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid #e8e8e8;
+  color: #666;
+  font-size: 13px;
+}
+
+.account-email strong {
+  color: #242424;
+  font-weight: 500;
+  text-align: right;
+}
+
 .field-group {
   display: flex;
   flex-direction: column;
@@ -300,9 +330,67 @@ hr {
   line-height: 1.55;
 }
 
+.price-context {
+  margin: 18px 0 0;
+  color: #777;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.vip-confirmation {
+  margin-top: 22px;
+  padding: 18px;
+  border: 1px solid #d9c79f;
+  border-radius: 4px;
+  background: #f8f3e9;
+}
+
+.vip-confirmation .eyebrow {
+  margin: 0 0 8px;
+  color: #8a6b35;
+}
+
+.vip-confirmation h2 {
+  margin: 0 0 8px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.vip-confirmation > p:not(.eyebrow) {
+  margin: 0;
+  color: #66532f;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.vip-acknowledgement {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 14px;
+  color: #49402e;
+  font-size: 13px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.vip-acknowledgement input {
+  width: 16px;
+  height: 16px;
+  margin: 1px 0 0;
+  accent-color: #242424;
+  flex: 0 0 auto;
+}
+
 @media (max-width: 500px) {
   .guest-details {
     padding: 18px;
+  }
+
+  .account-email {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
   }
 
   .date-selects {

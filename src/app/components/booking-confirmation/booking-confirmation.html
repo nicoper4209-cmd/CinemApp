@@ -24,10 +24,39 @@
         <p>Horario: {{ purchase.showtime.time }}</p>
         <p>Sala: {{ purchase.showtime.room }}</p>
 
+        @if (minorNotice) {
+          <p class="minor-notice" role="note">
+            Clasificación {{ purchase.movie.ageRating }}: los menores deben concurrir acompañados por un adulto.
+          </p>
+        }
+
         <div class="seats">
           <span>Butacas</span>
           <strong>{{ purchase.seats.join(', ') }}</strong>
         </div>
+
+        <hr />
+
+        <h3>Entradas individuales</h3>
+        @for (ticket of purchase.tickets ?? []; track ticket.qrCode) {
+          <article class="admission-ticket">
+            <div class="admission-details">
+              <p class="eyebrow">ENTRADA · {{ seatTypeLabel(ticket.seatType) }}</p>
+              <h4>Butaca {{ ticket.seatLabel }}</h4>
+              <p>Precio: ${{ ticket.price }}</p>
+              <p class="manual-code">Código manual: <strong>{{ ticket.manualCode }}</strong></p>
+            </div>
+            @if (ticket.qrDataUrl) {
+              <img class="ticket-qr" [src]="ticket.qrDataUrl"
+                [alt]="'Código QR de la entrada para la butaca ' + ticket.seatLabel" />
+            } @else {
+              <p class="field-hint">Preparando código QR...</p>
+            }
+          </article>
+        }
+        @if (qrError()) {
+          <p class="inline-error" role="alert">{{ qrError() }}</p>
+        }
 
         <div class="total">
           <span>Total</span>
@@ -36,8 +65,17 @@
       </div>
 
       <p class="disclaimer">
-        El pago se procesa en modo de prueba. Conservá este resumen para presentar tus entradas.
+        El pago se procesa en modo de prueba. Presentá el QR individual de cada entrada al ingresar.
       </p>
+
+      @if (pdfError()) {
+        <p class="inline-error" role="alert">{{ pdfError() }}</p>
+      }
+
+      <button class="pdf-button" type="button" (click)="downloadPdf()"
+        [disabled]="generatingPdf() || !canDownloadPdf()">
+        {{ generatingPdf() ? 'Generando PDF...' : 'Descargar entradas en PDF' }}
+      </button>
 
       <a routerLink="/movies" class="home-button">
         Volver a cartelera

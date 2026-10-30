@@ -1,11 +1,13 @@
 
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnDestroy, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ShowtimeService } from '../../services/showtime';
 import { MovieService } from '../../services/movie';
 import { Showtime } from '../../models/showtime';
 import { Movie } from '../../models/movie';
-import { BookingService } from '../../services/booking';
+import { SeatHoldService } from '../../services/seat-hold';
+import { PricingService, TicketPriceEstimate } from '../../services/pricing';
+import { getSeatContiguityError } from '../../utils/seat-validation';
 import { supabase } from '../../supabase.client';
 
 interface Seat {
@@ -20,18 +22,24 @@ interface SeatRow {
   sections: Seat[][];
 }
 
+interface SeatOccupancy {
+  state: 'held' | 'sold';
+  held_until: string | null;
+}
+
 @Component({
   selector: 'app-seat-selection',
   imports: [RouterLink],
   templateUrl: './seat-selection.html',
   styleUrl: './seat-selection.css',
 })
-export class SeatSelection {
+export class SeatSelection implements OnDestroy {
   private route = inject(ActivatedRoute);
   private showtimeService = inject(ShowtimeService);
   private movieService = inject(MovieService);
-  private bookingService = inject(BookingService);
   private router = inject(Router);
+  seatHoldService = inject(SeatHoldService);
+  private pricingService = inject(PricingService);
 
   showtimeId = computed(() =>
     Number(this.route.snapshot.paramMap.get('id'))
@@ -41,10 +49,15 @@ export class SeatSelection {
   movie = signal<Movie | undefined>(undefined);
 
   selectedSeats = signal<string[]>([]);
-  occupiedSeats = signal<Set<string>>(new Set());
+  seatOccupancy = signal<Map<string, SeatOccupancy>>(new Map());
   loadingOccupiedSeats = signal(false);
   seatError = signal('');
   seatConflict = signal('');
+  priceEstimate = signal<TicketPriceEstimate | null>(null);
+  priceEstimateLoading = signal(false);
+  priceEstimateError = signal('');
+  private occupancyChannel: ReturnType<typeof supabase.channel> | null = null;
+  private holdExpiryTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor() {
     effect(() => {
@@ -52,8 +65,11 @@ export class SeatSelection {
 
       this.showtime.set(undefined);
       this.movie.set(undefined);
-      this.occupiedSeats.set(new Set());
+      this.stopOccupancyUpdates();
+      this.seatOccupancy.set(new Map());
       this.selectedSeats.set([]);
+      this.priceEstimate.set(null);
+      this.priceEstimateError.set('');
 
       if (!Number.isInteger(id) || id <= 0) {
         this.seatError.set('La función seleccionada no es válida.');
@@ -75,10 +91,14 @@ export class SeatSelection {
         return;
       }
 
+      await this.seatHoldService.restoreHold(id);
+      this.selectedSeats.set(this.seatHoldService.getHeldSeats(id));
+
       const movie = await this.movieService.getById(showtime.movieId);
       this.movie.set(movie);
+      if (movie) await this.refreshPriceEstimate(this.selectedSeats());
 
-      await this.loadOccupiedSeats(id);
+      this.startOccupancyUpdates(id);
     } catch (error) {
       console.error('Error al cargar la función o película:', error);
       this.seatError.set(
@@ -87,62 +107,133 @@ export class SeatSelection {
     }
   }
 
-  private async loadOccupiedSeats(showtimeId: number): Promise<boolean> {
+  private startOccupancyUpdates(showtimeId: number): void {
     this.loadingOccupiedSeats.set(true);
     this.seatError.set('');
     this.seatConflict.set('');
 
+    let initialLoadFinished = false;
+    const pendingChanges: Array<() => void> = [];
+    const channel = supabase
+      .channel(`seat-occupancy-${showtimeId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'seat_occupancy',
+          filter: `showtime_id=eq.${showtimeId}`,
+        },
+        payload => {
+          const applyChange = () => {
+            const label =
+              payload.eventType === 'DELETE'
+                ? payload.old['seat_label']
+                : payload.new['seat_label'];
+            if (typeof label !== 'string') return;
+
+            const next = new Map(this.seatOccupancy());
+            if (payload.eventType === 'DELETE') {
+              next.delete(label);
+            } else {
+              const row = payload.new as SeatOccupancy & { seat_label: string };
+              if (row.state === 'held' || row.state === 'sold') {
+                next.set(label, { state: row.state, held_until: row.held_until });
+              }
+            }
+            this.setOccupancy(next);
+          };
+
+          if (initialLoadFinished) applyChange();
+          else pendingChanges.push(applyChange);
+        }
+      )
+      .subscribe(status => {
+        if (this.occupancyChannel !== channel) return;
+
+        if (status === 'SUBSCRIBED') {
+          initialLoadFinished = false;
+          pendingChanges.length = 0;
+          void this.loadOccupancySnapshot(showtimeId, () => {
+            initialLoadFinished = true;
+            pendingChanges.splice(0).forEach(apply => apply());
+          });
+        } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          this.loadingOccupiedSeats.set(false);
+          this.seatError.set('No se pudo conectar con la disponibilidad en tiempo real. Intentá nuevamente.');
+        }
+      });
+
+    this.occupancyChannel = channel;
+  }
+
+  private async loadOccupancySnapshot(
+    showtimeId: number,
+    onLoaded: () => void
+  ): Promise<void> {
+    this.loadingOccupiedSeats.set(true);
+    this.seatError.set('');
     try {
       const { data, error } = await supabase
-        .rpc('get_occupied_seats', {
-          p_showtime_id: showtimeId,
-        });
+        .from('seat_occupancy')
+        .select('seat_label,state,held_until')
+        .eq('showtime_id', showtimeId);
 
-      if (error) {
-        const errorCode = 'code' in error ? error.code : undefined;
-        const message =
-          errorCode === 'PGRST202' || errorCode === '42883'
-            ? 'La función get_occupied_seats no está configurada en Supabase. Aplicá la migración de disponibilidad y volvé a intentar.'
-            : `No se pudo consultar la disponibilidad: ${error.message}`;
-        throw new Error(message);
-      }
+      if (error) throw error;
 
-      const rows: unknown[] =
-        data === null ? [] : Array.isArray(data) ? data : [data];
-      const occupiedSeats = new Set<string>();
-
-      for (const row of rows) {
-        if (
-          typeof row !== 'object' ||
-          row === null ||
-          !('seat_label' in row) ||
-          typeof row.seat_label !== 'string'
-        ) {
-          throw new Error(
-            'Supabase devolvió un formato inesperado para las butacas ocupadas.'
-          );
+      const occupancy = new Map<string, SeatOccupancy>();
+      for (const row of data ?? []) {
+        if (row.state === 'held' || row.state === 'sold') {
+          occupancy.set(row.seat_label, {
+            state: row.state,
+            held_until: row.held_until,
+          });
         }
-
-        occupiedSeats.add(row.seat_label);
       }
-
-      this.bookingService
-        .getRecentlyBookedSeats(showtimeId)
-        .forEach(seat => occupiedSeats.add(seat));
-
-      this.occupiedSeats.set(occupiedSeats);
-      return true;
+      this.setOccupancy(occupancy);
+      onLoaded();
     } catch (error) {
-      console.error('Error al cargar butacas ocupadas:', error);
+      console.error('Error al cargar disponibilidad de butacas:', error);
       this.seatError.set(
         error instanceof Error
           ? error.message
           : 'No se pudo consultar la disponibilidad. Intentá nuevamente.'
       );
-      return false;
     } finally {
       this.loadingOccupiedSeats.set(false);
     }
+  }
+
+  private setOccupancy(occupancy: Map<string, SeatOccupancy>): void {
+    this.seatOccupancy.set(occupancy);
+    this.scheduleHoldExpiry();
+  }
+
+  private scheduleHoldExpiry(): void {
+    if (this.holdExpiryTimer) clearTimeout(this.holdExpiryTimer);
+    const expirations = [...this.seatOccupancy().values()]
+      .filter(seat => seat.state === 'held' && seat.held_until)
+      .map(seat => Date.parse(seat.held_until!))
+      .filter(expiry => Number.isFinite(expiry) && expiry > Date.now());
+    if (expirations.length === 0) return;
+
+    const nextExpiry = Math.min(...expirations);
+    this.holdExpiryTimer = setTimeout(() => {
+      // Fuerza una actualización reactiva para que el bloqueo vencido se vea libre.
+      this.seatOccupancy.update(current => new Map(current));
+      this.scheduleHoldExpiry();
+    }, Math.max(0, nextExpiry - Date.now()) + 25);
+  }
+
+  private stopOccupancyUpdates(): void {
+    if (this.holdExpiryTimer) clearTimeout(this.holdExpiryTimer);
+    this.holdExpiryTimer = null;
+    if (this.occupancyChannel) void supabase.removeChannel(this.occupancyChannel);
+    this.occupancyChannel = null;
+  }
+
+  ngOnDestroy(): void {
+    this.stopOccupancyUpdates();
   }
 
 
@@ -172,45 +263,111 @@ export class SeatSelection {
     });
   });
 
-  vipExtra = 6500;
-
   getSeatPrice(seatId: string): number {
-    const isVip = ['R', 'S', 'T'].includes(seatId.split('-')[0]);
-    const basePrice = this.showtime()?.price ?? 0;
-
-    return isVip ? basePrice + this.vipExtra : basePrice;
+    const estimate = this.priceEstimate();
+    if (!estimate) return 0;
+    return estimate.seatPrices[seatId] ?? this.getCategoryPrice(seatId, estimate);
   }
 
   total = computed(() =>
-    this.selectedSeats().reduce(
-      (sum, seatId) => sum + this.getSeatPrice(seatId),
-      0
-    )
+    this.priceEstimate()?.total ?? 0
   );
+
+  contiguityError = computed(() => getSeatContiguityError(this.selectedSeats()));
+  hasVipSelected = computed(() =>
+    this.selectedSeats().some(seat => ['R', 'S', 'T'].includes(seat.split('-')[0]))
+  );
+
+  private getCategoryPrice(seatId: string, estimate: TicketPriceEstimate): number {
+    const row = seatId.split('-')[0];
+    if (row === 'J' || row === 'K') return estimate.accessiblePrice;
+    if (['R', 'S', 'T'].includes(row)) return estimate.vipPrice;
+    return estimate.standardPrice;
+  }
+
+  private async refreshPriceEstimate(seats: string[]): Promise<void> {
+    const movie = this.movie();
+    const showtime = this.showtime();
+    if (!movie || !showtime) return;
+
+    this.priceEstimateLoading.set(true);
+    this.priceEstimateError.set('');
+    try {
+      this.priceEstimate.set(
+        await this.pricingService.estimateTickets(movie, showtime, seats)
+      );
+    } catch (error) {
+      this.priceEstimateError.set(
+        error instanceof Error
+          ? error.message
+          : 'No se pudo calcular el precio estimado.'
+      );
+    } finally {
+      this.priceEstimateLoading.set(false);
+    }
+  }
 
   isSelected(seatId: string): boolean {
     return this.selectedSeats().includes(seatId);
   }
 
   isOccupied(seatId: string): boolean {
-    return this.occupiedSeats().has(seatId);
+    const occupancy = this.seatOccupancy().get(seatId);
+    if (!occupancy) return false;
+    if (occupancy.state === 'sold') return true;
+    return !!occupancy.held_until && Date.parse(occupancy.held_until) > Date.now();
   }
 
-  toggleSeat(seatId: string): void {
+  isHeld(seatId: string): boolean {
+    return this.seatOccupancy().get(seatId)?.state === 'held' && this.isOccupied(seatId);
+  }
+
+  seatStateLabel(seatId: string): string {
+    if (this.isHeld(seatId)) return 'en proceso de compra';
+    if (this.isOccupied(seatId)) return 'ocupada';
+    return 'disponible';
+  }
+
+  updatingSeatHold = signal(false);
+
+  async toggleSeat(seatId: string): Promise<void> {
     if (
       this.loadingOccupiedSeats() ||
+      this.updatingSeatHold() ||
       this.seatError() ||
-      this.isOccupied(seatId)
+      (this.isOccupied(seatId) && !this.isSelected(seatId))
     ) {
       return;
     }
 
-    this.selectedSeats.update(seats =>
-      seats.includes(seatId)
-        ? seats.filter(id => id !== seatId)
-        : [...seats, seatId]
-    );
+    const previousSeats = this.selectedSeats();
+    const nextSeats =
+      previousSeats.includes(seatId)
+        ? previousSeats.filter(id => id !== seatId)
+        : [...previousSeats, seatId];
+    const showtimeId = this.showtime()?.id;
+    if (!showtimeId) return;
+
+    this.updatingSeatHold.set(true);
     this.seatConflict.set('');
+    try {
+      if (nextSeats.length > 0) {
+        await this.seatHoldService.updateHold(showtimeId, nextSeats);
+      } else {
+        await this.seatHoldService.releaseHold(showtimeId);
+      }
+      this.selectedSeats.set(nextSeats);
+      await this.refreshPriceEstimate(nextSeats);
+    } catch (error) {
+      this.seatConflict.set(
+        error instanceof Error
+          ? error.message
+          : 'No se pudo reservar temporalmente la butaca. Intentá nuevamente.'
+      );
+    } finally {
+      this.updatingSeatHold.set(false);
+    }
+
   }
 
   formatDate(date: string): string {
@@ -231,22 +388,18 @@ export class SeatSelection {
       !showtime ||
       !movie ||
       seats.length === 0 ||
-      this.loadingOccupiedSeats()
+      this.loadingOccupiedSeats() ||
+      this.priceEstimateLoading() ||
+      !!this.priceEstimateError() ||
+      !!this.contiguityError()
     ) {
       return;
     }
 
-    // Actualizar disponibilidad antes de avanzar.
-    const loaded = await this.loadOccupiedSeats(showtime.id);
-
-    if (!loaded) {
-      return;
-    }
-
-    // Si otro usuario reservó una de las butacas seleccionadas,
-    // quitarla de la selección y pedir al usuario que revise.
+    // Realtime mantiene el mapa actualizado; hold_seats vuelve a validar
+    // la disponibilidad de forma autoritativa al confirmar la compra.
     const newlyOccupied = seats.filter(seatId =>
-      this.isOccupied(seatId)
+      this.isOccupied(seatId) && !this.seatHoldService.ownsSeat(showtime.id, seatId)
     );
 
     if (newlyOccupied.length > 0) {
@@ -258,6 +411,17 @@ export class SeatSelection {
         `Estas butacas ya fueron reservadas: ${newlyOccupied.join(', ')}. Elegí otras para continuar.`
       );
 
+      return;
+    }
+
+    try {
+      await this.seatHoldService.updateHold(showtime.id, seats);
+    } catch (error) {
+      this.seatConflict.set(
+        error instanceof Error
+          ? error.message
+          : 'No se pudo renovar el bloqueo de las butacas.'
+      );
       return;
     }
 
