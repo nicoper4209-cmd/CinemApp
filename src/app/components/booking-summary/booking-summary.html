@@ -72,18 +72,58 @@
       </div>
       <p class="disclaimer">El importe definitivo se confirma al procesar la compra.</p>
 
-    <div class="guest-details">
-      <p>Podés comprar como visitante. Usaremos este correo como contacto de la compra.</p>
-      <label for="contact-email">Correo electrónico</label>
-      <input id="contact-email" type="email" name="contactEmail" required autocomplete="email"
-        [(ngModel)]="contactEmailValue" placeholder="tu@email.com" />
-      <label for="birth-date">Fecha de nacimiento</label>
-      <input id="birth-date" type="date" name="birthDate" required [max]="today"
-        [(ngModel)]="birthDateValue" />
+    <section class="guest-details" aria-labelledby="guest-details-title">
+      <div class="guest-details-heading">
+        <p class="eyebrow">DATOS DEL COMPRADOR</p>
+        <h2 id="guest-details-title">Finalizá como visitante</h2>
+        <p>Completá tus datos para asociarlos a esta compra.</p>
+      </div>
+
+      <div class="field-group">
+        <label for="contact-email">Correo electrónico</label>
+        <input id="contact-email" type="email" name="contactEmail" required autocomplete="email"
+          [(ngModel)]="contactEmailValue" placeholder="tu@email.com" />
+        <span class="field-hint">Lo usaremos como contacto de la compra.</span>
+      </div>
+
+      <fieldset class="birth-date-group">
+        <legend>Fecha de nacimiento</legend>
+        <div class="date-selects">
+          <div class="field-group date-day">
+            <label for="birth-day">Día</label>
+            <select id="birth-day" name="birthDay" required [(ngModel)]="birthDayValue">
+              <option value="" disabled>DD</option>
+              @for (day of birthDays(); track day) {
+                <option [value]="day">{{ day }}</option>
+              }
+            </select>
+          </div>
+          <div class="field-group date-month">
+            <label for="birth-month">Mes</label>
+            <select id="birth-month" name="birthMonth" required [(ngModel)]="birthMonthValue">
+              <option value="" disabled>Elegí un mes</option>
+              @for (month of months; track month.value) {
+                <option [value]="month.value">{{ month.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="field-group date-year">
+            <label for="birth-year">Año</label>
+            <select id="birth-year" name="birthYear" required [(ngModel)]="birthYearValue">
+              <option value="" disabled>AAAA</option>
+              @for (year of years; track year) {
+                <option [value]="year">{{ year }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <span class="field-hint">La fecha se utiliza para validar las restricciones de edad.</span>
+      </fieldset>
+
       @if (movie!.ageRating !== 'ATP') {
-        <p class="disclaimer">La edad se validará antes de confirmar. Para películas +13 y +18, los menores deben concurrir acompañados por un adulto.</p>
+        <p class="age-notice" role="note">Para películas +13 y +18, los menores deben concurrir acompañados por un adulto.</p>
       }
-    </div>
+    </section>
 
     @if (errorMessage()) {
       <p class="error-message" role="alert">
