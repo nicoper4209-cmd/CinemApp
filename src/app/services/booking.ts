@@ -41,34 +41,45 @@ export class BookingService {
     this.recentlyBookedSeats.set(showtimeId, bookedSeats);
   }
 
-  async create(data: NewBooking): Promise<Booking> {
-    const { data: result, error } = await supabase.rpc(
-      'create_booking',
-      {
-        p_showtime_id: data.showtime.id,
-        p_seats: data.seats,
-      }
-    );
+  async purchase(data: NewBooking & { contactEmail: string; birthDate: string }): Promise<Booking> {
+    const { error: holdError } = await supabase.rpc('hold_seats', {
+      p_showtime_id: data.showtime.id,
+      p_seats: data.seats,
+    });
+    if (holdError) throw new Error(holdError.message);
+
+    const { data: result, error } = await supabase.rpc('purchase_tickets', {
+      p_showtime_id: data.showtime.id,
+      p_seats: data.seats,
+      p_candy: [],
+      p_coupon_code: null,
+      p_use_credit: 0,
+      p_payment_method: 'mock',
+      p_contact_email: data.contactEmail,
+      p_birth_date: data.birthDate,
+    });
 
     if (error) {
       throw new Error(error.message);
     }
 
-    const created = result as {
-      id: string;
-      seats: string[];
-      total: number;
-    };
-    this.rememberBookedSeats(data.showtime.id, created.seats);
+    const bookingId = result as string;
+    this.rememberBookedSeats(data.showtime.id, data.seats);
 
     return {
-      id: created.id,
+      id: bookingId,
       movie: data.movie,
       showtime: data.showtime,
-      seats: created.seats,
-      total: Number(created.total),
+      seats: data.seats,
+      total: data.seats.reduce((total, seat) => total + this.estimatedSeatPrice(data.showtime, seat), 0),
       createdAt: new Date().toISOString(),
     };
+  }
+
+  private estimatedSeatPrice(showtime: Showtime, seat: string): number {
+    return ['R', 'S', 'T'].includes(seat.split('-')[0])
+      ? (showtime.price ?? 0) + 6500
+      : showtime.price ?? 0;
   }
 
   async getAll(): Promise<Booking[]> {

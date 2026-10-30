@@ -8,4 +8,5 @@ export interface Booking {
   seats: string[];
   total: number;
   createdAt: string;
+  contactEmail?: string;
 }

@@ -1,9 +1,11 @@
 
 import { Component, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Movie } from '../../models/movie';
 import { Showtime } from '../../models/showtime';
 import { BookingService } from '../../services/booking';
+import { AuthService } from '../../services/auth';
 
 interface BookingData {
   movie: Movie;
@@ -14,7 +16,7 @@ interface BookingData {
 
 @Component({
   selector: 'app-booking-summary',
-  imports: [RouterLink],
+  imports: [RouterLink, FormsModule],
   templateUrl: './booking-summary.html',
   styleUrl: './booking-summary.css',
 })
@@ -22,11 +24,15 @@ export class BookingSummary {
   private router = inject(Router);
   private bookingData = history.state as BookingData;
   private bookingService = inject(BookingService);
+  private authService = inject(AuthService);
 
   movie = this.bookingData?.movie;
   showtime = this.bookingData?.showtime;
   seats = this.bookingData?.seats ?? [];
   total = this.bookingData?.total ?? 0;
+  contactEmail = signal('');
+  birthDate = signal('');
+  today = new Date().toISOString().slice(0, 10);
 
   confirming = signal(false);
   errorMessage = signal('');
@@ -35,6 +41,11 @@ export class BookingSummary {
     !!this.movie &&
     !!this.showtime &&
     this.seats.length > 0
+  );
+
+  guestDetailsValid = computed(() =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.contactEmail().trim()) &&
+    !!this.birthDate() && this.birthDate() <= this.today
   );
 
   formatDate(date: string): string {
@@ -55,7 +66,7 @@ export class BookingSummary {
   }
 
   async confirmBooking(): Promise<void> {
-    if (!this.bookingAvailable() || this.confirming()) {
+    if (!this.bookingAvailable() || !this.guestDetailsValid() || this.confirming()) {
       return;
     }
 
@@ -63,10 +74,13 @@ export class BookingSummary {
     this.errorMessage.set('');
 
     try {
-      const booking = await this.bookingService.create({
+      await this.authService.continueAsGuest();
+      const booking = await this.bookingService.purchase({
         movie: this.movie!,
         showtime: this.showtime!,
         seats: [...this.seats],
+        contactEmail: this.contactEmail().trim(),
+        birthDate: this.birthDate(),
       });
 
       await this.router.navigate([
@@ -85,4 +99,9 @@ export class BookingSummary {
       this.confirming.set(false);
     }
   }
+
+  get contactEmailValue(): string { return this.contactEmail(); }
+  set contactEmailValue(value: string) { this.contactEmail.set(value); }
+  get birthDateValue(): string { return this.birthDate(); }
+  set birthDateValue(value: string) { this.birthDate.set(value); }
 }

@@ -31,7 +31,7 @@ export class BookingConfirmation {
     try {
       const { data: row, error } = await supabase
         .from('bookings')
-        .select('id, movie_id, showtime_id, total, created_at')
+        .select('id, movie_id, showtime_id, total, created_at, contact_email')
         .eq('id', this.bookingId)
         .single();
 
@@ -64,6 +64,7 @@ export class BookingConfirmation {
         seats: (seatRows ?? []).map(seat => seat.seat_label),
         total: Number(row.total),
         createdAt: row.created_at,
+        contactEmail: row.contact_email,
       });
     } catch (error) {
       console.error('Error al cargar la reserva:', error);

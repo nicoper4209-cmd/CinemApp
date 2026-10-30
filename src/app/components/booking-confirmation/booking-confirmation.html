@@ -12,6 +12,9 @@
       <div class="ticket">
         <p class="eyebrow">CÓDIGO DE COMPRA</p>
         <h2>{{ purchase.id }}</h2>
+        @if (purchase.contactEmail) {
+          <p>Correo de contacto: {{ purchase.contactEmail }}</p>
+        }
 
         <hr />
 
@@ -33,8 +36,7 @@
       </div>
 
       <p class="disclaimer">
-        Esta es una compra simulada. No se realizó ningún cobro
-        y la entrada todavía no es válida para ingresar al cine.
+        El pago se procesa en modo de prueba. Conservá este resumen para presentar tus entradas.
       </p>
 
       <a routerLink="/movies" class="home-button">

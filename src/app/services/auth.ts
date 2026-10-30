@@ -39,6 +39,15 @@ export class AuthService {
     return data;
   }
 
+  async continueAsGuest() {
+    const session = await this.getSession();
+    if (session) return session;
+
+    const { data, error } = await supabase.auth.signInAnonymously();
+    if (error) throw error;
+    return data.session;
+  }
+
   async signOut(): Promise<void> {
     const { error } = await supabase.auth.signOut();
 
