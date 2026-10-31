@@ -1,0 +1,97 @@
+<main class="staff-page">
+  <header class="page-header">
+    <p class="eyebrow">CINEMAPP / PERSONAL</p>
+    <h1>Atención en sala</h1>
+    <p>Validá entradas y registrá la entrega de pedidos de Candy.</p>
+  </header>
+
+  <nav class="operation-tabs" aria-label="Operaciones de personal">
+    <button type="button" [class.active]="operation() === 'ticket'"
+      [attr.aria-pressed]="operation() === 'ticket'" (click)="setOperation('ticket')">
+      Validar entrada
+    </button>
+    <button type="button" [class.active]="operation() === 'candy'"
+      [attr.aria-pressed]="operation() === 'candy'" (click)="setOperation('candy')">
+      Entregar Candy
+    </button>
+  </nav>
+
+  <section class="staff-card" [attr.aria-labelledby]="operation() === 'ticket' ? 'ticket-title' : 'candy-title'">
+    @if (operation() === 'ticket') {
+      <p class="eyebrow">INGRESO A LA FUNCIÓN</p>
+      <h2 id="ticket-title">Validar entrada</h2>
+      <p class="instruction">Escaneá el QR de la entrada o ingresá su código manual.</p>
+    } @else {
+      <p class="eyebrow">RETIRO DE PEDIDO</p>
+      <h2 id="candy-title">Entregar Candy</h2>
+      <p class="instruction">Escaneá el QR del pedido o ingresá su código de retiro.</p>
+    }
+
+    <div class="scanner-panel" [hidden]="!scannerOpen()">
+      <video #scannerVideo class="scanner-video" autoplay muted playsinline
+        aria-label="Vista de la cámara para escanear el código QR"></video>
+      <p role="status">Cámara activa. Enfocá el código QR.</p>
+      <button type="button" class="secondary-button" (click)="stopScanner()">Cerrar cámara</button>
+    </div>
+    @if (!scannerOpen()) {
+      <button type="button" class="camera-button" (click)="startScanner()" [disabled]="busy()">
+        <span aria-hidden="true">▣</span> Escanear código QR
+      </button>
+    }
+
+    @if (scannerError()) { <p class="alert error" role="alert">{{ scannerError() }}</p> }
+
+    <div class="manual-divider"><span>o ingresá el código</span></div>
+    <form class="code-form" (ngSubmit)="submitCode()">
+      <label for="staff-code">Código QR o código manual</label>
+      <div class="code-entry">
+        <input id="staff-code" name="staffCode" type="text" [(ngModel)]="codeValue"
+          autocomplete="off" autocapitalize="characters" spellcheck="false"
+          [placeholder]="operation() === 'ticket' ? 'Código de la entrada' : 'Código del pedido'"
+          [disabled]="busy()" required />
+        <button type="submit" [disabled]="busy() || !code().trim()">
+          {{ busy() ? 'Procesando…' : operation() === 'ticket' ? 'Validar entrada' : 'Confirmar entrega' }}
+        </button>
+      </div>
+    </form>
+
+    @if (errorMessage()) { <p class="alert error" role="alert">{{ errorMessage() }}</p> }
+
+    @if (ticketResult(); as ticket) {
+      <section class="result-card ticket-result" aria-labelledby="ticket-result-title" aria-live="polite">
+        <p class="result-status"><span aria-hidden="true">✓</span> Entrada validada</p>
+        <h3 id="ticket-result-title">{{ ticket.movie }}</h3>
+        <dl class="result-details">
+          <div><dt>Función</dt><dd>{{ formatDateTime(ticket.starts_at) }}</dd></div>
+          <div><dt>Sala</dt><dd>{{ ticket.room }}</dd></div>
+          <div><dt>Butaca</dt><dd>{{ ticket.seat }}</dd></div>
+          <div><dt>Tipo</dt><dd>{{ seatTypeLabel(ticket.seat_type) }}</dd></div>
+          <div><dt>Clasificación</dt><dd>{{ ticket.age_rating }}</dd></div>
+        </dl>
+        @if (ticket.minor_notice) {
+          <p class="minor-notice" role="note">
+            Clasificación {{ ticket.age_rating }}: los menores deben concurrir acompañados por un adulto.
+          </p>
+        }
+      </section>
+    }
+
+    @if (candyResult(); as delivery) {
+      <section class="result-card candy-result" aria-labelledby="candy-result-title" aria-live="polite">
+        <p class="result-status"><span aria-hidden="true">✓</span> Pedido entregado</p>
+        <h3 id="candy-result-title">Productos del pedido</h3>
+        @if (delivery.items.length > 0) {
+          <ul class="delivered-items">
+            @for (item of delivery.items; track $index) {
+              <li><span>{{ item.name }}</span><strong>×{{ item.qty }}</strong></li>
+            }
+          </ul>
+        } @else {
+          <p>El pedido no tiene productos pendientes.</p>
+        }
+      </section>
+    }
+  </section>
+
+  <p class="security-note">La confirmación se registra en el sistema al procesar el código.</p>
+</main>

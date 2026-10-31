@@ -64,6 +64,19 @@
       </button>
     </form>
 
+    <div class="oauth-divider"><span>o continuá con</span></div>
+    <div class="oauth-buttons">
+      <button type="button" class="oauth-button" (click)="signInWithProvider('google')" [disabled]="loading()">
+        <span class="provider-mark google-mark" aria-hidden="true">G</span>
+        Google
+      </button>
+      <button type="button" class="oauth-button" (click)="signInWithProvider('github')" [disabled]="loading()">
+        <span class="provider-mark github-mark" aria-hidden="true">⌘</span>
+        GitHub
+      </button>
+    </div>
+    @if (loading()) { <p class="oauth-status" role="status">Conectando…</p> }
+
     <p class="switch-mode">
       {{ isRegistering() ? '¿Ya tenés una cuenta?' : '¿Todavía no tenés cuenta?' }}
       <button type="button" class="text-button" (click)="toggleMode()">

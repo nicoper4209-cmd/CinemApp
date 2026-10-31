@@ -71,9 +71,71 @@
         </p>
       }
 
+      @if (isRegisteredUser()) {
+        <section class="account-benefits" aria-labelledby="account-benefits-title">
+          <p class="eyebrow">BENEFICIOS DE TU CUENTA</p>
+          <h2 id="account-benefits-title">Cupones y crédito</h2>
+          @if (benefitsLoading()) {
+            <p class="field-hint" role="status">Consultando beneficios disponibles...</p>
+          }
+          @if (couponError()) {
+            <p class="error-message" role="alert">{{ couponError() }}</p>
+          } @else {
+            <div class="field-group">
+              <label for="checkout-coupon">Cupón elegible</label>
+              <select id="checkout-coupon" name="checkoutCoupon" [(ngModel)]="selectedCouponCodeValue">
+                <option value="">No usar cupón</option>
+                @for (coupon of eligibleCoupons(); track coupon.id) {
+                  <option [value]="coupon.code">
+                    {{ coupon.code }} · {{ coupon.percentage }}% — {{ coupon.description }}
+                  </option>
+                }
+              </select>
+            </div>
+          }
+          @if (creditError()) {
+            <p class="error-message" role="alert">{{ creditError() }}</p>
+          } @else {
+            <p class="credit-balance">Crédito disponible: <strong>{{ formatPrice(creditBalance()) }}</strong></p>
+            @if (creditBalance() > 0) {
+              <label class="credit-option">
+                <input type="checkbox" name="useCredit" [(ngModel)]="useCreditValue" />
+                <span>Usar crédito en esta compra</span>
+              </label>
+              @if (useCredit()) {
+                <div class="field-group credit-amount-field">
+                  <label for="credit-amount">Importe de crédito a usar</label>
+                  <input id="credit-amount" type="number" name="creditAmount" min="0" step="0.01"
+                    [max]="creditBalance()" [(ngModel)]="creditAmountValue" />
+                </div>
+              }
+            }
+          }
+          @if (couponError() || creditError()) {
+            <button class="retry-benefits" type="button" (click)="retryAccountBenefits()">Reintentar beneficios</button>
+          }
+        </section>
+      }
+
       <div class="total-row">
-        <span>Total estimado</span>
-        <strong>${{ estimatedTotal() }}</strong>
+        <span>Subtotal estimado</span>
+        <strong>{{ formatPrice(estimatedTotal()) }}</strong>
+      </div>
+      @if (selectedCoupon(); as coupon) {
+        <div class="detail-row estimate-adjustment">
+          <span>Cupón {{ coupon.code }} (estimado)</span>
+          <strong>−{{ formatPrice(estimatedDiscount()) }}</strong>
+        </div>
+      }
+      @if (estimatedCredit() > 0) {
+        <div class="detail-row estimate-adjustment">
+          <span>Crédito a aplicar (estimado)</span>
+          <strong>−{{ formatPrice(estimatedCredit()) }}</strong>
+        </div>
+      }
+      <div class="total-row amount-due-row">
+        <span>Importe a abonar estimado</span>
+        <strong>{{ formatPrice(estimatedAmountDue()) }}</strong>
       </div>
       <p class="disclaimer">El importe definitivo se confirma al procesar la compra.</p>
 
@@ -190,7 +252,7 @@
         <button
           type="button"
           (click)="confirmBooking()"
-          [disabled]="!authService.initialized() || confirming() || priceEstimateLoading() || (hasTickets() && (!!priceEstimateError() || !!contiguityError() || (hasVip() && !vipAcknowledged()))) || (guestDetailsRequired() && !guestDetailsValid())"
+          [disabled]="!authService.initialized() || confirming() || priceEstimateLoading() || (isRegisteredUser() && benefitsLoading()) || (hasTickets() && (!!priceEstimateError() || !!contiguityError() || (hasVip() && !vipAcknowledged()))) || (guestDetailsRequired() && !guestDetailsValid())"
         >
           {{ confirming() ? 'Procesando...' : 'Confirmar compra' }}
         </button>

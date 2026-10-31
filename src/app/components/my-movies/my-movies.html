@@ -5,6 +5,10 @@
     <p>Todo lo que guardaste y las entradas que compraste.</p>
   </header>
 
+  @if (bookingError()) { <p class="inline-error" role="alert">{{ bookingError() }}</p> }
+  @if (cancellationError()) { <p class="inline-error" role="alert">{{ cancellationError() }}</p> }
+  @if (cancellationMessage()) { <p class="inline-success" role="status">{{ cancellationMessage() }}</p> }
+
   <nav class="section-tabs" aria-label="Secciones de mis películas">
     <button
       type="button"
@@ -96,6 +100,25 @@
               </div>
 
               <strong class="booking-price">${{ booking.total }}</strong>
+              @if (canCancel(booking)) {
+                @if (cancelTargetId() === booking.id) {
+                  <div class="cancel-confirmation" role="group" aria-label="Confirmar cancelación">
+                    <p>La cancelación es definitiva. Si la RPC confirma que estás dentro del plazo, el importe se acreditará y los puntos se revertirán.</p>
+                    <button type="button" class="confirm-cancel-button" (click)="cancelBooking(booking)"
+                      [disabled]="cancellingBookingId() === booking.id">
+                      {{ cancellingBookingId() === booking.id ? 'Cancelando...' : 'Confirmar cancelación' }}
+                    </button>
+                    <button type="button" class="keep-booking-button" (click)="cancelTargetId.set(null)"
+                      [disabled]="cancellingBookingId() === booking.id">Conservar reserva</button>
+                  </div>
+                } @else {
+                  <button type="button" class="cancel-booking-button" (click)="requestCancellation(booking.id)">
+                    Cancelar
+                  </button>
+                }
+              } @else if (booking.status === 'cancelled') {
+                <span class="cancelled-badge">Cancelada</span>
+              }
             </article>
           }
         </div>
@@ -134,6 +157,25 @@
               </div>
 
               <strong class="booking-price">${{ booking.total }}</strong>
+              @if (canCancel(booking)) {
+                @if (cancelTargetId() === booking.id) {
+                  <div class="cancel-confirmation" role="group" aria-label="Confirmar cancelación">
+                    <p>La cancelación es definitiva. Si la RPC confirma que estás dentro del plazo, el importe se acreditará y los puntos se revertirán.</p>
+                    <button type="button" class="confirm-cancel-button" (click)="cancelBooking(booking)"
+                      [disabled]="cancellingBookingId() === booking.id">
+                      {{ cancellingBookingId() === booking.id ? 'Cancelando...' : 'Confirmar cancelación' }}
+                    </button>
+                    <button type="button" class="keep-booking-button" (click)="cancelTargetId.set(null)"
+                      [disabled]="cancellingBookingId() === booking.id">Conservar reserva</button>
+                  </div>
+                } @else {
+                  <button type="button" class="cancel-booking-button" (click)="requestCancellation(booking.id)">
+                    Cancelar
+                  </button>
+                }
+              } @else if (booking.status === 'cancelled') {
+                <span class="cancelled-badge">Cancelada</span>
+              }
             </article>
           }
         </div>

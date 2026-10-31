@@ -1,0 +1,110 @@
+<main class="account-page">
+  <header class="page-header">
+    <p class="eyebrow">CINEMAPP / MI CUENTA</p>
+    <h1>Puntos y crédito</h1>
+    <p>Consultá tus movimientos y canjeá premios disponibles.</p>
+  </header>
+
+  @if (account.errorMessage()) {
+    <div class="error-message" role="alert">
+      <p>{{ account.errorMessage() }}</p>
+      <button type="button" (click)="account.loadAccount()">Reintentar</button>
+    </div>
+  }
+
+  @if (account.loading()) {
+    <p class="loading-message" role="status">Cargando los datos de tu cuenta...</p>
+  } @else {
+    <section class="balance-grid" aria-label="Saldos de cuenta">
+      <article class="balance-card">
+        <p class="eyebrow">PUNTOS</p>
+        <strong>{{ account.pointsBalance() }}</strong>
+        <span>1 $ de compra elegible = 1 punto</span>
+      </article>
+      <article class="balance-card credit-card">
+        <p class="eyebrow">CRÉDITO</p>
+        <strong>{{ formatPrice(account.creditBalance()) }}</strong>
+        <span>Se puede usar en una próxima compra</span>
+      </article>
+    </section>
+
+    <section class="account-section" aria-labelledby="rewards-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">CANJE</p>
+          <h2 id="rewards-title">Premios disponibles</h2>
+        </div>
+      </div>
+
+      @if (account.rewards().length > 0) {
+        <div class="reward-grid">
+          @for (reward of account.rewards(); track reward.id) {
+            <article class="reward-card">
+              <h3>{{ reward.name }}</h3>
+              @if (reward.description) { <p>{{ reward.description }}</p> }
+              @if (reward.rewardType === 'credit' && reward.rewardValue > 0) {
+                <p class="reward-value">Crédito: {{ formatPrice(reward.rewardValue) }}</p>
+              }
+              <div class="reward-action">
+                <span>{{ reward.pointsCost }} puntos</span>
+                <button type="button" (click)="redeem(reward)"
+                  [disabled]="account.pointsBalance() < reward.pointsCost || redeemingRewardId() !== null">
+                  {{ redeemingRewardId() === reward.id ? 'Canjeando...' : 'Canjear' }}
+                </button>
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <p class="empty-message">No hay premios disponibles por el momento.</p>
+      }
+
+      @if (actionMessage()) { <p class="success-message" role="status">{{ actionMessage() }}</p> }
+      @if (actionError()) { <p class="error-message" role="alert">{{ actionError() }}</p> }
+    </section>
+
+    <section class="account-section movement-grid" aria-label="Historial de movimientos">
+      <div>
+        <p class="eyebrow">HISTORIAL</p>
+        <h2>Movimientos de puntos</h2>
+        @if (account.pointsMovements().length > 0) {
+          <div class="movement-list">
+            @for (movement of account.pointsMovements(); track movement.id) {
+              <article class="movement-row">
+                <div>
+                  <strong>{{ movement.note || movementLabel(movement.reason) }}</strong>
+                  <small>{{ formatDate(movement.createdAt) }}</small>
+                </div>
+                <strong [class.negative]="movement.delta < 0">{{ movement.delta > 0 ? '+' : '' }}{{ movement.delta }}</strong>
+              </article>
+            }
+          </div>
+        } @else {
+          <p class="empty-message">Todavía no tenés movimientos de puntos.</p>
+        }
+      </div>
+
+      <div>
+        <p class="eyebrow">HISTORIAL</p>
+        <h2>Movimientos de crédito</h2>
+        @if (account.creditMovements().length > 0) {
+          <div class="movement-list">
+            @for (movement of account.creditMovements(); track movement.id) {
+              <article class="movement-row">
+                <div>
+                  <strong>{{ movementLabel(movement.reason) }}</strong>
+                  <small>{{ formatDate(movement.createdAt) }}</small>
+                </div>
+                <strong [class.negative]="movement.delta < 0">
+                  {{ movement.delta > 0 ? '+' : '' }}{{ formatPrice(movement.delta) }}
+                </strong>
+              </article>
+            }
+          </div>
+        } @else {
+          <p class="empty-message">Todavía no tenés movimientos de crédito.</p>
+        }
+      </div>
+    </section>
+  }
+</main>

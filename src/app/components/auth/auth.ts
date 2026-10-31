@@ -20,6 +20,10 @@ export class Auth {
   errorMessage = signal('');
   successMessage = signal('');
 
+  constructor() {
+    this.isRegistering.set(this.router.url.split('?')[0] === '/register');
+  }
+
   
   async submit(): Promise<void> {
     if (this.loading()) return;
@@ -44,18 +48,7 @@ export class Auth {
           this.password()
         );
 
-        const returnUrl =
-          this.router.parseUrl(this.router.url)
-            .queryParams['returnUrl'];
-
-        const destination =
-          typeof returnUrl === 'string' &&
-          returnUrl.startsWith('/') &&
-          !returnUrl.startsWith('//')
-            ? returnUrl
-            : '/';
-
-        await this.router.navigateByUrl(destination);
+        await this.router.navigateByUrl(this.safeReturnUrl());
       }
     } catch (error: unknown) {
       this.errorMessage.set(
@@ -65,6 +58,34 @@ export class Auth {
       );
     } finally {
       this.loading.set(false);
+    }
+  }
+
+  async signInWithProvider(provider: 'google' | 'github'): Promise<void> {
+    if (this.loading()) return;
+    this.loading.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
+    try {
+      const redirectTo = `${window.location.origin}/auth/callback?returnUrl=${encodeURIComponent(this.safeReturnUrl())}`;
+      await this.authService.signInWithProvider(provider, redirectTo);
+    } catch (error: unknown) {
+      this.errorMessage.set(
+        error instanceof Error ? error.message : 'No se pudo iniciar sesión con el proveedor.'
+      );
+      this.loading.set(false);
+    }
+  }
+
+  private safeReturnUrl(): string {
+    const returnUrl = this.router.parseUrl(this.router.url).queryParams['returnUrl'];
+    if (typeof returnUrl !== 'string') return '/';
+    try {
+      const target = new URL(returnUrl, window.location.origin);
+      if (target.origin !== window.location.origin) return '/';
+      return `${target.pathname}${target.search}${target.hash}`;
+    } catch {
+      return '/';
     }
   }
 

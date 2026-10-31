@@ -11,6 +11,12 @@ import { Auth } from './components/auth/auth';
 import { authGuard } from './guards/auth-guard';
 import { guestGuard } from './guards/guest-guard';
 import { CandyShop } from './components/candy-shop/candy-shop';
+import { Account } from './components/account/account';
+import { Profile } from './components/profile/profile';
+import { customerGuard } from './guards/role-guards';
+import { AuthCallback } from './components/auth/auth-callback';
+import { Staff } from './components/staff/staff';
+import { staffGuard } from './guards/role-guards';
 
 export const routes: Routes = [
     {path:'top',component:TopMovies}, // Top 3 peliculas
@@ -21,9 +27,13 @@ export const routes: Routes = [
     {path:'seats/:id',component: SeatSelection}, // Butaca detalle
     {path:'booking-summary',component: BookingSummary}, // Resumen compra
     {path:'booking-confirmation/:id',component: BookingConfirmation}, // Confirmación compra
-    {path:'my-movies', component: MyMovies,canActivate: [authGuard]}, // Sección mis peliculas
+    {path:'my-movies', component: MyMovies,canActivate: [customerGuard]}, // Sección mis peliculas
+    {path:'account', component: Account, canActivate: [customerGuard]},
+    {path:'profile', component: Profile, canActivate: [authGuard]},
     {path:'login',component:Auth, canActivate: [guestGuard]}, // Pantalla login
     {path:'register',component:Auth, canActivate: [guestGuard]}, // Pantalla registrarse
+    {path:'auth/callback', component: AuthCallback},
+    {path:'staff', component: Staff, canActivate: [staffGuard]},
     {path:'',redirectTo:'top',pathMatch:'full'},
     {path:'**',redirectTo:'top'}
 ];

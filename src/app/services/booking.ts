@@ -13,6 +13,16 @@ interface NewBooking {
   showtime: Showtime | null;
   seats: string[];
   candy?: Array<{ product_id: number; qty: number }>;
+  couponCode?: string | null;
+  useCredit?: number;
+}
+
+export interface EligibleCoupon {
+  id: number;
+  code: string;
+  type: string;
+  percentage: number;
+  description: string;
 }
 
 interface BookingRow {
@@ -24,6 +34,7 @@ interface BookingRow {
   contact_email?: string | null;
   candy_qr?: string | null;
   candy_code?: string | null;
+  status: 'confirmed' | 'cancelled';
 }
 
 @Injectable({
@@ -43,8 +54,8 @@ export class BookingService {
       p_showtime_id: data.showtime?.id ?? null,
       p_seats: data.seats,
       p_candy: data.candy ?? [],
-      p_coupon_code: null,
-      p_use_credit: 0,
+      p_coupon_code: data.couponCode?.trim() || null,
+      p_use_credit: data.useCredit ?? 0,
       p_payment_method: 'mock',
       p_contact_email: data.contactEmail,
       p_birth_date: data.birthDate,
@@ -60,10 +71,36 @@ export class BookingService {
     return result as string;
   }
 
+  async getEligibleCoupons(): Promise<EligibleCoupon[]> {
+    const { data, error } = await supabase.rpc('eligible_coupons');
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((coupon: EligibleCoupon) => ({
+      ...coupon,
+      percentage: Number(coupon.percentage),
+    }));
+  }
+
+  async getCreditBalance(): Promise<number> {
+    const { data, error } = await supabase.rpc('my_credit_balance');
+    if (error) throw new Error(error.message);
+    const balance = Number(data ?? 0);
+    return Number.isFinite(balance) && balance > 0 ? balance : 0;
+  }
+
+  async cancelBooking(bookingId: string): Promise<number> {
+    const { data, error } = await supabase.rpc('cancel_booking', {
+      p_booking_id: bookingId,
+    });
+    if (error) throw new Error(error.message);
+    const credited = Number(data ?? 0);
+    if (!Number.isFinite(credited)) throw new Error('La cancelación devolvió un crédito inválido.');
+    return credited;
+  }
+
   async getAll(): Promise<TicketBooking[]> {
     const { data, error } = await supabase
       .from('bookings')
-      .select('id, movie_id, showtime_id, total, created_at, contact_email, candy_qr, candy_code')
+      .select('id, movie_id, showtime_id, total, created_at, contact_email, candy_qr, candy_code, status')
       .not('showtime_id', 'is', null)
       .order('created_at', { ascending: false });
 
@@ -78,14 +115,19 @@ export class BookingService {
       if (!booking.movie || !booking.showtime) {
         throw new Error('No se encontraron los datos de la película o función.');
       }
-      return { ...booking, movie: booking.movie, showtime: booking.showtime };
+      return {
+        ...booking,
+        movie: booking.movie,
+        showtime: booking.showtime,
+        status: booking.status ?? 'confirmed',
+      };
     });
   }
 
   async getById(id: string): Promise<Booking | undefined> {
     const { data, error } = await supabase
       .from('bookings')
-      .select('id, movie_id, showtime_id, total, created_at, contact_email, candy_qr, candy_code')
+      .select('id, movie_id, showtime_id, total, created_at, contact_email, candy_qr, candy_code, status')
       .eq('id', id)
       .maybeSingle();
 
@@ -142,6 +184,7 @@ export class BookingService {
       candyQr: row.candy_qr ?? undefined,
       candyCode: row.candy_code ?? undefined,
       candyItems,
+      status: row.status,
     };
   }
 }

@@ -8,6 +8,11 @@
     @if (authService.user(); as currentUser) {
       @if (!currentUser.is_anonymous) {
         <a routerLink="/my-movies">Mis películas</a>
+        <a routerLink="/account">Mi cuenta</a>
+        <a routerLink="/profile">Perfil</a>
+        @if (authService.profile()?.role === 'empleado' || authService.profile()?.role === 'admin') {
+          <a routerLink="/staff">Personal</a>
+        }
 
         <button type="button" (click)="logout()">
         Cerrar sesión

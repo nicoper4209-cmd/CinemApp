@@ -94,6 +94,29 @@ form > button:disabled {
   cursor: not-allowed;
 }
 
+.oauth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 22px 0 14px;
+  color: #77736c;
+  font-size: 12px;
+}
+
+.oauth-divider::before, .oauth-divider::after { content: ''; flex: 1; height: 1px; background: #e5e2dc; }
+.oauth-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.oauth-button {
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  padding: 11px 8px; border: 1px solid #d8d5cf; background: #fff; color: #242424;
+  font: inherit; font-size: 13px; cursor: pointer;
+}
+.oauth-button:hover:not(:disabled) { background: #f8f7f4; }
+.oauth-button:disabled { opacity: .55; cursor: wait; }
+.provider-mark { font-weight: 700; font-size: 16px; }
+.google-mark { font-family: Arial, sans-serif; }
+.github-mark { font-size: 18px; }
+.oauth-status { margin: 10px 0 0; color: #68655f; font-size: 12px; text-align: center; }
+
 .message {
   margin: 0 0 16px;
   font-size: 13px;

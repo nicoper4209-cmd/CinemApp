@@ -6,6 +6,7 @@ import { MovieService } from '../../services/movie';
 import { BookingService } from '../../services/booking';
 import { TicketBooking } from '../../models/booking';
 import { AuthService } from '../../services/auth';
+import { AccountService } from '../../services/account';
 
 type MyMoviesSection = 'favorites' | 'upcoming' | 'tickets';
 
@@ -21,10 +22,15 @@ export class MyMovies {
 
   private authService = inject(AuthService);
   private favoriteService = inject(FavoriteService);
+  private accountService = inject(AccountService);
 
   activeSection = signal<MyMoviesSection>('favorites');
   favoriteError = signal('');
   bookingError = signal('');
+  cancellationError = signal('');
+  cancellationMessage = signal('');
+  cancelTargetId = signal<string | null>(null);
+  cancellingBookingId = signal<string | null>(null);
 
   constructor() {
   effect(() => {
@@ -75,9 +81,9 @@ private async loadFavoriteMovies(): Promise<void> {
 
   upcomingBookings = computed(() =>
     this.bookings()
-      .filter(booking =>
+      .filter(booking => booking.status === 'confirmed' &&
         new Date(
-          `${booking.showtime.date}T${booking.showtime.time}:00`
+          `${booking.showtime.date}T${booking.showtime.time}:00-03:00`
         ).getTime() >= Date.now()
       )
       .sort((a, b) =>
@@ -89,6 +95,56 @@ private async loadFavoriteMovies(): Promise<void> {
 
   setSection(section: MyMoviesSection): void {
     this.activeSection.set(section);
+  }
+
+  canCancel(booking: TicketBooking): boolean {
+    return booking.status === 'confirmed' &&
+      new Date(`${booking.showtime.date}T${booking.showtime.time}:00-03:00`).getTime() > Date.now();
+  }
+
+  requestCancellation(bookingId: string): void {
+    this.cancelTargetId.set(bookingId);
+    this.cancellationError.set('');
+    this.cancellationMessage.set('');
+  }
+
+  async cancelBooking(booking: TicketBooking): Promise<void> {
+    if (!this.canCancel(booking) || this.cancellingBookingId()) return;
+    this.cancellingBookingId.set(booking.id);
+    this.cancellationError.set('');
+    this.cancellationMessage.set('');
+    try {
+      const credited = await this.bookingService.cancelBooking(booking.id);
+      this.bookings.update(bookings => bookings.map(item => item.id === booking.id
+        ? { ...item, status: 'cancelled' }
+        : item));
+      this.cancelTargetId.set(null);
+      this.cancellationMessage.set(
+        `Reserva cancelada. Se acreditaron ${this.formatPrice(credited)} en tu cuenta. Los puntos de la compra fueron revertidos.`
+      );
+      try {
+        await this.accountService.refreshBalancesAndMovements();
+      } catch (error) {
+        this.cancellationMessage.set(
+          `Reserva cancelada y crédito de ${this.formatPrice(credited)} acreditado. No se pudo actualizar el resumen de saldos; volvé a cargar Mi cuenta.`
+        );
+        console.error('No se pudo refrescar la cuenta después de cancelar:', error);
+      }
+    } catch (error) {
+      this.cancellationError.set(
+        error instanceof Error ? error.message : 'No se pudo cancelar la reserva.'
+      );
+    } finally {
+      this.cancellingBookingId.set(null);
+    }
+  }
+
+  formatPrice(amount: number): string {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      maximumFractionDigits: 2,
+    }).format(amount);
   }
 
   formatDate(date: string): string {

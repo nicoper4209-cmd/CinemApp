@@ -1,10 +1,10 @@
 
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { Movie } from '../../models/movie';
 import { Showtime } from '../../models/showtime';
-import { BookingService } from '../../services/booking';
+import { BookingService, EligibleCoupon } from '../../services/booking';
 import { AuthService } from '../../services/auth';
 import { SeatHoldService } from '../../services/seat-hold';
 import { PricingService, TicketPriceEstimate } from '../../services/pricing';
@@ -42,6 +42,15 @@ export class BookingSummary {
   priceEstimateLoading = signal(false);
   priceEstimateError = signal('');
   vipAcknowledged = signal(false);
+  eligibleCoupons = signal<EligibleCoupon[]>([]);
+  selectedCouponCode = signal('');
+  creditBalance = signal(0);
+  useCredit = signal(false);
+  creditAmount = signal(0);
+  benefitsLoading = signal(false);
+  couponError = signal('');
+  creditError = signal('');
+  private benefitsLoadedForUser: string | null = null;
   contactEmail = signal('');
   isRegisteredUser = computed(() => {
     const user = this.authService.user();
@@ -100,6 +109,22 @@ export class BookingSummary {
     this.seats.some(seat => ['R', 'S', 'T'].includes(seat.split('-')[0]))
   );
   estimatedTotal = computed(() => (this.priceEstimate()?.total ?? 0) + this.cart.subtotal());
+  selectedCoupon = computed(() =>
+    this.eligibleCoupons().find(coupon => coupon.code === this.selectedCouponCode())
+  );
+  estimatedDiscount = computed(() => {
+    const discount = this.estimatedTotal() * (this.selectedCoupon()?.percentage ?? 0) / 100;
+    return Math.round(discount * 100) / 100;
+  });
+  estimatedCredit = computed(() => {
+    if (!this.useCredit()) return 0;
+    const requested = Number(this.creditAmount());
+    if (!Number.isFinite(requested) || requested <= 0) return 0;
+    return Math.min(requested, this.creditBalance(), Math.max(0, this.estimatedTotal() - this.estimatedDiscount()));
+  });
+  estimatedAmountDue = computed(() =>
+    Math.max(0, this.estimatedTotal() - this.estimatedDiscount() - this.estimatedCredit())
+  );
 
   get checkoutContext(): BookingData {
     return {
@@ -112,6 +137,24 @@ export class BookingSummary {
   }
 
   constructor() {
+    effect(() => {
+      const initialized = this.authService.initialized();
+      const user = this.authService.user();
+      if (!initialized) return;
+      if (!user || user.is_anonymous) {
+        this.benefitsLoadedForUser = null;
+        this.eligibleCoupons.set([]);
+        this.selectedCouponCode.set('');
+        this.creditBalance.set(0);
+        this.creditAmount.set(0);
+        this.useCredit.set(false);
+        return;
+      }
+      if (this.benefitsLoadedForUser !== user.id) {
+        this.benefitsLoadedForUser = user.id;
+        void this.loadAccountBenefits();
+      }
+    });
     if (this.movie && this.showtime) void this.loadPriceEstimate();
     if (this.showtime) {
       void this.seatHoldService.restoreHold(this.showtime.id).catch(error => {
@@ -120,6 +163,41 @@ export class BookingSummary {
         );
       });
     }
+  }
+
+  private async loadAccountBenefits(): Promise<void> {
+    this.benefitsLoading.set(true);
+    this.couponError.set('');
+    this.creditError.set('');
+    const [couponsResult, creditResult] = await Promise.allSettled([
+      this.bookingService.getEligibleCoupons(),
+      this.bookingService.getCreditBalance(),
+    ]);
+
+    if (couponsResult.status === 'fulfilled') {
+      const coupons = couponsResult.value;
+      this.eligibleCoupons.set(coupons);
+      const firstPurchase = coupons.find(coupon => coupon.type === 'primera_compra');
+      this.selectedCouponCode.set(firstPurchase?.code ?? '');
+    } else {
+      this.couponError.set(this.getErrorMessage(couponsResult.reason));
+    }
+
+    if (creditResult.status === 'fulfilled') {
+      this.creditBalance.set(creditResult.value);
+      this.creditAmount.set(creditResult.value);
+    } else {
+      this.creditError.set(this.getErrorMessage(creditResult.reason));
+    }
+    this.benefitsLoading.set(false);
+  }
+
+  retryAccountBenefits(): void {
+    void this.loadAccountBenefits();
+  }
+
+  private getErrorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : 'No se pudieron cargar los beneficios de la cuenta.';
   }
 
   formatDate(date: string): string {
@@ -189,6 +267,8 @@ export class BookingSummary {
           product_id: item.product.id,
           qty: item.quantity,
         })),
+        couponCode: this.isRegisteredUser() ? this.selectedCouponCode() || null : null,
+        useCredit: this.isRegisteredUser() ? this.estimatedCredit() : 0,
         contactEmail: isAnonymous
           ? this.contactEmail().trim()
           : session?.user.email ?? null,
@@ -220,6 +300,15 @@ export class BookingSummary {
       maximumFractionDigits: 2,
     }).format(price);
   }
+
+  get selectedCouponCodeValue(): string { return this.selectedCouponCode(); }
+  set selectedCouponCodeValue(value: string) { this.selectedCouponCode.set(value); }
+  get creditAmountValue(): number { return this.creditAmount(); }
+  set creditAmountValue(value: number) {
+    this.creditAmount.set(Number.isFinite(value) ? Math.max(0, value) : 0);
+  }
+  get useCreditValue(): boolean { return this.useCredit(); }
+  set useCreditValue(value: boolean) { this.useCredit.set(value); }
 
   get contactEmailValue(): string { return this.contactEmail(); }
   set contactEmailValue(value: string) { this.contactEmail.set(value); }

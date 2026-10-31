@@ -1,0 +1,45 @@
+<main class="profile-page">
+  <header class="profile-header">
+    <p class="eyebrow">CINEMAPP / PERFIL</p>
+    <h1>Mi perfil</h1>
+    <p>Administrá tus datos personales. Tu rol no se puede cambiar desde acá.</p>
+  </header>
+
+  @if (loading()) {
+    <p role="status">Cargando perfil…</p>
+  } @else {
+    @if (errorMessage()) {
+      <p class="message error" role="alert">{{ errorMessage() }}</p>
+      <button class="retry-button" type="button" (click)="loadProfile()">Reintentar</button>
+    }
+    <section class="profile-card">
+      <div class="identity-row">
+        @if (auth.profile()?.avatar_url) {
+          <img class="avatar" [src]="auth.profile()?.avatar_url" alt="" />
+        }
+        <div>
+          <p class="eyebrow">ROL DE LA CUENTA</p>
+          <strong>{{ roleLabel(auth.profile()?.role) }}</strong>
+        </div>
+      </div>
+      <p class="email-value">{{ auth.profile()?.email }}</p>
+
+      <form (ngSubmit)="save()">
+        <label for="profile-name">Nombre y apellido</label>
+        <input id="profile-name" name="fullName" type="text" autocomplete="name"
+          [(ngModel)]="fullNameValue" required maxlength="120" />
+
+        <label for="profile-birth-date">Fecha de nacimiento</label>
+        <input id="profile-birth-date" name="birthDate" type="date" min="1900-01-01"
+          [max]="maxBirthDate" [(ngModel)]="birthDateValue" />
+
+        @if (errorMessage()) { <p class="message error" role="alert">{{ errorMessage() }}</p> }
+        @if (successMessage()) { <p class="message success" role="status">{{ successMessage() }}</p> }
+
+        <button type="submit" [disabled]="saving() || !fullName().trim()">
+          {{ saving() ? 'Guardando…' : 'Guardar cambios' }}
+        </button>
+      </form>
+    </section>
+  }
+</main>

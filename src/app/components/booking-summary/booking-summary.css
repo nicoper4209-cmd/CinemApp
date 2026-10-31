@@ -337,6 +337,84 @@ hr {
   line-height: 1.5;
 }
 
+.account-benefits {
+  margin: 24px 0;
+  padding: 18px;
+  border: 1px solid #e4e0d8;
+  border-radius: 4px;
+  background: #fcfbf8;
+}
+
+.account-benefits h2 {
+  margin: 4px 0 16px;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.account-benefits .field-group {
+  margin-top: 12px;
+}
+
+.account-benefits select,
+.account-benefits input[type='number'] {
+  width: 100%;
+  max-width: 440px;
+  padding: 10px 12px;
+  border: 1px solid #d6d6d6;
+  border-radius: 3px;
+  background: #fff;
+  color: #242424;
+  font: inherit;
+}
+
+.credit-balance {
+  margin: 14px 0 8px;
+  color: #555;
+  font-size: 14px;
+}
+
+.credit-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 12px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.credit-option input {
+  width: 16px;
+  height: 16px;
+  accent-color: #242424;
+}
+
+.credit-amount-field {
+  margin-left: 25px;
+}
+
+.estimate-adjustment {
+  padding: 10px 0;
+  color: #5d6f4c;
+  font-size: 14px;
+}
+
+.amount-due-row {
+  margin-top: 6px;
+  border-top: 1px solid #e5e5e5;
+  padding-top: 15px;
+}
+
+.retry-benefits {
+  margin-top: 8px;
+  padding: 7px 10px;
+  border: 1px solid #a94442;
+  border-radius: 3px;
+  background: transparent;
+  color: #8d302e;
+  font: inherit;
+  cursor: pointer;
+}
+
 .candy-cart-summary .detail-row {
   gap: 12px;
 }

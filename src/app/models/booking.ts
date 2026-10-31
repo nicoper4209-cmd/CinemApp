@@ -30,9 +30,11 @@ export interface Booking {
   candyQr?: string;
   candyCode?: string;
   candyQrDataUrl?: string;
+  status?: 'confirmed' | 'cancelled';
 }
 
 export interface TicketBooking extends Booking {
   movie: Movie;
   showtime: Showtime;
+  status: 'confirmed' | 'cancelled';
 }

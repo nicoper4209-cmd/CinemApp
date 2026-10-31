@@ -211,3 +211,31 @@
     font-size: 13px;
   }
 }
+
+.inline-error, .inline-success {
+  padding: 12px 14px;
+  margin: 12px 0;
+  border-left: 3px solid #a94442;
+  background: #fbf1f0;
+  color: #8d302e;
+}
+
+.inline-success { border-left-color: #54866a; background: #f0f7f2; color: #37644a; }
+
+.cancel-booking-button, .confirm-cancel-button, .keep-booking-button {
+  padding: 9px 12px;
+  border: 1px solid #242424;
+  border-radius: 3px;
+  background: #242424;
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.keep-booking-button { background: transparent; color: #242424; }
+.confirm-cancel-button:disabled, .keep-booking-button:disabled { opacity: .55; cursor: wait; }
+.cancel-confirmation { flex-basis: 100%; padding: 14px; border: 1px solid #e5d8c1; background: #fbf8f1; }
+.cancel-confirmation p { margin: 0 0 12px; color: #665b49; font-size: 13px; line-height: 1.5; }
+.cancel-confirmation button + button { margin-left: 8px; }
+.cancelled-badge { color: #8d302e; font-size: 13px; font-weight: 600; }
