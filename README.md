@@ -44,6 +44,28 @@ To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use th
 ng test
 ```
 
+## Notificaciones push
+
+La preferencia se administra desde **Perfil → Notificaciones**. Para habilitar envíos reales:
+
+1. Generá un par de claves VAPID. Configurá la clave **pública** en `vapidPublicKey` de `src/app/environments/environments.ts`; la clave privada no debe estar en el frontend ni en Git.
+2. Desplegá la Edge Function `send-notifications` y configurá sus secretos en Supabase:
+
+   ```bash
+   supabase secrets set \
+     VAPID_PUBLIC_KEY="<clave-publica>" \
+     VAPID_PRIVATE_KEY="<clave-privada>" \
+     VAPID_SUBJECT="mailto:administracion@tu-dominio.com" \
+     CRON_SECRET="<secreto-aleatorio>"
+   supabase functions deploy send-notifications
+   ```
+
+   `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` deben estar disponibles para la Edge Function desde el entorno Supabase. Nunca copies la service role key al código Angular.
+3. Programá un único invocador confiable para llamar `POST /functions/v1/send-notifications` cada minuto, con `Authorization: Bearer <service-role-key>` y `x-cron-secret: <CRON_SECRET>`. Guardá esos valores solo en el entorno del scheduler.
+4. El navegador debe usar HTTPS (localhost también sirve durante desarrollo) y el usuario debe aceptar el permiso. La cola sin suscripciones se consume sin envío; endpoints que respondan 404/410 se eliminan. Los errores transitorios quedan pendientes para reintento.
+
+La función procesa hasta 25 avisos por invocación. No ejecutes varios schedulers en paralelo: la entrega es de tipo *at least once*, por lo que un fallo después de un envío y antes de marcar la fila podría ocasionar un reintento duplicado.
+
 ## Running end-to-end tests
 
 For end-to-end (e2e) testing, run:

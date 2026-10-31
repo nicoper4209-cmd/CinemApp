@@ -7,6 +7,7 @@ const authMock = vi.hoisted(() => ({
   signInAnonymously: vi.fn(),
   onAuthStateChange: vi.fn(),
   signInWithOAuth: vi.fn(),
+  signUp: vi.fn(),
 }));
 const supabaseMock = vi.hoisted(() => ({ from: vi.fn() }));
 
@@ -64,6 +65,19 @@ describe('AuthService guest session', () => {
     expect(authMock.signInWithOAuth).toHaveBeenCalledWith({
       provider: 'google',
       options: { redirectTo: 'https://cinema.example/account' },
+    });
+  });
+
+  it('saves birth date in signup metadata for profile creation', async () => {
+    authMock.signUp.mockResolvedValue({ data: { user: { id: 'new-user' } }, error: null });
+    const service = Injector.create({ providers: [AuthService] }).get(AuthService);
+
+    await service.signUp('new@example.com', 'password123', '2000-04-15');
+
+    expect(authMock.signUp).toHaveBeenCalledWith({
+      email: 'new@example.com',
+      password: 'password123',
+      options: { data: { birth_date: '2000-04-15' } },
     });
   });
 

@@ -171,6 +171,13 @@
           <strong>{{ authService.user()?.email || 'El correo guardado en tu perfil' }}</strong>
         </p>
       </section>
+      @if (hasTickets() && movie!.ageRating !== 'ATP' && !authService.profile()?.birth_date) {
+        <section class="guest-details" aria-labelledby="missing-birth-date-title">
+          <h2 id="missing-birth-date-title">Completá tu perfil</h2>
+          <p>Para validar la restricción de edad, necesitamos tu fecha de nacimiento. Este dato se guarda una sola vez en tu perfil.</p>
+          <button type="button" class="secondary-button" (click)="completeBirthDate()">Completar fecha de nacimiento</button>
+        </section>
+      }
     } @else {
     <section class="guest-details" aria-labelledby="guest-details-title">
       <div class="guest-details-heading">
@@ -186,6 +193,13 @@
         <span class="field-hint">Lo usaremos como contacto de la compra.</span>
       </div>
 
+      @if (movie && movie.ageRating !== 'ATP') {
+        <p class="age-notice" role="note">Para películas +13 y +18, los menores deben concurrir acompañados por un adulto.</p>
+      }
+    </section>
+    }
+
+    @if (guestDetailsRequired()) {
       <fieldset class="birth-date-group">
         <legend>Fecha de nacimiento</legend>
         <div class="date-selects">
@@ -217,13 +231,10 @@
             </select>
           </div>
         </div>
-        <span class="field-hint">La fecha se utiliza para validar las restricciones de edad.</span>
+        @if (guestDetailsRequired()) {
+          <span class="field-hint">La fecha se utiliza para validar las restricciones de edad.</span>
+        }
       </fieldset>
-
-      @if (movie && movie.ageRating !== 'ATP') {
-        <p class="age-notice" role="note">Para películas +13 y +18, los menores deben concurrir acompañados por un adulto.</p>
-      }
-    </section>
     }
 
     @if (errorMessage()) {
@@ -252,7 +263,7 @@
         <button
           type="button"
           (click)="confirmBooking()"
-          [disabled]="!authService.initialized() || confirming() || priceEstimateLoading() || (isRegisteredUser() && benefitsLoading()) || (hasTickets() && (!!priceEstimateError() || !!contiguityError() || (hasVip() && !vipAcknowledged()))) || (guestDetailsRequired() && !guestDetailsValid())"
+          [disabled]="!authService.initialized() || confirming() || priceEstimateLoading() || (isRegisteredUser() && benefitsLoading()) || (hasTickets() && (!!priceEstimateError() || !!contiguityError() || (hasVip() && !vipAcknowledged()))) || (guestDetailsRequired() && !guestDetailsValid()) || (isRegisteredUser() && hasTickets() && movie!.ageRating !== 'ATP' && !authService.profile()?.birth_date)"
         >
           {{ confirming() ? 'Procesando...' : 'Confirmar compra' }}
         </button>

@@ -1,0 +1,32 @@
+<section class="notification-card" aria-labelledby="notification-title">
+  <p class="eyebrow">AVISOS</p>
+  <h2 id="notification-title">Notificaciones</h2>
+  <p class="description">Recibí recordatorios de tus funciones y novedades de estrenos en este dispositivo.</p>
+
+  @if (!notifications.supported()) {
+    <p class="notice" role="status">Este navegador no admite notificaciones push. Podés seguir consultando tus avisos desde la cuenta.</p>
+  } @else if (!notifications.vapidConfigured) {
+    <p class="notice" role="status">La función está lista, pero falta configurar la clave pública VAPID para activarla.</p>
+  } @else if (notifications.permission() === 'denied') {
+    <p class="notice" role="status">El permiso está bloqueado. Habilitá las notificaciones desde la configuración del sitio y volvé a intentar.</p>
+  } @else {
+    <div class="notification-action">
+      <div>
+        <strong>{{ notifications.enabled() ? 'Activas en este dispositivo' : 'Desactivadas' }}</strong>
+        <span>Permiso del navegador: {{ notifications.permission() }}</span>
+      </div>
+      @if (notifications.enabled()) {
+        <button type="button" class="secondary-button" (click)="notifications.disable()" [disabled]="notifications.loading()">
+          {{ notifications.loading() ? 'Guardando…' : 'Desactivar' }}
+        </button>
+      } @else {
+        <button type="button" class="primary-button" (click)="notifications.enable()" [disabled]="notifications.loading()">
+          {{ notifications.loading() ? 'Activando…' : 'Activar notificaciones' }}
+        </button>
+      }
+    </div>
+  }
+
+  @if (notifications.statusMessage()) { <p class="success-message" role="status">{{ notifications.statusMessage() }}</p> }
+  @if (notifications.errorMessage()) { <p class="error-message" role="alert">{{ notifications.errorMessage() }}</p> }
+</section>

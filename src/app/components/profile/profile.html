@@ -2,7 +2,11 @@
   <header class="profile-header">
     <p class="eyebrow">CINEMAPP / PERFIL</p>
     <h1>Mi perfil</h1>
-    <p>Administrá tus datos personales. Tu rol no se puede cambiar desde acá.</p>
+    @if (birthDateRequired) {
+      <p>Completá tu fecha de nacimiento para continuar con la compra.</p>
+    } @else {
+      <p>Administrá tus datos personales. Tu rol no se puede cambiar desde acá.</p>
+    }
   </header>
 
   @if (loading()) {
@@ -29,17 +33,18 @@
         <input id="profile-name" name="fullName" type="text" autocomplete="name"
           [(ngModel)]="fullNameValue" required maxlength="120" />
 
-        <label for="profile-birth-date">Fecha de nacimiento</label>
+        <label for="profile-birth-date">Fecha de nacimiento{{ birthDateRequired ? ' (obligatoria)' : '' }}</label>
         <input id="profile-birth-date" name="birthDate" type="date" min="1900-01-01"
-          [max]="maxBirthDate" [(ngModel)]="birthDateValue" />
+          [max]="maxBirthDate" [(ngModel)]="birthDateValue" [required]="birthDateRequired" />
 
         @if (errorMessage()) { <p class="message error" role="alert">{{ errorMessage() }}</p> }
         @if (successMessage()) { <p class="message success" role="status">{{ successMessage() }}</p> }
 
-        <button type="submit" [disabled]="saving() || !fullName().trim()">
-          {{ saving() ? 'Guardando…' : 'Guardar cambios' }}
+        <button type="submit" [disabled]="saving() || !fullName().trim() || (birthDateRequired && !birthDate())">
+          {{ saving() ? 'Guardando…' : birthDateRequired ? 'Guardar y continuar' : 'Guardar cambios' }}
         </button>
       </form>
     </section>
+    <app-notification-settings />
   }
 </main>

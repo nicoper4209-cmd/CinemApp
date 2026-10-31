@@ -96,10 +96,11 @@ export class AuthService {
     return profile;
   }
 
-  async signUp(email: string, password: string) {
+  async signUp(email: string, password: string, birthDate: string) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: { data: { birth_date: birthDate } },
     });
 
     if (error) throw error;

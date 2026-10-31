@@ -1,0 +1,15 @@
+.notification-card { margin-top: 26px; padding: 20px; border: 1px solid #e2e2e2; border-radius: 4px; background: #fff; }
+.eyebrow { margin: 0 0 6px; color: #777; font-size: 11px; font-weight: 600; letter-spacing: .12em; }
+h2 { margin: 0 0 8px; font-size: 20px; font-weight: 500; }
+.description, .notice { color: #707070; font-size: 13px; line-height: 1.6; }
+.notification-action { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 16px; }
+.notification-action > div { display: flex; flex-direction: column; gap: 5px; }
+.notification-action strong { font-size: 14px; }
+.notification-action span { color: #777; font-size: 12px; }
+.primary-button, .secondary-button { flex: 0 0 auto; padding: 10px 13px; border: 1px solid #242424; border-radius: 3px; background: #242424; color: #fff; font: inherit; font-size: 13px; cursor: pointer; }
+.secondary-button { background: #fff; color: #242424; }
+button:disabled { opacity: .55; cursor: wait; }
+.error-message, .success-message { padding: 10px 12px; margin-bottom: 0; font-size: 13px; }
+.error-message { background: #fbf1f0; color: #8d302e; }
+.success-message { background: #f0f7f2; color: #37644a; }
+@media (max-width: 560px) { .notification-action { align-items: stretch; flex-direction: column; } .notification-action button { width: 100%; } }

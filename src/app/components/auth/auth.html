@@ -32,6 +32,13 @@
         placeholder="tu@email.com"
       />
 
+      @if (isRegistering()) {
+        <label for="birth-date">Fecha de nacimiento</label>
+        <input id="birth-date" type="date" name="birthDate" min="1900-01-01"
+          [max]="maxBirthDate" [(ngModel)]="birthDateValue" required />
+        <span class="field-hint">La usamos para validar las restricciones de edad de las películas.</span>
+      }
+
       <label for="password">Contraseña</label>
       <input
         id="password"

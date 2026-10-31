@@ -15,6 +15,8 @@ export class Auth {
 
   email = signal('');
   password = signal('');
+  birthDate = signal('');
+  maxBirthDate = new Date().toISOString().slice(0, 10);
   isRegistering = signal(false);
   loading = signal(false);
   errorMessage = signal('');
@@ -36,19 +38,25 @@ export class Auth {
       if (this.isRegistering()) {
         await this.authService.signUp(
           this.email().trim(),
-          this.password()
+          this.password(),
+          this.birthDate()
         );
 
-        this.successMessage.set(
-          'Cuenta creada. Si te solicitaron confirmar tu correo, revisá tu bandeja de entrada.'
-        );
+        this.successMessage.set('Cuenta creada correctamente.');
       } else {
         await this.authService.signIn(
           this.email().trim(),
           this.password()
         );
 
-        await this.router.navigateByUrl(this.safeReturnUrl());
+        const profile = await this.authService.loadProfile();
+        if (profile && !profile.birth_date) {
+          await this.router.navigate(['/profile'], {
+            queryParams: { completeBirthDate: '1', returnUrl: this.safeReturnUrl() },
+          });
+        } else {
+          await this.router.navigateByUrl(this.safeReturnUrl());
+        }
       }
     } catch (error: unknown) {
       this.errorMessage.set(
@@ -112,5 +120,8 @@ export class Auth {
   set passwordValue(value: string) {
     this.password.set(value);
   }
+
+  get birthDateValue(): string { return this.birthDate(); }
+  set birthDateValue(value: string) { this.birthDate.set(value); }
 
 }

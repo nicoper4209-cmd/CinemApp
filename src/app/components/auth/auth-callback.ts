@@ -52,8 +52,14 @@ export class AuthCallback {
       if (!session || session.user.is_anonymous) {
         throw new Error('No se recibió una sesión válida del proveedor.');
       }
-      await this.auth.loadProfile(session.user.id);
-      await this.router.navigateByUrl(this.safeReturnUrl());
+      const profile = await this.auth.loadProfile(session.user.id);
+      if (profile && !profile.birth_date) {
+        await this.router.navigate(['/profile'], {
+          queryParams: { completeBirthDate: '1', returnUrl: this.safeReturnUrl() },
+        });
+      } else {
+        await this.router.navigateByUrl(this.safeReturnUrl());
+      }
     } catch (error) {
       this.errorMessage.set(
         error instanceof Error ? error.message : 'No se pudo verificar la cuenta.'

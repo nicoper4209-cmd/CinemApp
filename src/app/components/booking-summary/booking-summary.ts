@@ -97,12 +97,15 @@ export class BookingSummary {
 
   guestDetailsValid = computed(() =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.contactEmail().trim()) &&
-    !!this.birthDate() && this.birthDate() <= this.today &&
-    this.birthDays().includes(this.birthDay())
+    this.birthDateSelectionValid()
   );
 
   guestDetailsRequired = computed(() =>
     this.authService.initialized() && !this.isRegisteredUser()
+  );
+  birthDateSelectionValid = computed(() =>
+    !!this.birthDate() && this.birthDate() <= this.today &&
+    this.birthDays().includes(this.birthDay())
   );
   contiguityError = computed(() => getSeatContiguityError(this.seats));
   hasVip = computed(() =>
@@ -333,5 +336,12 @@ export class BookingSummary {
     if (selectedDay > lastDay) {
       this.birthDay.set(String(lastDay).padStart(2, '0'));
     }
+  }
+
+  async completeBirthDate(): Promise<void> {
+    await this.router.navigate(['/profile'], {
+      queryParams: { completeBirthDate: '1', returnUrl: '/booking-summary' },
+      state: this.checkoutContext,
+    });
   }
 }
