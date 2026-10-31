@@ -1,0 +1,31 @@
+{
+  "$schema": "./node_modules/@angular/service-worker/config/schema.json",
+  "index": "/index.html",
+  "assetGroups": [
+    {
+      "name": "app-shell",
+      "installMode": "prefetch",
+      "resources": {
+        "files": ["/**/*.css", "/index.html", "/manifest.webmanifest", "/favicon.ico"]
+      }
+    },
+    {
+      "name": "app-assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": { "files": ["/**/*.js", "/icons/**"] }
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "public-movie-catalog",
+      "urls": ["https://nscnylyluanqqjalgkgn.supabase.co/rest/v1/movies**"],
+      "cacheConfig": {
+        "strategy": "freshness",
+        "maxSize": 100,
+        "maxAge": "1h",
+        "timeout": "3s"
+      }
+    }
+  ]
+}

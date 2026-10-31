@@ -138,6 +138,10 @@ form > button:disabled {
   text-align: center;
 }
 
+.guest-start { display: block; margin: 0 auto 18px; }
+.guest-form { margin: 20px 0; padding-top: 18px; border-top: 1px solid #e5e2dc; }
+.guest-cancel { align-self: center; margin-top: 12px; }
+
 .text-button {
   padding: 0;
   border: 0;

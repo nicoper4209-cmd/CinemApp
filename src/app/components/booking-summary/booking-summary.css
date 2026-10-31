@@ -314,12 +314,6 @@ hr {
   padding: 0;
 }
 
-.date-selects {
-  display: grid;
-  grid-template-columns: minmax(75px, 0.8fr) minmax(145px, 1.7fr) minmax(85px, 1fr);
-  gap: 12px;
-}
-
 .age-notice {
   margin: 20px 0 0;
   padding: 12px 14px;
@@ -511,13 +505,4 @@ hr {
     gap: 6px;
   }
 
-  .date-selects {
-    grid-template-columns: 0.8fr 1.5fr 1fr;
-    gap: 8px;
-  }
-
-  .guest-details select {
-    padding: 9px 7px;
-    font-size: 13px;
-  }
 }

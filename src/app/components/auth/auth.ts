@@ -16,6 +16,9 @@ export class Auth {
   email = signal('');
   password = signal('');
   birthDate = signal('');
+  guestEmail = signal('');
+  guestBirthDate = signal('');
+  guestFormVisible = signal(false);
   maxBirthDate = new Date().toISOString().slice(0, 10);
   isRegistering = signal(false);
   loading = signal(false);
@@ -85,6 +88,26 @@ export class Auth {
     }
   }
 
+  async continueAsGuest(): Promise<void> {
+    if (this.loading()) return;
+    this.loading.set(true);
+    this.errorMessage.set('');
+    try {
+      await this.authService.continueAsGuest();
+      await this.router.navigateByUrl(this.safeReturnUrl(), {
+        state: {
+          ...history.state,
+          guestEmail: this.guestEmail().trim(),
+          guestBirthDate: this.guestBirthDate(),
+        },
+      });
+    } catch (error) {
+      this.errorMessage.set(error instanceof Error ? error.message : 'No se pudo iniciar la sesión de visitante.');
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
   private safeReturnUrl(): string {
     const returnUrl = this.router.parseUrl(this.router.url).queryParams['returnUrl'];
     if (typeof returnUrl !== 'string') return '/';
@@ -123,5 +146,9 @@ export class Auth {
 
   get birthDateValue(): string { return this.birthDate(); }
   set birthDateValue(value: string) { this.birthDate.set(value); }
+  get guestEmailValue(): string { return this.guestEmail(); }
+  set guestEmailValue(value: string) { this.guestEmail.set(value); }
+  get guestBirthDateValue(): string { return this.guestBirthDate(); }
+  set guestBirthDateValue(value: string) { this.guestBirthDate.set(value); }
 
 }

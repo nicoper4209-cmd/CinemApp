@@ -79,8 +79,7 @@ export class NotificationsService {
           : 'Necesitamos tu permiso para enviarte notificaciones.');
       }
 
-      const registration = await navigator.serviceWorker.register('/push-sw.js', { scope: '/' });
-      await navigator.serviceWorker.ready;
+      const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.getSubscription() ??
         await registration.pushManager.subscribe({
           userVisibleOnly: true,

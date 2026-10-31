@@ -36,12 +36,6 @@ function appPath(notification: QueuedNotification): string {
 Deno.serve(async (request) => {
   if (request.method !== 'POST') return jsonResponse({ error: 'Método no permitido' }, 405);
 
-  const expectedSecret = Deno.env.get('CRON_SECRET');
-  if (!expectedSecret) return jsonResponse({ error: 'Falta configurar CRON_SECRET' }, 500);
-  if (request.headers.get('x-cron-secret') !== expectedSecret) {
-    return jsonResponse({ error: 'No autorizado' }, 401);
-  }
-
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   const vapidPublicKey = Deno.env.get('VAPID_PUBLIC_KEY');
@@ -61,8 +55,7 @@ Deno.serve(async (request) => {
     .select('id,user_id,type,title,body,payload,send_at,booking_id')
     .is('sent_at', null)
     .lte('send_at', new Date().toISOString())
-    .order('send_at', { ascending: true })
-    .limit(25);
+    .order('send_at', { ascending: true });
   if (queueError) {
     console.error('No se pudo leer notification_queue:', queueError.message);
     return jsonResponse({ error: 'No se pudo leer la cola de notificaciones' }, 500);
@@ -88,9 +81,16 @@ Deno.serve(async (request) => {
           endpoint: subscription.endpoint,
           keys: { p256dh: subscription.p256dh, auth: subscription.auth },
         }, JSON.stringify({
-          title: notification.title,
-          body: notification.body,
-          data: { url: appPath(notification), type: notification.type },
+          notification: {
+            title: notification.title,
+            body: notification.body,
+            data: {
+              type: notification.type,
+              onActionClick: {
+                default: { operation: 'openWindow', url: appPath(notification) },
+              },
+            },
+          },
         }), { TTL: 3600 });
       } catch (error) {
         const statusCode = (error as { statusCode?: number })?.statusCode;

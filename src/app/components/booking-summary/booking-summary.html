@@ -202,38 +202,10 @@
     @if (guestDetailsRequired()) {
       <fieldset class="birth-date-group">
         <legend>Fecha de nacimiento</legend>
-        <div class="date-selects">
-          <div class="field-group date-day">
-            <label for="birth-day">Día</label>
-            <select id="birth-day" name="birthDay" required [(ngModel)]="birthDayValue">
-              <option value="" disabled>DD</option>
-              @for (day of birthDays(); track day) {
-                <option [value]="day">{{ day }}</option>
-              }
-            </select>
-          </div>
-          <div class="field-group date-month">
-            <label for="birth-month">Mes</label>
-            <select id="birth-month" name="birthMonth" required [(ngModel)]="birthMonthValue">
-              <option value="" disabled>Elegí un mes</option>
-              @for (month of months; track month.value) {
-                <option [value]="month.value">{{ month.label }}</option>
-              }
-            </select>
-          </div>
-          <div class="field-group date-year">
-            <label for="birth-year">Año</label>
-            <select id="birth-year" name="birthYear" required [(ngModel)]="birthYearValue">
-              <option value="" disabled>AAAA</option>
-              @for (year of years; track year) {
-                <option [value]="year">{{ year }}</option>
-              }
-            </select>
-          </div>
-        </div>
-        @if (guestDetailsRequired()) {
-          <span class="field-hint">La fecha se utiliza para validar las restricciones de edad.</span>
-        }
+        <label for="guest-birth-date">Ingresá tu fecha de nacimiento</label>
+        <input id="guest-birth-date" type="date" name="birthDate" min="1900-01-01"
+          [max]="today" required [(ngModel)]="birthDateValue" />
+        <span class="field-hint">La fecha se utiliza para validar las restricciones de edad.</span>
       </fieldset>
     }
 

@@ -51,39 +51,13 @@ export class BookingSummary {
   couponError = signal('');
   creditError = signal('');
   private benefitsLoadedForUser: string | null = null;
-  contactEmail = signal('');
+  contactEmail = signal((history.state as BookingData & { guestEmail?: string }).guestEmail ?? '');
   isRegisteredUser = computed(() => {
     const user = this.authService.user();
     return !!user && !user.is_anonymous;
   });
   today = new Date().toISOString().slice(0, 10);
-  birthDay = signal('');
-  birthMonth = signal('');
-  birthYear = signal('');
-  months = [
-    { value: '01', label: 'Enero' }, { value: '02', label: 'Febrero' },
-    { value: '03', label: 'Marzo' }, { value: '04', label: 'Abril' },
-    { value: '05', label: 'Mayo' }, { value: '06', label: 'Junio' },
-    { value: '07', label: 'Julio' }, { value: '08', label: 'Agosto' },
-    { value: '09', label: 'Septiembre' }, { value: '10', label: 'Octubre' },
-    { value: '11', label: 'Noviembre' }, { value: '12', label: 'Diciembre' },
-  ];
-  years = Array.from(
-    { length: new Date().getFullYear() - 1899 },
-    (_, index) => String(new Date().getFullYear() - index)
-  );
-  birthDays = computed(() => {
-    const month = Number(this.birthMonth());
-    const year = Number(this.birthYear());
-    const count = month && year ? new Date(year, month, 0).getDate() : 31;
-    return Array.from({ length: count }, (_, index) => String(index + 1).padStart(2, '0'));
-  });
-  birthDate = computed(() => {
-    const day = this.birthDay();
-    const month = this.birthMonth();
-    const year = this.birthYear();
-    return day && month && year ? `${year}-${month}-${day}` : '';
-  });
+  birthDate = signal((history.state as BookingData & { guestBirthDate?: string }).guestBirthDate ?? '');
 
   confirming = signal(false);
   errorMessage = signal('');
@@ -104,8 +78,9 @@ export class BookingSummary {
     this.authService.initialized() && !this.isRegisteredUser()
   );
   birthDateSelectionValid = computed(() =>
-    !!this.birthDate() && this.birthDate() <= this.today &&
-    this.birthDays().includes(this.birthDay())
+    !!this.birthDate() &&
+    this.birthDate() >= '1900-01-01' &&
+    this.birthDate() <= this.today
   );
   contiguityError = computed(() => getSeatContiguityError(this.seats));
   hasVip = computed(() =>
@@ -315,28 +290,10 @@ export class BookingSummary {
 
   get contactEmailValue(): string { return this.contactEmail(); }
   set contactEmailValue(value: string) { this.contactEmail.set(value); }
-  get birthDayValue(): string { return this.birthDay(); }
-  set birthDayValue(value: string) { this.birthDay.set(value); }
-  get birthMonthValue(): string { return this.birthMonth(); }
-  set birthMonthValue(value: string) {
-    this.birthMonth.set(value);
-    this.clampBirthDay();
-  }
-  get birthYearValue(): string { return this.birthYear(); }
-  set birthYearValue(value: string) {
-    this.birthYear.set(value);
-    this.clampBirthDay();
-  }
+  get birthDateValue(): string { return this.birthDate(); }
+  set birthDateValue(value: string) { this.birthDate.set(value); }
   get vipAcknowledgedValue(): boolean { return this.vipAcknowledged(); }
   set vipAcknowledgedValue(value: boolean) { this.vipAcknowledged.set(value); }
-
-  private clampBirthDay(): void {
-    const selectedDay = Number(this.birthDay());
-    const lastDay = this.birthDays().length;
-    if (selectedDay > lastDay) {
-      this.birthDay.set(String(lastDay).padStart(2, '0'));
-    }
-  }
 
   async completeBirthDate(): Promise<void> {
     await this.router.navigate(['/profile'], {

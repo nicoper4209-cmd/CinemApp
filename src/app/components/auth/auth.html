@@ -91,6 +91,26 @@
       </button>
     </p>
 
+    @if (!guestFormVisible()) {
+      <button type="button" class="text-button guest-start" (click)="guestFormVisible.set(true)">
+        Continuar como visitante
+      </button>
+    } @else {
+      <form (ngSubmit)="continueAsGuest()" #guestForm="ngForm" class="guest-form">
+        <p class="eyebrow">COMPRA COMO VISITANTE</p>
+        <label for="guest-email">Correo de contacto</label>
+        <input id="guest-email" type="email" name="guestEmail" [(ngModel)]="guestEmailValue"
+          autocomplete="email" required email placeholder="tu@email.com" />
+        <label for="guest-birth-date">Fecha de nacimiento</label>
+        <input id="guest-birth-date" type="date" name="guestBirthDate" min="1900-01-01"
+          [max]="maxBirthDate" [(ngModel)]="guestBirthDateValue" required />
+        <button type="submit" [disabled]="guestForm.invalid || loading()">
+          {{ loading() ? 'Continuando…' : 'Continuar' }}
+        </button>
+        <button type="button" class="text-button guest-cancel" (click)="guestFormVisible.set(false)">Cancelar</button>
+      </form>
+    }
+
     <a routerLink="/" class="back-link">Volver a la cartelera</a>
   </section>
 </main>
