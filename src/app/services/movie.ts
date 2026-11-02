@@ -11,6 +11,7 @@ interface MovieRow {
   genre: string;
   age_rating: string;
   poster: string;
+  poster_horizontal: string | null;
   alt: string;
   year: number;
   rating: number | null;
@@ -34,6 +35,7 @@ export interface AdminMovieInput {
   status: Movie['status'];
   release_date: string;
   is_featured: boolean;
+  poster_horizontal: string | null;
 }
 
 export interface TopMovie {
@@ -44,7 +46,7 @@ export interface TopMovie {
 }
 
 const MOVIE_COLUMNS =
-  'id, title, synopsis, duration, genre, age_rating, poster, alt, year, rating, trailer, status, release_date, is_featured';
+  'id, title, synopsis, duration, genre, age_rating, poster, poster_horizontal, alt, year, rating, trailer, status, release_date, is_featured';
 
 @Injectable({
   providedIn: 'root',
@@ -114,43 +116,83 @@ export class MovieService {
     });
   }
 
+  async setFeatured(id: number, isFeatured: boolean): Promise<Movie> {
+    const { data, error } = await supabase
+      .from('movies')
+      .update({ is_featured: isFeatured })
+      .eq('id', id)
+      .select(MOVIE_COLUMNS)
+      .single();
+
+    if (error) throw new Error(error.message);
+    return this.mapMovie(data as MovieRow);
+  }
+
   async getUpcoming(): Promise<Movie[]> {
     const movies = await this.getAll();
     return movies.filter(movie => movie.status === 'upcoming');
   }
 
-  async saveAdminMovie(input: AdminMovieInput, id?: number, posterFile?: File): Promise<Movie> {
-    let posterPath = input.poster.trim();
-    let uploadedPath: string | null = null;
+  async saveAdminMovie(
+    input: AdminMovieInput,
+    id?: number,
+    posterFile?: File,
+    posterHorizontalFile?: File,
+    posterUrl?: string,
+    posterHorizontalUrl?: string,
+  ): Promise<Movie> {
+    let posterPath = posterUrl?.trim() || input.poster.trim();
+    let posterHorizontalPath = posterHorizontalUrl?.trim() || input.poster_horizontal?.trim() || null;
+    let uploadedPosterPath: string | null = null;
+    let uploadedHorizontalPath: string | null = null;
 
     if (posterFile) {
-      const extension = this.posterExtension(posterFile);
-      uploadedPath = `${crypto.randomUUID()}.${extension}`;
-      const { error } = await supabase.storage.from('posters').upload(uploadedPath, posterFile, {
-        contentType: posterFile.type,
-        cacheControl: '3600',
-        upsert: false,
-      });
-      if (error) throw new Error(error.message);
-      posterPath = uploadedPath;
+      uploadedPosterPath = await this.uploadPoster(posterFile);
+      posterPath = uploadedPosterPath;
     }
 
-    const values = { ...input, poster: posterPath };
+    if (posterHorizontalFile) {
+      try {
+        uploadedHorizontalPath = await this.uploadPoster(posterHorizontalFile);
+      } catch (error) {
+        if (uploadedPosterPath) await this.removePoster(uploadedPosterPath);
+        throw error;
+      }
+      posterHorizontalPath = uploadedHorizontalPath;
+    }
+
+    const values = { ...input, poster: posterPath, poster_horizontal: posterHorizontalPath };
     const query = id === undefined
       ? supabase.from('movies').insert(values)
       : supabase.from('movies').update(values).eq('id', id);
     const { data, error } = await query.select(MOVIE_COLUMNS).single();
 
     if (error) {
-      if (uploadedPath) await this.removePoster(uploadedPath);
+      if (uploadedPosterPath) await this.removePoster(uploadedPosterPath);
+      if (uploadedHorizontalPath) await this.removePoster(uploadedHorizontalPath);
       throw new Error(error.message);
     }
 
-    if (uploadedPath && input.poster && input.poster !== uploadedPath) {
+    if (input.poster && input.poster !== posterPath) {
       await this.removePoster(input.poster);
+    }
+    if (input.poster_horizontal && input.poster_horizontal !== posterHorizontalPath) {
+      await this.removePoster(input.poster_horizontal);
     }
 
     return this.mapMovie(data as MovieRow);
+  }
+
+  private async uploadPoster(file: File): Promise<string> {
+    const extension = this.posterExtension(file);
+    const path = `${crypto.randomUUID()}.${extension}`;
+    const { error } = await supabase.storage.from('posters').upload(path, file, {
+      contentType: file.type,
+      cacheControl: '3600',
+      upsert: false,
+    });
+    if (error) throw new Error(error.message);
+    return path;
   }
 
   async deleteAdminMovie(id: number): Promise<void> {
@@ -158,12 +200,14 @@ export class MovieService {
       .from('movies')
       .delete()
       .eq('id', id)
-      .select('poster')
+      .select('poster,poster_horizontal')
       .single();
     if (error) throw new Error(error.message);
 
     const poster = data?.['poster'];
     if (typeof poster === 'string') await this.removePoster(poster);
+    const horizontalPoster = data?.['poster_horizontal'];
+    if (typeof horizontalPoster === 'string') await this.removePoster(horizontalPoster);
   }
 
   private posterExtension(file: File): string {
@@ -201,6 +245,8 @@ export class MovieService {
       ageRating: row.age_rating,
       poster: this.posterUrl(row.poster),
       posterPath: row.poster,
+      posterHorizontal: row.poster_horizontal ? this.posterUrl(row.poster_horizontal) : null,
+      posterHorizontalPath: row.poster_horizontal,
       alt: row.alt,
       year: String(row.year),
       rating: row.rating ?? 0,

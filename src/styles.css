@@ -8,3 +8,21 @@ app-root {
 body {
   margin: 0;
 }
+
+/* La pantalla Top 3 comparte el alto visible con la navegación global. */
+app-root:has(app-top-movies) {
+  display: flex;
+  height: 100dvh;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+app-root:has(app-top-movies) .main-nav {
+  flex: 0 0 auto;
+}
+
+app-root:has(app-top-movies) app-top-movies {
+  flex: 1 1 0;
+  min-height: 0;
+}

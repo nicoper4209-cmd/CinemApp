@@ -1,22 +1,42 @@
-<section class="movies-admin" aria-labelledby="movies-admin-title">
-  <header class="section-header">
-    <div>
-      <p class="eyebrow">ADMINISTRACIÓN / CARTELERA</p>
-      <h2 id="movies-admin-title">Películas</h2>
-      <p>Administrá la información que se muestra en la cartelera.</p>
-    </div>
-    <button type="button" class="primary-button" (click)="createMovie()">Agregar película</button>
-  </header>
+<section class="movies-admin" [class.edit-screen]="isEditScreen()" aria-labelledby="movies-admin-title">
+  @if (isEditScreen()) {
+    <header class="section-header edit-screen-header">
+      <div>
+        <p class="eyebrow">ADMINISTRACIÓN / PELÍCULAS</p>
+        <h2 id="movies-admin-title">Editar película</h2>
+        <p>Modificá los datos de {{ form.title }}.</p>
+      </div>
+      <button type="button" class="secondary-button" (click)="cancelEditor()">Volver al listado</button>
+    </header>
+  } @else {
+    <header class="section-header">
+      <div>
+        <p class="eyebrow">ADMINISTRACIÓN / CARTELERA</p>
+        <h2 id="movies-admin-title">Películas</h2>
+        <p>Administrá la información que se muestra en la cartelera.</p>
+      </div>
+      <button type="button" class="primary-button" (click)="createMovie()">Agregar película</button>
+    </header>
+  }
 
   @if (errorMessage()) { <p class="message error" role="alert">{{ errorMessage() }}</p> }
   @if (successMessage()) { <p class="message success" role="status">{{ successMessage() }}</p> }
 
+  @if (isEditScreen() && loading()) {
+    <p role="status">Cargando película…</p>
+  }
+
   @if (editorOpen()) {
-    <section class="editor" aria-labelledby="editor-title">
-      <div class="editor-heading">
-        <h3 id="editor-title">{{ editingId() === null ? 'Nueva película' : 'Editar película' }}</h3>
-        <button type="button" class="text-button" (click)="closeEditor()" [disabled]="saving()">Cancelar</button>
-      </div>
+    <section class="editor" [attr.aria-labelledby]="isEditScreen() ? 'movies-admin-title' : 'editor-title'">
+      @if (!isEditScreen()) {
+        <div class="editor-heading">
+          <div>
+            <p class="eyebrow">DATOS DE LA PELÍCULA</p>
+            <h3 id="editor-title">Nueva película</h3>
+          </div>
+          <button type="button" class="text-button" (click)="cancelEditor()" [disabled]="saving()">Cancelar</button>
+        </div>
+      }
 
       <form #movieForm="ngForm" (ngSubmit)="saveMovie()">
         <div class="form-grid">
@@ -68,12 +88,37 @@
             <label for="movie-trailer">URL del tráiler (opcional)</label>
             <input id="movie-trailer" type="url" name="trailer" [(ngModel)]="form.trailer" />
           </div>
-          <div class="field field-wide">
-            <label for="movie-poster">Póster (JPG, PNG o WebP){{ editingId() === null ? '' : ' — opcional para conservar el actual' }}</label>
-            <input id="movie-poster" type="file" accept="image/jpeg,image/png,image/webp" name="posterFile"
-              (change)="selectPoster($event)" [required]="editingId() === null" />
-            @if (posterPreview) {
-              <img class="poster-preview" [src]="posterPreview" alt="Vista previa del póster" />
+          <div class="field field-wide poster-field">
+            <label for="movie-poster-url">Póster vertical{{ editingId() === null && !posterFile ? ' *' : '' }}</label>
+            <div class="poster-input-row">
+              <input id="movie-poster-url" type="url" name="posterUrl" [(ngModel)]="posterUrlInput"
+                (ngModelChange)="setPosterUrl($event, posterFileInput)"
+                [required]="editingId() === null && !posterFile" placeholder="Pegá un enlace o elegí un archivo" />
+              <button type="button" class="file-picker" (click)="posterFileInput.click()">Elegir archivo</button>
+            </div>
+            <input #posterFileInput class="file-input-hidden" type="file" accept="image/jpeg,image/png,image/webp"
+              name="posterFile" (change)="selectPoster($event)" />
+            @if (posterFile) { <p class="selected-file">{{ posterFile.name }}</p> }
+            @if (posterPreview && !posterUrlInput && !posterFile) { <p class="field-hint">Se conserva el archivo actual.</p> }
+            @if (posterUrlInput || posterPreview) {
+              <img class="poster-preview" [src]="posterUrlInput || posterPreview" alt="Vista previa del póster vertical" />
+            }
+          </div>
+          <div class="field field-wide poster-field">
+            <label for="movie-poster-horizontal-url">Póster horizontal <span class="optional-tag">Opcional</span></label>
+            <div class="poster-input-row">
+              <input id="movie-poster-horizontal-url" type="url" name="posterHorizontalUrl"
+                [(ngModel)]="posterHorizontalUrlInput"
+                (ngModelChange)="setPosterHorizontalUrl($event, posterHorizontalFileInput)"
+                placeholder="Pegá un enlace o elegí un archivo" />
+              <button type="button" class="file-picker" (click)="posterHorizontalFileInput.click()">Elegir archivo</button>
+            </div>
+            <input #posterHorizontalFileInput class="file-input-hidden" type="file" accept="image/jpeg,image/png,image/webp"
+              name="posterHorizontalFile" (change)="selectHorizontalPoster($event)" />
+            @if (posterHorizontalFile) { <p class="selected-file">{{ posterHorizontalFile.name }}</p> }
+            @if (posterHorizontalPreview && !posterHorizontalUrlInput && !posterHorizontalFile) { <p class="field-hint">Se conserva el archivo actual.</p> }
+            @if (posterHorizontalUrlInput || posterHorizontalPreview) {
+              <img class="poster-horizontal-preview" [src]="posterHorizontalUrlInput || posterHorizontalPreview" alt="Vista previa del póster horizontal" />
             }
           </div>
           <div class="field field-wide">
@@ -87,7 +132,7 @@
         </div>
 
         <div class="form-actions">
-          <button type="button" class="secondary-button" (click)="closeEditor()" [disabled]="saving()">Cancelar</button>
+          <button type="button" class="secondary-button" (click)="cancelEditor()" [disabled]="saving()">Cancelar</button>
           <button type="submit" class="primary-button" [disabled]="movieForm.invalid || saving()">
             {{ saving() ? 'Guardando…' : 'Guardar película' }}
           </button>
@@ -96,11 +141,12 @@
     </section>
   }
 
-  @if (loading()) {
-    <p role="status">Cargando películas…</p>
-  } @else if (movies().length === 0) {
-    <p class="empty-state">Todavía no hay películas cargadas.</p>
-  } @else {
+  @if (!isEditScreen()) {
+    @if (loading()) {
+      <p role="status">Cargando películas…</p>
+    } @else if (movies().length === 0) {
+      <p class="empty-state">Todavía no hay películas cargadas.</p>
+    } @else {
     <div class="list-filters">
       <div class="field">
         <label for="movie-search">Buscar por título</label>
@@ -113,6 +159,7 @@
           <option value="available">En cartelera</option>
           <option value="upcoming">Próximamente</option>
           <option value="unavailable">No disponible</option>
+          <option value="featured">Destacadas</option>
         </select>
       </div>
     </div>
@@ -130,7 +177,16 @@
               <td><img class="poster-thumb" [src]="movie.poster" [alt]="movie.alt" /></td>
               <td><strong>{{ movie.title }}</strong><span class="subtext">{{ movie.year }} · {{ movie.genre }} · {{ movie.ageRating }}</span></td>
               <td>{{ statusLabel(movie.status) }}</td>
-              <td>{{ movie.isFeatured ? 'Sí' : 'No' }}</td>
+              <td>
+                <input
+                  class="featured-checkbox"
+                  type="checkbox"
+                  [checked]="movie.isFeatured"
+                  [disabled]="updatingFeaturedId() !== null"
+                  [attr.aria-label]="movie.isFeatured ? 'Quitar ' + movie.title + ' de destacadas' : 'Destacar ' + movie.title"
+                  (change)="setFeatured(movie, $any($event.target).checked)"
+                />
+              </td>
               <td class="row-actions">
                 <button type="button" class="text-button" (click)="editMovie(movie)">Editar</button>
                 <button type="button" class="text-button danger-button" (click)="deleteMovie(movie)">Eliminar</button>
@@ -140,6 +196,7 @@
         </tbody>
       </table>
     </div>
+    }
     }
   }
 </section>

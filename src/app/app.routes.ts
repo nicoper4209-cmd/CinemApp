@@ -48,6 +48,10 @@ export const routes: Routes = [
           loadComponent: () => import('./components/admin/movies/admin-movies').then(module => module.AdminMovies),
         },
         {
+          path: 'movies/:id/edit',
+          loadComponent: () => import('./components/admin/movies/admin-movies').then(module => module.AdminMovies),
+        },
+        {
           path: 'showtimes',
           loadComponent: () => import('./components/admin/showtimes/admin-showtimes').then(module => module.AdminShowtimes),
         },

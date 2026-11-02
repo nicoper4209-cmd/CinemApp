@@ -15,4 +15,7 @@ export interface Movie {
   isFeatured?: boolean;
   /** Path in the posters Storage bucket; `poster` is its display URL. */
   posterPath?: string;
+  /** Optional horizontal poster URL and underlying Storage path. */
+  posterHorizontal?: string | null;
+  posterHorizontalPath?: string | null;
 }
