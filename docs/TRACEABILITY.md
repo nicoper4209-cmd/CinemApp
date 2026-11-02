@@ -12,7 +12,7 @@ Estado de referencia del código actual. **Implementado** indica que hay una rut
 | RF-08; HU-03 | `src/app/components/staff/`; `src/app/services/staff.ts`; RPC `validate_ticket`, `deliver_candy` | Implementado; probar escaneo y códigos reales. |
 | RF-09, RF-11, RF-28 | `src/app/components/booking-summary/`; `src/app/services/booking.ts`; RPC `purchase_tickets`, `cancel_booking`, `eligible_coupons` | Compra y beneficios conectados; verificar cancelación y cupones según datos configurados. |
 | RF-10, RF-26; RNF-20 | `src/app/services/pricing.ts`, `booking.ts`; RPC `purchase_tickets` | Estimación cliente y decisión final en servidor. |
-| RF-12, RF-16 | `src/app/components/candy-shop/`; `src/app/services/candy.ts`, `candy-cart.ts`; RPC `purchase_tickets`, `deliver_candy` | Compra de candy; CRUD administrativo pendiente de verificar. |
+| RF-12, RF-16 | `src/app/components/candy-shop/`, `src/app/components/admin/candy/`; `src/app/services/candy.ts`, `candy-cart.ts`; Storage `candy`; RPC `purchase_tickets`, `deliver_candy` | Tienda y CRUD admin de categorías/productos con imágenes, combos y destacados; probar permisos/RLS y compra real. |
 | RF-13; RF-15 favoritos | `src/app/components/movie-detail/`, `my-movies/`; `src/app/services/favorites.ts`; vistas `movie_reviews`, `movie_ratings` | Implementado; verificar permisos y persistencia. |
 | RF-14; RF-09 | `src/app/components/account/`; `src/app/services/account.ts`; RPC de saldo y canje | Implementado; verificar movimientos y reglas con datos reales. |
 | RF-17, RF-20; RNF-04, RNF-05, RNF-12 | `src/app/guards/`, `src/app/services/auth.ts`, `src/app/components/auth/`; RLS del esquema SQL | Implementado; los roles se resuelven en base de datos, no desde Angular. |

@@ -15,3 +15,23 @@ export interface CandyProduct {
   isCombo: boolean;
   isFeatured: boolean;
 }
+
+export interface CandyAdminCategory {
+  id: number;
+  name: string;
+  sortOrder: number;
+  active: boolean;
+}
+
+export interface CandyAdminProduct {
+  id: number;
+  categoryId: number;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl: string;
+  imagePath: string;
+  isCombo: boolean;
+  isFeatured: boolean;
+  active: boolean;
+}

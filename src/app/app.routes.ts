@@ -55,6 +55,10 @@ export const routes: Routes = [
           path: 'showtimes',
           loadComponent: () => import('./components/admin/showtimes/admin-showtimes').then(module => module.AdminShowtimes),
         },
+        {
+          path: 'candy',
+          loadComponent: () => import('./components/admin/candy/admin-candy').then(module => module.AdminCandy),
+        },
       ],
     },
     {path:'',redirectTo:'top',pathMatch:'full'},

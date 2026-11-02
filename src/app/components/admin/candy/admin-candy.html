@@ -1,0 +1,171 @@
+<section class="candy-admin" aria-labelledby="candy-admin-title">
+  <header class="page-heading">
+    <div>
+      <p class="eyebrow">ADMINISTRACIÓN / CATÁLOGO</p>
+      <h2 id="candy-admin-title">Candy</h2>
+      <p>Organizá categorías y productos del menú.</p>
+    </div>
+    <button type="button" class="secondary-button" (click)="loadCatalog()" [disabled]="loading()">Actualizar</button>
+  </header>
+
+  @if (errorMessage()) { <p class="message error" role="alert">{{ errorMessage() }}</p> }
+  @if (successMessage()) { <p class="message success" role="status">{{ successMessage() }}</p> }
+
+  @if (loading()) {
+    <p role="status">Cargando catálogo…</p>
+  } @else {
+    <section class="admin-card" aria-labelledby="categories-title">
+      <header class="card-heading">
+        <div>
+          <h3 id="categories-title">Categorías</h3>
+          <p>Las categorías inactivas no aparecen en la tienda.</p>
+        </div>
+      </header>
+
+      <form class="inline-form category-form" #categoryNgForm="ngForm" (ngSubmit)="saveCategory()">
+        <div class="field category-name">
+          <label for="category-name">Nombre</label>
+          <input id="category-name" name="categoryName" [(ngModel)]="categoryForm.name" required maxlength="80" />
+        </div>
+        <div class="field category-order">
+          <label for="category-order">Orden</label>
+          <input id="category-order" type="number" name="categoryOrder" [(ngModel)]="categoryForm.sort_order" min="0" step="1" required />
+        </div>
+        <div class="form-buttons">
+          @if (editingCategoryId !== null) {
+            <button type="button" class="secondary-button" (click)="resetCategoryForm()">Cancelar</button>
+          }
+          <button type="submit" class="primary-button" [disabled]="categoryNgForm.invalid || savingCategory()">
+            {{ savingCategory() ? 'Guardando…' : editingCategoryId === null ? 'Agregar categoría' : 'Guardar categoría' }}
+          </button>
+        </div>
+      </form>
+
+      @if (categories().length === 0) {
+        <p class="empty-state">Todavía no hay categorías.</p>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Categoría</th><th scope="col">Orden</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
+            <tbody>
+              @for (category of categories(); track category.id) {
+                <tr>
+                  <td><strong>{{ category.name }}</strong></td>
+                  <td>{{ category.sortOrder }}</td>
+                  <td><span class="status" [class.inactive]="!category.active">{{ category.active ? 'Activa' : 'Inactiva' }}</span></td>
+                  <td class="actions">
+                    <button type="button" class="text-button" (click)="editCategory(category)">Editar</button>
+                    <button type="button" class="text-button" [disabled]="updatingCategoryId() !== null"
+                      (click)="toggleCategory(category)">
+                      {{ updatingCategoryId() === category.id ? 'Actualizando…' : category.active ? 'Desactivar' : 'Activar' }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <section class="admin-card product-admin" aria-labelledby="products-title">
+      <header class="card-heading">
+        <div>
+          <h3 id="products-title">Productos</h3>
+          <p>Los productos inactivos dejan de ofrecerse, pero se conservan para el historial de compras.</p>
+        </div>
+      </header>
+
+      @if (categories().length === 0) {
+        <p class="empty-state">Creá una categoría antes de agregar productos.</p>
+      } @else {
+        <form class="product-form" #productNgForm="ngForm" (ngSubmit)="saveProduct()">
+          <div class="product-fields">
+            <div class="field">
+              <label for="product-name">Nombre</label>
+              <input id="product-name" name="productName" [(ngModel)]="productForm.name" required maxlength="120" />
+            </div>
+            <div class="field">
+              <label for="product-category">Categoría</label>
+              <select id="product-category" name="productCategory" [(ngModel)]="productForm.category_id" required>
+                <option [ngValue]="0" disabled>Elegí una categoría</option>
+                @for (category of categories(); track category.id) {
+                  <option [ngValue]="category.id">{{ category.name }}{{ category.active ? '' : ' (inactiva)' }}</option>
+                }
+              </select>
+            </div>
+            <div class="field">
+              <label for="product-price">Precio (ARS)</label>
+              <input id="product-price" type="number" name="productPrice" [(ngModel)]="productForm.price" min="0" step="0.01" required />
+            </div>
+            <div class="field field-wide">
+              <label for="product-description">Descripción</label>
+              <textarea id="product-description" name="productDescription" [(ngModel)]="productForm.description" rows="2"></textarea>
+            </div>
+
+            <div class="field field-wide image-field">
+              <label for="product-image-url">Imagen <span class="optional">Opcional</span></label>
+              <div class="image-control">
+                <input id="product-image-url" type="url" name="productImageUrl"
+                  [(ngModel)]="imageUrlInput" (ngModelChange)="setImageUrl($event, productImageFile)"
+                  placeholder="Pegá un enlace o elegí un archivo" />
+                <button type="button" class="secondary-button" (click)="productImageFile.click()">Elegir archivo</button>
+              </div>
+              <input #productImageFile class="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp"
+                (change)="selectImage($event)" />
+              @if (imageFile) { <p class="field-hint">{{ imageFile.name }}</p> }
+              @if (imagePreview) { <img class="image-preview" [src]="imagePreview" alt="Vista previa del producto" /> }
+            </div>
+
+            <div class="options field-wide">
+              <label><input type="checkbox" name="productCombo" [(ngModel)]="productForm.is_combo" /> Es un combo</label>
+              <label><input type="checkbox" name="productFeatured" [(ngModel)]="productForm.is_featured" /> Destacar en la tienda</label>
+              <label><input type="checkbox" name="productActive" [(ngModel)]="productForm.active" /> Producto activo</label>
+            </div>
+          </div>
+
+          <div class="form-buttons product-form-buttons">
+            @if (editingProductId !== null) {
+              <button type="button" class="secondary-button" (click)="resetProductForm()" [disabled]="savingProduct()">Cancelar edición</button>
+            }
+            <button type="submit" class="primary-button"
+              [disabled]="productNgForm.invalid || productForm.category_id === 0 || savingProduct()">
+              {{ savingProduct() ? 'Guardando…' : editingProductId === null ? 'Agregar producto' : 'Guardar producto' }}
+            </button>
+          </div>
+        </form>
+      }
+
+      @if (products().length === 0) {
+        <p class="empty-state">Todavía no hay productos cargados.</p>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th scope="col">Producto</th><th scope="col">Categoría</th><th scope="col">Precio</th><th scope="col">Tipo</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
+            <tbody>
+              @for (product of products(); track product.id) {
+                <tr>
+                  <td class="product-cell">
+                    @if (product.imageUrl) { <img [src]="product.imageUrl" [alt]="''" /> }
+                    <span><strong>{{ product.name }}</strong><small>{{ product.description }}</small></span>
+                  </td>
+                  <td>{{ categoryName(product.categoryId) }}</td>
+                  <td>{{ formatPrice(product.price) }}</td>
+                  <td>{{ product.isCombo ? 'Combo' : 'Individual' }}{{ product.isFeatured ? ' · Destacado' : '' }}</td>
+                  <td><span class="status" [class.inactive]="!product.active">{{ product.active ? 'Activo' : 'Inactivo' }}</span></td>
+                  <td class="actions">
+                    <button type="button" class="text-button" (click)="editProduct(product)">Editar</button>
+                    <button type="button" class="text-button" [disabled]="updatingProductId() !== null"
+                      (click)="toggleProduct(product)">
+                      {{ updatingProductId() === product.id ? 'Actualizando…' : product.active ? 'Desactivar' : 'Activar' }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</section>
