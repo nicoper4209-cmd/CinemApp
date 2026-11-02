@@ -37,3 +37,4 @@
 .movie-card {
   position: relative;
 }
+:host { display: block; background: #fff; }

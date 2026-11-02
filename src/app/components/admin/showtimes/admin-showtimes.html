@@ -1,0 +1,126 @@
+<section class="showtimes-admin" aria-labelledby="showtimes-title">
+  <header class="section-header">
+    <p class="eyebrow">ADMINISTRACIÓN / FUNCIONES</p>
+    <h2 id="showtimes-title">Programar funciones</h2>
+    <p>Elegí las fechas y días recurrentes. Supabase asigna las salas y omite los horarios que entran en conflicto.</p>
+  </header>
+
+  @if (errorMessage()) { <p class="message error" role="alert">{{ errorMessage() }}</p> }
+
+  @if (loading()) {
+    <p role="status">Cargando películas y formatos…</p>
+  } @else if (movies().length === 0 && !errorMessage()) {
+    <p class="empty-state">No hay películas disponibles para programar. Agregá una película primero.</p>
+  } @else {
+    <form #scheduleForm="ngForm" (ngSubmit)="schedule()" class="schedule-form">
+      <div class="form-grid">
+        <div class="field field-wide">
+          <label for="schedule-movie">Película</label>
+          <select id="schedule-movie" name="movieId" [(ngModel)]="movieId" required>
+            <option [ngValue]="null" disabled>Elegí una película</option>
+            @for (movie of movies(); track movie.id) {
+              <option [ngValue]="movie.id">{{ movie.title }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="schedule-from">Desde</label>
+          <input id="schedule-from" type="date" name="from" [(ngModel)]="from" required />
+        </div>
+        <div class="field">
+          <label for="schedule-to">Hasta</label>
+          <input id="schedule-to" type="date" name="to" [(ngModel)]="to" required />
+        </div>
+
+        <fieldset class="field field-wide weekday-fieldset">
+          <legend>Días de la semana</legend>
+          <div class="weekday-options">
+            @for (day of weekdays; track day.id) {
+              <label class="weekday-option">
+                <input type="checkbox" [checked]="selectedWeekdays().includes(day.id)"
+                  (change)="toggleWeekday(day.id, $any($event.target).checked)" />
+                <span>{{ day.label }}</span>
+              </label>
+            }
+          </div>
+        </fieldset>
+
+        <div class="field">
+          <label for="schedule-time">Horario</label>
+          <input id="schedule-time" type="time" name="time" [(ngModel)]="time" required />
+        </div>
+        <div class="field">
+          <label for="schedule-format">Formato</label>
+          <select id="schedule-format" name="formatId" [(ngModel)]="formatId">
+            <option [ngValue]="null">Predeterminado (2D)</option>
+            @for (format of formats(); track format.id) {
+              <option [ngValue]="format.id">{{ format.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <p class="field-hint">La sala se asigna automáticamente. Los conflictos de horario se informan al programar.</p>
+      <button type="submit" class="primary-button" [disabled]="scheduleForm.invalid || selectedWeekdays().length === 0 || submitting()">
+        {{ submitting() ? 'Programando…' : 'Programar funciones' }}
+      </button>
+    </form>
+  }
+
+  @if (result(); as scheduleResult) {
+    <section class="result-card" aria-live="polite" aria-labelledby="schedule-result-title">
+      <h3 id="schedule-result-title">Resultado de la programación</h3>
+      <p>Funciones creadas: <strong>{{ scheduleResult.created }}</strong></p>
+      <p>Fechas omitidas por conflictos: <strong>{{ scheduleResult.skipped }}</strong></p>
+      @if (scheduleResult.skipped_dates.length > 0) {
+        <ul>
+          @for (date of scheduleResult.skipped_dates; track date) { <li>{{ formatDate(date) }}</li> }
+        </ul>
+      }
+    </section>
+  }
+
+  <section class="scheduled-list" aria-labelledby="scheduled-list-title">
+    <header class="list-heading">
+      <div>
+        <p class="eyebrow">AGENDA</p>
+        <h3 id="scheduled-list-title">Próximas funciones</h3>
+      </div>
+      <button type="button" class="refresh-button" (click)="loadUpcomingShowtimes()" [disabled]="loadingShowtimes()">
+        {{ loadingShowtimes() ? 'Actualizando…' : 'Actualizar' }}
+      </button>
+    </header>
+    @if (showtimesError()) { <p class="message error" role="alert">{{ showtimesError() }}</p> }
+    @if (loadingShowtimes()) {
+      <p role="status">Cargando funciones…</p>
+    } @else if (upcomingShowtimes().length === 0 && !showtimesError()) {
+      <p class="empty-state">No hay funciones próximas programadas.</p>
+    } @else if (upcomingShowtimes().length > 0) {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Película</th>
+              <th scope="col">Fecha</th>
+              <th scope="col">Horario</th>
+              <th scope="col">Formato</th>
+              <th scope="col">Sala asignada</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (showtime of upcomingShowtimes(); track showtime.id) {
+              <tr>
+                <td>{{ showtime.movieTitle }}</td>
+                <td>{{ formatDate(showtime.date) }}</td>
+                <td>{{ showtime.time }}</td>
+                <td>{{ showtime.formatName }}</td>
+                <td>{{ showtime.room }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</section>

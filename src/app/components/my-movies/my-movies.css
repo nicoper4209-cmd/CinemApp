@@ -239,3 +239,4 @@
 .cancel-confirmation p { margin: 0 0 12px; color: #665b49; font-size: 13px; line-height: 1.5; }
 .cancel-confirmation button + button { margin-left: 8px; }
 .cancelled-badge { color: #8d302e; font-size: 13px; font-weight: 600; }
+:host { display: block; background: #fff; }

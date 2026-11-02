@@ -13,3 +13,4 @@ button:disabled { opacity: .55; cursor: wait; }
 .error-message { background: #fbf1f0; color: #8d302e; }
 .success-message { background: #f0f7f2; color: #37644a; }
 @media (max-width: 560px) { .notification-action { align-items: stretch; flex-direction: column; } .notification-action button { width: 100%; } }
+:host { display: block; background: #fff; }

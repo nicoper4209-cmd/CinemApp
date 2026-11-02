@@ -4,10 +4,10 @@ Estado de referencia del código actual. **Implementado** indica que hay una rut
 
 | Requisito | Implementación principal | Estado / observación |
 |---|---|---|
-| RF-01, RF-02, RF-15 | `src/app/components/movie-list/`, `movie-detail/`, `top-movies/`, `coming-soon/`; `src/app/services/movie.ts` | Implementado; verificar datos reales y filtros. |
+| RF-01, RF-02, RF-15 | `src/app/components/movie-list/`, `movie-detail/`, `top-movies/`, `coming-soon/`, `admin/movies/`; `src/app/services/movie.ts`; Storage `posters`; vista `top_movies_30d` | Cartelera con sección manual `is_featured` y Top 3 por ventas de 30 días; verificar permisos de lectura de la vista y datos reales. |
 | RF-03, RF-04, RF-25; RN-02, RN-03, RN-07, RN-08 | `src/app/components/seat-selection/`; `src/app/services/seat-hold.ts`; `src/app/utils/seat-validation.ts`; RPC y Realtime del esquema SQL | Implementado en frontend; probar concurrencia con dos sesiones. |
 | RF-05; RN-03, RN-04 | `src/app/components/auth/`, `profile/`, `booking-summary/`, `booking-confirmation/`; `src/app/utils/age-rating.ts`; RPC `purchase_tickets` | Registro pide fecha; visitante la declara antes de comprar; OAuth/cuentas incompletas completan perfil. Verificar PDF y restricciones en vivo. |
-| RF-06, RF-21 | RPC `schedule_showtimes`; rutas/componentes del proyecto | **Pendiente de verificar** la interfaz administrativa y su cobertura. |
+| RF-06, RF-21 | `src/app/components/admin/showtimes/`; `src/app/services/showtime.ts`; RPC `schedule_showtimes` | Programación recurrente y listado de próximas funciones con sala asignada; probar conflictos contra Supabase. |
 | RF-07 | `src/app/components/booking-confirmation/`; modelos de compra; `jspdf`, `qrcode` | Implementado; validar contenido del QR y PDF. |
 | RF-08; HU-03 | `src/app/components/staff/`; `src/app/services/staff.ts`; RPC `validate_ticket`, `deliver_candy` | Implementado; probar escaneo y códigos reales. |
 | RF-09, RF-11, RF-28 | `src/app/components/booking-summary/`; `src/app/services/booking.ts`; RPC `purchase_tickets`, `cancel_booking`, `eligible_coupons` | Compra y beneficios conectados; verificar cancelación y cupones según datos configurados. |

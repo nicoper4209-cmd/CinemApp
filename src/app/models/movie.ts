@@ -10,6 +10,9 @@ export interface Movie {
   year: string;
   rating: number;
   trailer: string
-  status: 'available' | 'upcoming';
+  status: 'available' | 'upcoming' | 'unavailable';
   releaseDate?: string | null;
+  isFeatured?: boolean;
+  /** Path in the posters Storage bucket; `poster` is its display URL. */
+  posterPath?: string;
 }

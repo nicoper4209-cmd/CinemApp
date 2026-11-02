@@ -18,3 +18,4 @@
 .retry-button { padding: 9px 12px; border: 1px solid #242424; background: #fff; color: #242424; font: inherit; cursor: pointer; }
 .error { color: #a3332f; }
 .success { color: #37644a; }
+:host { display: block; background: #fff; }

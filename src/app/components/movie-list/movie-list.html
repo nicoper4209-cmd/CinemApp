@@ -1,1 +1,32 @@
-<app-movie-catalog [movies]="movies()" />
+@if (loading()) {
+  <p class="catalog-message" role="status">Cargando cartelera…</p>
+} @else if (errorMessage()) {
+  <p class="catalog-message error" role="alert">{{ errorMessage() }}</p>
+} @else {
+  @if (featuredMovies().length > 0) {
+    <section class="featured-section" aria-labelledby="featured-title">
+      <div class="featured-heading">
+        <p class="eyebrow">SELECCIÓN DE CINEMAPP</p>
+        <h1 id="featured-title">Destacadas</h1>
+      </div>
+      <div class="featured-grid">
+        @for (movie of featuredMovies(); track movie.id) {
+          <a class="featured-card" [routerLink]="['/movies', movie.id]">
+            <img [src]="movie.poster" [alt]="movie.alt" />
+            <div class="featured-info">
+              <span>EN CARTELERA</span>
+              <h2>{{ movie.title }}</h2>
+              <p>{{ movie.year }} · {{ movie.genre }}</p>
+            </div>
+          </a>
+        }
+      </div>
+    </section>
+  }
+
+  @if (movies().length > 0) {
+    <app-movie-catalog [movies]="movies()" />
+  } @else if (featuredMovies().length === 0) {
+    <p class="catalog-message">Todavía no hay películas en cartelera.</p>
+  }
+}

@@ -45,3 +45,4 @@
   .code-entry button { width: 100%; }
   .result-details { grid-template-columns: 1fr; }
 }
+:host { display: block; background: #fff; }

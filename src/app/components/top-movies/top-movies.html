@@ -9,21 +9,30 @@
     <span class="eyebrow">CINEMAPP / SELECCIÓN</span>
 
     <h1>Top 3 películas</h1>
+    <p>Las más elegidas en los últimos 30 días.</p>
   </header>
 
-    <!-- Tres bloques restantes: películas -->
-    @for (movie of topMovies; track movie.id; let i = $index) {
-      <a class="movie-block" [routerLink]="['/movies', movie.id]">
-        <img [src]="movie.poster" [alt]="movie.alt" />
+    @if (loading()) {
+      <p class="top-state" role="status">Cargando ranking…</p>
+    } @else if (errorMessage()) {
+      <p class="top-state error" role="alert">{{ errorMessage() }}</p>
+    } @else if (topMovies().length === 0) {
+      <p class="top-state">Todavía no hay ventas registradas en los últimos 30 días.</p>
+    } @else {
+      @for (movie of topMovies(); track movie.movieId; let i = $index) {
+      <a class="movie-block" [routerLink]="['/movies', movie.movieId]">
+        <img [src]="movie.poster" [alt]="'Póster de ' + movie.title" />
+        <span class="ranking">N.º {{ i + 1 }}</span>
 
         <div class="movie-overlay">
 
           <div class="movie-info">
             <h2>{{ movie.title }}</h2>
-            <p>{{ movie.year }} / {{ movie.genre }}</p>
+            <p>{{ movie.ticketsSold }} {{ movie.ticketsSold === 1 ? 'entrada vendida' : 'entradas vendidas' }}</p>
           </div>
         </div>
       </a>
+    }
     }
   </main>
 </div>

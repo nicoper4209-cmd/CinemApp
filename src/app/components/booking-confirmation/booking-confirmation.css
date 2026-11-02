@@ -231,3 +231,4 @@ h1 {
     align-self: center;
   }
 }
+:host { display: block; background: #fff; }

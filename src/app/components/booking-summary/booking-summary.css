@@ -506,3 +506,4 @@ hr {
   }
 
 }
+:host { display: block; background: #fff; }

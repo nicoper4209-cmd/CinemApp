@@ -1,0 +1,145 @@
+<section class="movies-admin" aria-labelledby="movies-admin-title">
+  <header class="section-header">
+    <div>
+      <p class="eyebrow">ADMINISTRACIÓN / CARTELERA</p>
+      <h2 id="movies-admin-title">Películas</h2>
+      <p>Administrá la información que se muestra en la cartelera.</p>
+    </div>
+    <button type="button" class="primary-button" (click)="createMovie()">Agregar película</button>
+  </header>
+
+  @if (errorMessage()) { <p class="message error" role="alert">{{ errorMessage() }}</p> }
+  @if (successMessage()) { <p class="message success" role="status">{{ successMessage() }}</p> }
+
+  @if (editorOpen()) {
+    <section class="editor" aria-labelledby="editor-title">
+      <div class="editor-heading">
+        <h3 id="editor-title">{{ editingId() === null ? 'Nueva película' : 'Editar película' }}</h3>
+        <button type="button" class="text-button" (click)="closeEditor()" [disabled]="saving()">Cancelar</button>
+      </div>
+
+      <form #movieForm="ngForm" (ngSubmit)="saveMovie()">
+        <div class="form-grid">
+          <div class="field">
+            <label for="movie-title">Título</label>
+            <input id="movie-title" name="title" [(ngModel)]="form.title" required maxlength="200" />
+          </div>
+          <div class="field">
+            <label for="movie-genre">Género</label>
+            <input id="movie-genre" name="genre" [(ngModel)]="form.genre" required />
+          </div>
+          <div class="field field-wide">
+            <label for="movie-synopsis">Sinopsis</label>
+            <textarea id="movie-synopsis" name="synopsis" rows="4" [(ngModel)]="form.synopsis" required></textarea>
+          </div>
+          <div class="field">
+            <label for="movie-duration">Duración (minutos)</label>
+            <input id="movie-duration" type="number" name="duration" [(ngModel)]="form.duration" required min="1" step="1" />
+          </div>
+          <div class="field">
+            <label for="movie-age-rating">Clasificación</label>
+            <select id="movie-age-rating" name="ageRating" [(ngModel)]="form.age_rating" required>
+              <option value="ATP">ATP</option>
+              <option value="+13">+13</option>
+              <option value="+18">+18</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="movie-year">Año</label>
+            <input id="movie-year" type="number" name="year" [(ngModel)]="form.year" required min="1900" step="1" />
+          </div>
+          <div class="field">
+            <label for="movie-release-date">Fecha de estreno</label>
+            <input id="movie-release-date" type="date" name="releaseDate" [(ngModel)]="form.release_date" required />
+          </div>
+          <div class="field">
+            <label for="movie-status">Estado</label>
+            <select id="movie-status" name="status" [(ngModel)]="form.status" required>
+              <option value="available">En cartelera</option>
+              <option value="upcoming">Próximamente</option>
+              <option value="unavailable">No disponible</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="movie-rating">Puntuación externa (0–10, opcional)</label>
+            <input id="movie-rating" type="number" name="rating" [(ngModel)]="form.rating" min="0" max="10" step="0.1" />
+          </div>
+          <div class="field field-wide">
+            <label for="movie-trailer">URL del tráiler (opcional)</label>
+            <input id="movie-trailer" type="url" name="trailer" [(ngModel)]="form.trailer" />
+          </div>
+          <div class="field field-wide">
+            <label for="movie-poster">Póster (JPG, PNG o WebP){{ editingId() === null ? '' : ' — opcional para conservar el actual' }}</label>
+            <input id="movie-poster" type="file" accept="image/jpeg,image/png,image/webp" name="posterFile"
+              (change)="selectPoster($event)" [required]="editingId() === null" />
+            @if (posterPreview) {
+              <img class="poster-preview" [src]="posterPreview" alt="Vista previa del póster" />
+            }
+          </div>
+          <div class="field field-wide">
+            <label for="movie-alt">Texto alternativo del póster</label>
+            <input id="movie-alt" name="alt" [(ngModel)]="form.alt" required />
+          </div>
+          <label class="featured-option field-wide">
+            <input type="checkbox" name="featured" [(ngModel)]="form.is_featured" />
+            <span>Destacar en la cartelera (las películas destacadas aparecen en su sección propia)</span>
+          </label>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="secondary-button" (click)="closeEditor()" [disabled]="saving()">Cancelar</button>
+          <button type="submit" class="primary-button" [disabled]="movieForm.invalid || saving()">
+            {{ saving() ? 'Guardando…' : 'Guardar película' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (loading()) {
+    <p role="status">Cargando películas…</p>
+  } @else if (movies().length === 0) {
+    <p class="empty-state">Todavía no hay películas cargadas.</p>
+  } @else {
+    <div class="list-filters">
+      <div class="field">
+        <label for="movie-search">Buscar por título</label>
+        <input id="movie-search" type="search" name="movieSearch" [(ngModel)]="searchTermValue" />
+      </div>
+      <div class="field">
+        <label for="movie-status-filter">Filtrar por estado</label>
+        <select id="movie-status-filter" name="movieStatusFilter" [(ngModel)]="statusFilterValue">
+          <option value="all">Todos los estados</option>
+          <option value="available">En cartelera</option>
+          <option value="upcoming">Próximamente</option>
+          <option value="unavailable">No disponible</option>
+        </select>
+      </div>
+    </div>
+    @if (visibleMovies().length === 0) {
+      <p class="empty-state">No hay películas que coincidan con la búsqueda.</p>
+    } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th scope="col">Póster</th><th scope="col">Película</th><th scope="col">Estado</th><th scope="col">Destacada</th><th scope="col"><span class="visually-hidden">Acciones</span></th></tr>
+        </thead>
+        <tbody>
+          @for (movie of visibleMovies(); track movie.id) {
+            <tr>
+              <td><img class="poster-thumb" [src]="movie.poster" [alt]="movie.alt" /></td>
+              <td><strong>{{ movie.title }}</strong><span class="subtext">{{ movie.year }} · {{ movie.genre }} · {{ movie.ageRating }}</span></td>
+              <td>{{ statusLabel(movie.status) }}</td>
+              <td>{{ movie.isFeatured ? 'Sí' : 'No' }}</td>
+              <td class="row-actions">
+                <button type="button" class="text-button" (click)="editMovie(movie)">Editar</button>
+                <button type="button" class="text-button danger-button" (click)="deleteMovie(movie)">Eliminar</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    }
+  }
+</section>

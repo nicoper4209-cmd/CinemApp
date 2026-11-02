@@ -16,7 +16,7 @@ import { Profile } from './components/profile/profile';
 import { customerGuard } from './guards/role-guards';
 import { AuthCallback } from './components/auth/auth-callback';
 import { Staff } from './components/staff/staff';
-import { staffGuard } from './guards/role-guards';
+import { adminGuard, staffGuard } from './guards/role-guards';
 
 export const routes: Routes = [
     {path:'top',component:TopMovies}, // Top 3 peliculas
@@ -34,6 +34,25 @@ export const routes: Routes = [
     {path:'register',component:Auth, canActivate: [guestGuard]}, // Pantalla registrarse
     {path:'auth/callback', component: AuthCallback},
     {path:'staff', component: Staff, canActivate: [staffGuard]},
+    {
+      path: 'admin',
+      canActivate: [adminGuard],
+      loadComponent: () => import('./components/admin/admin-layout').then(module => module.AdminLayout),
+      children: [
+        {
+          path: '',
+          loadComponent: () => import('./components/admin/admin-home').then(module => module.AdminHome),
+        },
+        {
+          path: 'movies',
+          loadComponent: () => import('./components/admin/movies/admin-movies').then(module => module.AdminMovies),
+        },
+        {
+          path: 'showtimes',
+          loadComponent: () => import('./components/admin/showtimes/admin-showtimes').then(module => module.AdminShowtimes),
+        },
+      ],
+    },
     {path:'',redirectTo:'top',pathMatch:'full'},
     {path:'**',redirectTo:'top'}
 ];

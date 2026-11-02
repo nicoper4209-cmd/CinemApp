@@ -64,3 +64,4 @@
   .account-page { width: calc(100% - 28px); margin: 28px auto 60px; }
   .balance-grid, .movement-grid { grid-template-columns: 1fr; }
 }
+:host { display: block; background: #fff; }
