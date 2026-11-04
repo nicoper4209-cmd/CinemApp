@@ -67,6 +67,14 @@ export const routes: Routes = [
           path: 'promotions',
           loadComponent: () => import('./components/admin/promotions/admin-promotions').then(module => module.AdminPromotions),
         },
+        {
+          path: 'reports',
+          loadComponent: () => import('./components/admin/reports/admin-reports').then(module => module.AdminReports),
+        },
+        {
+          path: 'alerts',
+          loadComponent: () => import('./components/admin/alerts/admin-alerts').then(module => module.AdminAlerts),
+        },
       ],
     },
     {path:'',redirectTo:'top',pathMatch:'full'},

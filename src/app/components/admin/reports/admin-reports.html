@@ -1,0 +1,185 @@
+<section class="reports-admin" aria-labelledby="reports-title">
+  <header class="section-header">
+    <div>
+      <p class="eyebrow">ADMINISTRACIÓN / REPORTES</p>
+      <h2 id="reports-title">Reportes y auditoría</h2>
+      <p>Consultá la caja diaria, las ventas por película y el registro de cambios administrativos.</p>
+    </div>
+    <button type="button" class="secondary-button" (click)="loadAll()"
+      [disabled]="dailyLoading() || salesLoading() || auditLoading()">Recargar todo</button>
+  </header>
+
+  @if (errorMessage()) { <p class="message error" role="alert">{{ errorMessage() }}</p> }
+  @if (successMessage()) { <p class="message success" role="status">{{ successMessage() }}</p> }
+
+  <section class="admin-card" aria-labelledby="daily-title">
+    <header class="card-heading">
+      <div>
+        <h3 id="daily-title">Caja del día</h3>
+        <p>Reservas confirmadas según la fecha de compra, en horario de Argentina.</p>
+      </div>
+      <form class="inline-form" #dailyForm="ngForm" (ngSubmit)="refreshDaily()">
+        <div class="field">
+          <label for="report-date">Fecha</label>
+          <input id="report-date" type="date" name="reportDate" [(ngModel)]="reportDate" required />
+        </div>
+        <button type="submit" class="primary-button" [disabled]="dailyForm.invalid || dailyLoading()">
+          {{ dailyLoading() ? 'Consultando…' : 'Consultar' }}
+        </button>
+      </form>
+    </header>
+
+    @if (dailyLoading()) {
+      <p role="status">Cargando caja del día…</p>
+    } @else if (daily(); as report) {
+      <dl class="metric-grid">
+        <div><dt>Reservas</dt><dd>{{ report.bookingsCount }}</dd></div>
+        <div><dt>Entradas</dt><dd>{{ report.ticketsCount }}</dd></div>
+        <div><dt>Importe entradas</dt><dd>{{ formatPrice(report.ticketsAmount) }}</dd></div>
+        <div><dt>Candy</dt><dd>{{ formatPrice(report.candyAmount) }}</dd></div>
+        <div><dt>Descuentos</dt><dd>{{ formatPrice(report.discounts) }}</dd></div>
+        <div><dt>Crédito usado</dt><dd>{{ formatPrice(report.creditUsed) }}</dd></div>
+        <div class="metric-highlight"><dt>Total cobrado</dt><dd>{{ formatPrice(report.cashTotal) }}</dd></div>
+      </dl>
+      <div class="export-row">
+        <button type="button" class="secondary-button" (click)="exportDailyCsv()">Exportar CSV (Excel)</button>
+        <button type="button" class="secondary-button" (click)="exportDailyPdf()">Exportar PDF</button>
+      </div>
+    } @else {
+      <p class="empty-state">No hay datos de caja para la fecha elegida.</p>
+    }
+  </section>
+
+  <section class="admin-card" aria-labelledby="sales-title">
+    <header class="card-heading card-heading-stack">
+      <div>
+        <h3 id="sales-title">Ventas por película</h3>
+        <p>Entradas activas de reservas confirmadas en el rango elegido.</p>
+      </div>
+      <form class="inline-form" #salesForm="ngForm" (ngSubmit)="refreshSales()">
+        <div class="field">
+          <label for="sales-from">Desde</label>
+          <input id="sales-from" type="date" name="salesFrom" [(ngModel)]="salesFrom" required />
+        </div>
+        <div class="field">
+          <label for="sales-to">Hasta</label>
+          <input id="sales-to" type="date" name="salesTo" [(ngModel)]="salesTo" required />
+        </div>
+        <button type="submit" class="primary-button" [disabled]="salesForm.invalid || salesLoading()">
+          {{ salesLoading() ? 'Generando…' : 'Generar reporte' }}
+        </button>
+      </form>
+    </header>
+
+    @if (salesLoading()) {
+      <p role="status">Cargando ventas…</p>
+    } @else if (sales().length === 0) {
+      <p class="empty-state">No hay ventas de entradas en el rango elegido.</p>
+    } @else {
+      <dl class="metric-grid metric-grid-compact">
+        <div><dt>Entradas</dt><dd>{{ salesTotals().tickets }}</dd></div>
+        <div><dt>Ingresos</dt><dd>{{ formatPrice(salesTotals().revenue) }}</dd></div>
+        <div><dt>Días con ventas</dt><dd>{{ salesTotals().days }}</dd></div>
+      </dl>
+
+      <div class="chart-block">
+        <h4>Ingresos por película</h4>
+        <ul class="bar-chart" aria-label="Ingresos por película">
+          @for (movie of movieTotals(); track movie.movieId) {
+            <li>
+              <span class="bar-label">{{ movie.title }}</span>
+              <span class="bar-track" aria-hidden="true">
+                <span class="bar-fill" [style.width.%]="barWidth(movie.revenue)"></span>
+              </span>
+              <span class="bar-value">{{ formatPrice(movie.revenue) }} · {{ movie.tickets }} entradas</span>
+            </li>
+          }
+        </ul>
+      </div>
+
+      <div class="export-row">
+        <button type="button" class="secondary-button" (click)="exportSalesCsv()">Exportar CSV (Excel)</button>
+        <button type="button" class="secondary-button" (click)="exportSalesPdf()">Exportar PDF</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <caption class="visually-hidden">Detalle diario de ventas por película</caption>
+          <thead>
+            <tr>
+              <th scope="col">Fecha</th>
+              <th scope="col">Película</th>
+              <th scope="col">Entradas</th>
+              <th scope="col">Ingresos</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of sales(); track row.saleDate + '-' + row.movieId) {
+              <tr>
+                <td>{{ formatReportDateValue(row.saleDate) }}</td>
+                <td>{{ row.title }}</td>
+                <td>{{ row.tickets }}</td>
+                <td>{{ formatPrice(row.revenue) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  <section class="admin-card" aria-labelledby="audit-title">
+    <header class="card-heading card-heading-stack">
+      <div>
+        <h3 id="audit-title">Auditoría</h3>
+        <p>Cambios registrados automáticamente sobre catálogo, configuración, cupones, premios y roles. Es de solo lectura.</p>
+      </div>
+      <form class="inline-form" #auditForm="ngForm" (ngSubmit)="refreshAudit()">
+        <div class="field">
+          <label for="audit-limit">Últimos registros</label>
+          <select id="audit-limit" name="auditLimit" [(ngModel)]="auditLimit">
+            @for (limit of auditLimitOptions; track limit) {
+              <option [ngValue]="limit">{{ limit }}</option>
+            }
+          </select>
+        </div>
+        <button type="submit" class="primary-button" [disabled]="auditLoading()">
+          {{ auditLoading() ? 'Cargando…' : 'Actualizar' }}
+        </button>
+      </form>
+    </header>
+
+    @if (auditLoading()) {
+      <p role="status">Cargando registros…</p>
+    } @else if (audit().length === 0) {
+      <p class="empty-state">Todavía no hay cambios registrados.</p>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Fecha</th>
+              <th scope="col">Actor</th>
+              <th scope="col">Acción</th>
+              <th scope="col">Entidad</th>
+              <th scope="col">ID</th>
+              <th scope="col">Campos modificados</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (entry of audit(); track entry.id) {
+              <tr>
+                <td class="nowrap">{{ formatAuditDate(entry.createdAt) }}</td>
+                <td>{{ entry.actorEmail ?? 'Sistema' }}</td>
+                <td><span class="action-badge" [class.delete]="entry.action === 'DELETE'">{{ actionLabel(entry.action) }}</span></td>
+                <td>{{ entityLabel(entry.entity) }}</td>
+                <td>{{ entry.entityId ?? '—' }}</td>
+                <td class="changed-fields">{{ changedFields(entry) }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+</section>

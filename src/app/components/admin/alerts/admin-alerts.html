@@ -1,0 +1,79 @@
+<section class="alerts-admin" aria-labelledby="alerts-title">
+  <header class="section-header">
+    <div>
+      <p class="eyebrow">ADMINISTRACIÓN / AVISOS</p>
+      <h2 id="alerts-title">Avisos de estreno</h2>
+      <p>Enviá una notificación push a los usuarios registrados que activaron el aviso de una película próxima.</p>
+    </div>
+    <button type="button" class="secondary-button" (click)="loadMovies()" [disabled]="loading() || sending()">
+      Recargar
+    </button>
+  </header>
+
+  @if (errorMessage()) { <p class="message error" role="alert">{{ errorMessage() }}</p> }
+  @if (successMessage()) { <p class="message success" role="status">{{ successMessage() }}</p> }
+
+  @if (loading()) {
+    <p role="status">Cargando próximas películas…</p>
+  } @else if (movies().length === 0) {
+    <div class="empty-state">
+      <p>No hay películas en estado “Próximamente”.</p>
+      <p>Cambiá el estado de una película desde <a routerLink="/admin/movies">Gestión de películas</a> para poder avisar su estreno.</p>
+    </div>
+  } @else {
+    <form class="admin-card alert-form" #alertNgForm="ngForm" (ngSubmit)="send()">
+      <div class="form-grid">
+        <div class="field field-wide">
+          <label for="alert-movie">Película</label>
+          <select id="alert-movie" name="alertMovie" [(ngModel)]="movieId"
+            (ngModelChange)="onMovieChange($event)" required>
+            <option [ngValue]="null" disabled>Elegí una película próxima</option>
+            @for (movie of movies(); track movie.id) {
+              <option [ngValue]="movie.id">{{ movie.title }} · {{ formatReleaseDate(movie.releaseDate) }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="field field-wide">
+          <label for="alert-title">Título del aviso</label>
+          <input id="alert-title" name="alertTitle" [(ngModel)]="title" required
+            [attr.maxlength]="maxTitleLength" placeholder="Ej.: ¡Se estrena esta semana!" />
+          <p class="field-hint">{{ title.length }}/{{ maxTitleLength }} caracteres.</p>
+        </div>
+
+        <div class="field field-wide">
+          <label for="alert-body">Mensaje</label>
+          <textarea id="alert-body" name="alertBody" [(ngModel)]="body" required rows="3"
+            [attr.maxlength]="maxBodyLength" placeholder="Texto breve que verá el usuario en la notificación"></textarea>
+          <p class="field-hint">{{ body.length }}/{{ maxBodyLength }} caracteres.</p>
+        </div>
+      </div>
+
+      <div class="preview" aria-label="Vista previa de la notificación">
+        <p class="preview-label">Vista previa</p>
+        <div class="notification-card">
+          <span class="notification-app">CINEMAPP</span>
+          <strong>{{ title || 'Título del aviso' }}</strong>
+          <p>{{ body || 'Mensaje del aviso' }}</p>
+        </div>
+      </div>
+
+      @if (sentCount() !== null) {
+        <p class="sent-result" role="status">
+          Notificaciones encoladas: <strong>{{ sentCount() }}</strong>
+        </p>
+      }
+
+      <div class="form-footer">
+        <label class="confirm-label">
+          <input type="checkbox" name="alertConfirmed" [(ngModel)]="confirmed" />
+          <span>Confirmo que este aviso se enviará a todos los usuarios suscriptos.</span>
+        </label>
+        <button type="submit" class="primary-button"
+          [disabled]="alertNgForm.invalid || movieId === null || !confirmed || sending()">
+          {{ sending() ? 'Enviando…' : 'Enviar aviso' }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

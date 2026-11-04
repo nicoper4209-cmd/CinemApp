@@ -16,15 +16,12 @@ import { RouterLink } from '@angular/router';
         <a routerLink="/admin/candy" class="movies-link">Administrar Candy</a>
         <a routerLink="/admin/config" class="movies-link">Configurar precios y salas</a>
         <a routerLink="/admin/promotions" class="movies-link">Gestionar cupones y premios</a>
+        <a routerLink="/admin/reports" class="movies-link">Ver reportes y auditoría</a>
+        <a routerLink="/admin/alerts" class="movies-link">Avisar estrenos</a>
       </div>
 
-      <h3>Módulos previstos</h3>
-      <ul>
-        @for (section of sections; track section) {
-          <li>{{ section }}</li>
-        }
-      </ul>
-      <p class="note">Las herramientas se incorporarán por etapas. Por ahora, esta pantalla es solo la entrada al panel.</p>
+      <h3>Estado del panel</h3>
+      <p class="note">Los módulos de administración previstos en la SPEC están disponibles. Queda pendiente la verificación integral con datos reales y el despliegue.</p>
     </section>
   `,
   styles: [`
@@ -36,14 +33,9 @@ import { RouterLink } from '@angular/router';
     .admin-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
     .movies-link { display: inline-block; padding: 11px 15px; background: #242424; color: white; font-size: 13px; text-decoration: none; }
     h3 { margin: 28px 0 12px; font-size: 16px; }
-    ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px 28px; padding-left: 20px; }
-    li { padding: 5px 0; }
     .note { margin-top: 24px; padding: 14px 16px; border-left: 3px solid #b99b65; background: #f7f6f2; font-size: 13px; }
   `],
 })
 export class AdminHome {
-  readonly sections = [
-    'Reportes y auditoría',
-    'Avisos de estreno',
-  ];
+  readonly pendingModules: string[] = [];
 }

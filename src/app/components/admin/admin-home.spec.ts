@@ -3,10 +3,9 @@ import { describe, expect, it } from 'vitest';
 import { AdminHome } from './admin-home';
 
 describe('AdminHome', () => {
-  it('lists only the administration modules that are still pending', () => {
+  it('has no pending administration modules left', () => {
     const page = new AdminHome();
 
-    expect(page.sections).toEqual(['Reportes y auditoría', 'Avisos de estreno']);
-    expect(page.sections).not.toContain('Cupones y premios');
+    expect(page.pendingModules).toEqual([]);
   });
 });

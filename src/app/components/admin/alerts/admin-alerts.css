@@ -1,0 +1,44 @@
+:host { display: block; background: #fff; }
+.alerts-admin { padding: 28px 0; color: #242424; }
+.section-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 22px; }
+.section-header h2 { margin: 0 0 8px; font-size: 25px; }
+.section-header p:not(.eyebrow) { max-width: 720px; margin: 0; color: #68655f; line-height: 1.6; }
+.eyebrow { margin: 0 0 8px; color: #77736c; font-size: 11px; letter-spacing: .14em; }
+.admin-card { margin: 20px 0; padding: 22px; border: 1px solid #e1dfd9; border-radius: 5px; background: #fff; }
+.primary-button, .secondary-button { min-height: 40px; padding: 9px 13px; border: 1px solid #242424; border-radius: 4px; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.primary-button { background: #242424; color: #fff; }
+.secondary-button { background: #fff; color: #242424; }
+button:disabled { opacity: .55; cursor: not-allowed; }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.field { display: flex; min-width: 0; flex-direction: column; gap: 7px; }
+.field-wide { grid-column: 1 / -1; }
+.field label { color: #34332f; font-size: 13px; font-weight: 600; }
+.field input:not([type="checkbox"]), .field select, .field textarea { box-sizing: border-box; width: 100%; min-height: 42px; padding: 9px 11px; border: 1px solid #d4d1ca; border-radius: 4px; background: #fff; color: #242424; font: inherit; font-size: 14px; }
+.field textarea { min-height: 84px; resize: vertical; }
+.field input:focus, .field select:focus, .field textarea:focus, button:focus-visible { outline: 2px solid rgb(108 78 20 / 30%); outline-offset: 1px; }
+.field-hint { margin: 0; color: #77736c; font-size: 12px; }
+.preview { margin: 20px 0; padding: 16px; border-radius: 4px; background: #f7f6f2; }
+.preview-label { margin: 0 0 10px; color: #68655f; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+.notification-card { max-width: 420px; padding: 14px 16px; border: 1px solid #e1dfd9; border-radius: 10px; background: #fff; box-shadow: 0 6px 18px rgb(36 36 36 / 8%); }
+.notification-app { display: block; margin-bottom: 5px; color: #77736c; font-size: 10px; letter-spacing: .12em; }
+.notification-card strong { display: block; font-size: 14px; }
+.notification-card p { margin: 5px 0 0; color: #55524c; font-size: 13px; line-height: 1.45; }
+.sent-result { margin: 0 0 4px; padding: 10px 12px; border-left: 3px solid #b99b65; background: #f7f6f2; font-size: 13px; }
+.form-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 18px; padding-top: 16px; border-top: 1px solid #e8e6e0; }
+.confirm-label { display: inline-flex; align-items: flex-start; gap: 8px; max-width: 620px; color: #34332f; font-size: 13px; line-height: 1.45; cursor: pointer; }
+.confirm-label input { width: 16px; height: 16px; margin: 1px 0 0; accent-color: #242424; }
+.message { padding: 11px 13px; border-radius: 4px; font-size: 13px; }
+.error { background: #fbf1f0; color: #8d302e; }
+.success { background: #f0f7f2; color: #37644a; }
+.empty-state { padding: 24px; border: 1px dashed #c9c6c0; color: #68655f; text-align: center; }
+.empty-state p { margin: 6px 0; }
+.empty-state a { color: #242424; }
+@media (max-width: 700px) {
+  .alerts-admin { padding-top: 20px; }
+  .section-header { flex-direction: column; }
+  .admin-card { padding: 16px; }
+  .form-grid { grid-template-columns: 1fr; }
+  .field-wide { grid-column: auto; }
+  .form-footer { align-items: flex-start; flex-direction: column; }
+  .form-footer .primary-button { width: 100%; }
+}

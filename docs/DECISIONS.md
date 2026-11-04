@@ -14,5 +14,8 @@ Decisiones simples para mantener la solución alineada con la SPEC y explicar su
 | Caché de precios | `PricingService.invalidate()` limpia precios, días de preventa y formatos memorizados después de guardar configuración. | Evita que las estimaciones de compra muestren valores viejos durante la misma sesión. |
 | Cupones y premios | No se eliminan desde el panel: se activan o desactivan. | `coupon_redemptions` referencia los cupones y el historial de canjes referencia los premios; el borrado rompería esos registros. |
 | Vigencia de cupones | Las fechas se interpretan como días completos en `America/Argentina/Buenos_Aires` (inicio 00:00, fin 23:59:59). | Coincide con la zona horaria del negocio y evita corrimientos de día al guardar timestamptz. |
+| Exportación Excel | Se descarga CSV UTF-8 con BOM y separador `;`, compatible con Excel en español. | Evita sumar una dependencia de hojas de cálculo y mantiene el archivo legible en Excel; el PDF se genera con `jspdf`, ya usado por las entradas. |
+| Gráficos de reportes | Las barras de ingresos por película se dibujan con CSS y datos de la RPC. | Cumple RF-18 sin incorporar una librería de gráficos ni aumentar el bundle inicial. |
+| Suscriptos a estrenos | El panel no lista usuarios suscriptos: solo envía el aviso y muestra cuántos quedaron encolados. | `movie_alerts` tiene RLS por usuario; el conteo lo devuelve la RPC sin exponer datos personales. |
 
 No se agregan tablas ni columnas: el esquema aplicado y las RPC de la SPEC son la fuente de verdad.
