@@ -1,0 +1,217 @@
+<section class="config-admin" aria-labelledby="config-title">
+  <header class="section-header">
+    <div>
+      <p class="eyebrow">ADMINISTRACIÓN / CONFIGURACIÓN</p>
+      <h2 id="config-title">Configuración del cine</h2>
+      <p>Precios, formatos, salas y parámetros operativos. Los cambios se aplican a las próximas compras; las ventas ya realizadas conservan su importe.</p>
+    </div>
+    <button type="button" class="secondary-button" (click)="loadConfig()" [disabled]="loading() || saving() !== ''">
+      Recargar
+    </button>
+  </header>
+
+  @if (errorMessage()) { <p class="message error" role="alert">{{ errorMessage() }}</p> }
+  @if (successMessage()) { <p class="message success" role="status">{{ successMessage() }}</p> }
+
+  @if (loading()) {
+    <p role="status">Cargando configuración…</p>
+  } @else {
+    <form class="admin-card" #pricingForm="ngForm" (ngSubmit)="savePricing()" aria-labelledby="pricing-title">
+      <header class="card-heading">
+        <div>
+          <h3 id="pricing-title">Precios de entradas</h3>
+          <p>El precio final se multiplica por el formato de la función. La base de datos lo calcula al comprar.</p>
+        </div>
+      </header>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Tipo de butaca</th>
+              <th scope="col">Precio normal (ARS)</th>
+              <th scope="col">Precio de preventa (ARS)</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of pricing; track row.seatType) {
+              <tr>
+                <td><strong>{{ seatTypeLabel(row.seatType) }}</strong></td>
+                <td>
+                  <input type="number" min="0.01" step="0.01" required
+                    [id]="'price-base-' + row.seatType" [name]="'basePrice-' + row.seatType"
+                    [attr.aria-label]="'Precio normal ' + seatTypeLabel(row.seatType)"
+                    [(ngModel)]="row.basePrice" />
+                </td>
+                <td>
+                  <input type="number" min="0.01" step="0.01" required
+                    [id]="'price-presale-' + row.seatType" [name]="'presalePrice-' + row.seatType"
+                    [attr.aria-label]="'Precio de preventa ' + seatTypeLabel(row.seatType)"
+                    [(ngModel)]="row.presalePrice" />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="form-buttons">
+        <button type="submit" class="primary-button" [disabled]="pricingForm.invalid || saving() !== ''">
+          {{ saving() === 'pricing' ? 'Guardando…' : 'Guardar precios' }}
+        </button>
+      </div>
+    </form>
+
+    <section class="admin-card" aria-labelledby="formats-title">
+      <header class="card-heading">
+        <div>
+          <h3 id="formats-title">Formatos</h3>
+          <p>El multiplicador ajusta el precio de la entrada. Los formatos inactivos no se ofrecen al programar funciones.</p>
+        </div>
+      </header>
+
+      <form class="inline-form" #formatNgForm="ngForm" (ngSubmit)="saveFormat()">
+        <div class="field format-name">
+          <label for="format-name">Nombre</label>
+          <input id="format-name" name="formatName" [(ngModel)]="formatForm.name" required maxlength="40" placeholder="Ej.: 2D" />
+        </div>
+        <div class="field format-multiplier">
+          <label for="format-multiplier">Multiplicador</label>
+          <input id="format-multiplier" type="number" name="formatMultiplier" [(ngModel)]="formatForm.priceMultiplier"
+            min="0.01" max="99.99" step="0.01" required />
+        </div>
+        <div class="field format-active">
+          <span class="field-label">Estado</span>
+          <label class="checkbox-label">
+            <input type="checkbox" name="formatActive" [(ngModel)]="formatForm.active" />
+            <span>Activo</span>
+          </label>
+        </div>
+        <div class="form-buttons">
+          @if (editingFormatId !== null) {
+            <button type="button" class="secondary-button" (click)="resetFormatForm()">Cancelar</button>
+          }
+          <button type="submit" class="primary-button" [disabled]="formatNgForm.invalid || saving() !== ''">
+            {{ saving() === 'format' ? 'Guardando…' : editingFormatId === null ? 'Agregar formato' : 'Guardar formato' }}
+          </button>
+        </div>
+      </form>
+
+      @if (formats().length === 0) {
+        <p class="empty-state">Todavía no hay formatos configurados.</p>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Formato</th>
+                <th scope="col">Multiplicador</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (format of formats(); track format.id) {
+                <tr>
+                  <td><strong>{{ format.name }}</strong></td>
+                  <td>×{{ format.priceMultiplier }}</td>
+                  <td><span class="status" [class.inactive]="!format.active">{{ format.active ? 'Activo' : 'Inactivo' }}</span></td>
+                  <td class="actions">
+                    <button type="button" class="text-button" (click)="editFormat(format)">Editar</button>
+                    <button type="button" class="text-button" [disabled]="saving() !== ''" (click)="toggleFormat(format)">
+                      {{ format.active ? 'Desactivar' : 'Activar' }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <section class="admin-card" aria-labelledby="rooms-title">
+      <header class="card-heading">
+        <div>
+          <h3 id="rooms-title">Salas</h3>
+          <p>Las funciones se asignan automáticamente a una sala activa. Las salas no se eliminan para conservar el historial.</p>
+        </div>
+      </header>
+
+      <form class="inline-form" #roomNgForm="ngForm" (ngSubmit)="createRoom()">
+        <div class="field room-code">
+          <label for="room-code">Código de sala</label>
+          <input id="room-code" name="roomCode" [(ngModel)]="roomCode" required maxlength="3" placeholder="Ej.: E" />
+        </div>
+        <div class="form-buttons">
+          <button type="submit" class="primary-button" [disabled]="roomNgForm.invalid || saving() !== ''">
+            {{ saving() === 'room' ? 'Guardando…' : 'Agregar sala' }}
+          </button>
+        </div>
+      </form>
+
+      @if (rooms().length === 0) {
+        <p class="empty-state">Todavía no hay salas configuradas.</p>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Sala</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (room of rooms(); track room.code) {
+                <tr>
+                  <td><strong>{{ room.code }}</strong></td>
+                  <td><span class="status" [class.inactive]="!room.active">{{ room.active ? 'Activa' : 'Inactiva' }}</span></td>
+                  <td class="actions">
+                    <button type="button" class="text-button" [disabled]="saving() !== ''" (click)="toggleRoom(room)">
+                      {{ room.active ? 'Desactivar' : 'Activar' }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <form class="admin-card" #settingsForm="ngForm" (ngSubmit)="saveSettings()" aria-labelledby="settings-title">
+      <header class="card-heading">
+        <div>
+          <h3 id="settings-title">Parámetros operativos</h3>
+          <p>Reglas generales que usan las RPC de compra, cancelación y validación.</p>
+        </div>
+      </header>
+
+      @if (settingFields.length === 0) {
+        <p class="empty-state">No se encontraron parámetros en la base de datos.</p>
+      } @else {
+        <div class="settings-grid">
+          @for (field of settingFields; track field.setting.key) {
+            <div class="field">
+              <label [for]="'setting-' + field.rule.key">{{ field.rule.label }}</label>
+              <div class="setting-input">
+                <input [id]="'setting-' + field.rule.key" [name]="field.rule.key" type="number"
+                  [min]="field.rule.min" [max]="field.rule.max" step="1" required
+                  [(ngModel)]="field.setting.value" />
+                <span class="unit">{{ field.rule.unit }}</span>
+              </div>
+              <p class="field-hint">{{ field.rule.description }}</p>
+            </div>
+          }
+        </div>
+      }
+
+      <div class="form-buttons">
+        <button type="submit" class="primary-button" [disabled]="settingsForm.invalid || saving() !== ''">
+          {{ saving() === 'settings' ? 'Guardando…' : 'Guardar parámetros' }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

@@ -26,6 +26,13 @@ export class PricingService {
   private presaleDaysPromise?: Promise<number>;
   private formatPromises = new Map<number, Promise<{ name: string; multiplier: number }>>();
 
+  /** Limpia los valores memorizados para que la próxima estimación lea la configuración guardada. */
+  invalidate(): void {
+    this.pricingConfigPromise = undefined;
+    this.presaleDaysPromise = undefined;
+    this.formatPromises.clear();
+  }
+
   async estimateTickets(
     movie: Movie,
     showtime: Showtime,

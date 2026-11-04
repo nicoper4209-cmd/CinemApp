@@ -13,12 +13,15 @@ import { RouterLink } from '@angular/router';
       <div class="admin-actions">
         <a routerLink="/admin/movies" class="movies-link">Gestionar películas</a>
         <a routerLink="/admin/showtimes" class="movies-link">Programar funciones</a>
+        <a routerLink="/admin/candy" class="movies-link">Administrar Candy</a>
+        <a routerLink="/admin/config" class="movies-link">Configurar precios y salas</a>
+        <a routerLink="/admin/promotions" class="movies-link">Gestionar cupones y premios</a>
       </div>
 
       <h3>Módulos previstos</h3>
       <ul>
         @for (section of sections; track section) {
-          @if (section !== 'Películas y cartelera') { <li>{{ section }}</li> }
+          <li>{{ section }}</li>
         }
       </ul>
       <p class="note">Las herramientas se incorporarán por etapas. Por ahora, esta pantalla es solo la entrada al panel.</p>
@@ -40,9 +43,6 @@ import { RouterLink } from '@angular/router';
 })
 export class AdminHome {
   readonly sections = [
-    'Productos Candy',
-    'Precios y configuración',
-    'Cupones y premios',
     'Reportes y auditoría',
     'Avisos de estreno',
   ];

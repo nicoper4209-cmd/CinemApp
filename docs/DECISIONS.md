@@ -10,5 +10,9 @@ Decisiones simples para mantener la solución alineada con la SPEC y explicar su
 | PWA y push | Se usa el service worker generado por Angular para caché offline y notificaciones push; se cachea solo el catálogo público. | Evita registrar dos workers con el mismo alcance y no almacena datos privados fuera de línea. |
 | Envío push | La Edge Function procesa la cola con la service role, configurada solo en Supabase; un scheduler la invoca periódicamente. | La cola y su procesamiento forman parte de RF-22/RNF-19; no se exponen credenciales privilegiadas al navegador. |
 | Datos de configuración | La URL y la clave anon de Supabase son datos públicos del cliente; service role y clave privada VAPID permanecen en el servidor. | Distingue configuración pública de secretos y evita incluir secretos en Angular. |
+| Salas y formatos | No se eliminan desde el panel: se activan o desactivan. | Las funciones y ventas históricas los referencian; el borrado rompería el historial y las claves foráneas. |
+| Caché de precios | `PricingService.invalidate()` limpia precios, días de preventa y formatos memorizados después de guardar configuración. | Evita que las estimaciones de compra muestren valores viejos durante la misma sesión. |
+| Cupones y premios | No se eliminan desde el panel: se activan o desactivan. | `coupon_redemptions` referencia los cupones y el historial de canjes referencia los premios; el borrado rompería esos registros. |
+| Vigencia de cupones | Las fechas se interpretan como días completos en `America/Argentina/Buenos_Aires` (inicio 00:00, fin 23:59:59). | Coincide con la zona horaria del negocio y evita corrimientos de día al guardar timestamptz. |
 
 No se agregan tablas ni columnas: el esquema aplicado y las RPC de la SPEC son la fuente de verdad.

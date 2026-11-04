@@ -59,6 +59,14 @@ export const routes: Routes = [
           path: 'candy',
           loadComponent: () => import('./components/admin/candy/admin-candy').then(module => module.AdminCandy),
         },
+        {
+          path: 'config',
+          loadComponent: () => import('./components/admin/config/admin-config').then(module => module.AdminConfig),
+        },
+        {
+          path: 'promotions',
+          loadComponent: () => import('./components/admin/promotions/admin-promotions').then(module => module.AdminPromotions),
+        },
       ],
     },
     {path:'',redirectTo:'top',pathMatch:'full'},

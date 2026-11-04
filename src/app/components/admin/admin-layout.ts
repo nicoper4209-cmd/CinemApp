@@ -18,6 +18,8 @@ import { RouterLink, RouterOutlet } from '@angular/router';
         <a routerLink="/admin/movies">Películas</a>
         <a routerLink="/admin/showtimes">Funciones</a>
         <a routerLink="/admin/candy">Candy</a>
+        <a routerLink="/admin/config">Configuración</a>
+        <a routerLink="/admin/promotions">Cupones y premios</a>
       </nav>
       <router-outlet />
     </main>

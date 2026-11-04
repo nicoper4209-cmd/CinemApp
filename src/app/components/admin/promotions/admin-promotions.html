@@ -1,0 +1,219 @@
+<section class="promotions-admin" aria-labelledby="promotions-title">
+  <header class="section-header">
+    <div>
+      <p class="eyebrow">ADMINISTRACIÓN / BENEFICIOS</p>
+      <h2 id="promotions-title">Cupones y premios</h2>
+      <p>Los cupones se ofrecen en el checkout según las reglas de la base de datos. Los premios se canjean con puntos desde la cuenta del cliente.</p>
+    </div>
+    <button type="button" class="secondary-button" (click)="loadPromotions()" [disabled]="loading() || saving() !== ''">
+      Recargar
+    </button>
+  </header>
+
+  @if (errorMessage()) { <p class="message error" role="alert">{{ errorMessage() }}</p> }
+  @if (successMessage()) { <p class="message success" role="status">{{ successMessage() }}</p> }
+
+  @if (loading()) {
+    <p role="status">Cargando cupones y premios…</p>
+  } @else {
+    <section class="admin-card" aria-labelledby="coupons-title">
+      <header class="card-heading">
+        <div>
+          <h3 id="coupons-title">Cupones</h3>
+          <p>El descuento se aplica sobre el subtotal. Los cupones de primera compra solo se ofrecen a registrados que todavía no compraron.</p>
+        </div>
+      </header>
+
+      <form class="promotion-form" #couponNgForm="ngForm" (ngSubmit)="saveCoupon()">
+        <div class="form-grid">
+          <div class="field">
+            <label for="coupon-code">Código</label>
+            <input id="coupon-code" name="couponCode" [(ngModel)]="couponForm.code" required maxlength="30" placeholder="Ej.: BIENVENIDA" />
+          </div>
+          <div class="field">
+            <label for="coupon-type">Tipo</label>
+            <select id="coupon-type" name="couponType" [(ngModel)]="couponForm.type"
+              (ngModelChange)="onCouponTypeChange($event)" required>
+              @for (type of couponTypes; track type.value) {
+                <option [ngValue]="type.value">{{ type.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="coupon-percentage">Descuento (%)</label>
+            <input id="coupon-percentage" type="number" name="couponPercentage" [(ngModel)]="couponForm.percentage"
+              min="0.01" max="100" step="0.01" required />
+          </div>
+          <div class="field">
+            <label for="coupon-min-age">Edad mínima</label>
+            <input id="coupon-min-age" type="number" name="couponMinAge" [(ngModel)]="couponForm.minAge"
+              min="1" max="120" step="1" placeholder="Opcional" />
+            <p class="field-hint">Obligatoria para cupones de mayores.</p>
+          </div>
+          <div class="field">
+            <label for="coupon-from">Válido desde</label>
+            <input id="coupon-from" type="date" name="couponFrom" [(ngModel)]="couponForm.validFrom" />
+          </div>
+          <div class="field">
+            <label for="coupon-until">Válido hasta</label>
+            <input id="coupon-until" type="date" name="couponUntil" [(ngModel)]="couponForm.validUntil" />
+          </div>
+          <div class="field field-wide">
+            <label for="coupon-description">Descripción</label>
+            <input id="coupon-description" name="couponDescription" [(ngModel)]="couponForm.description"
+              maxlength="160" placeholder="Texto que ve el cliente al elegir el cupón" />
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <label class="checkbox-label">
+            <input type="checkbox" name="couponActive" [(ngModel)]="couponForm.active" />
+            <span>Cupón activo</span>
+          </label>
+          <div class="form-buttons">
+            @if (editingCouponId !== null) {
+              <button type="button" class="secondary-button" (click)="resetCouponForm()" [disabled]="saving() !== ''">Cancelar</button>
+            }
+            <button type="submit" class="primary-button" [disabled]="couponNgForm.invalid || saving() !== ''">
+              {{ saving() === 'coupon' ? 'Guardando…' : editingCouponId === null ? 'Agregar cupón' : 'Guardar cupón' }}
+            </button>
+          </div>
+        </div>
+      </form>
+
+      @if (coupons().length === 0) {
+        <p class="empty-state">Todavía no hay cupones configurados.</p>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Código</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Descuento</th>
+                <th scope="col">Edad mín.</th>
+                <th scope="col">Vigencia</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (coupon of coupons(); track coupon.id) {
+                <tr>
+                  <td><strong>{{ coupon.code }}</strong></td>
+                  <td>{{ couponTypeLabel(coupon.type) }}</td>
+                  <td>{{ coupon.percentage }}%</td>
+                  <td>{{ coupon.minAge ?? '—' }}</td>
+                  <td class="validity">{{ formatDate(coupon.validFrom) }} — {{ formatDate(coupon.validUntil) }}</td>
+                  <td><span class="status" [class.inactive]="!coupon.active">{{ coupon.active ? 'Activo' : 'Inactivo' }}</span></td>
+                  <td class="actions">
+                    <button type="button" class="text-button" (click)="editCoupon(coupon)">Editar</button>
+                    <button type="button" class="text-button" [disabled]="saving() !== ''" (click)="toggleCoupon(coupon)">
+                      {{ coupon.active ? 'Desactivar' : 'Activar' }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <section class="admin-card" aria-labelledby="rewards-title">
+      <header class="card-heading">
+        <div>
+          <h3 id="rewards-title">Premios</h3>
+          <p>El cliente canjea con puntos. Los premios de crédito acreditan el valor automáticamente; los demás generan un código de canje.</p>
+        </div>
+      </header>
+
+      <form class="promotion-form" #rewardNgForm="ngForm" (ngSubmit)="saveReward()">
+        <div class="form-grid">
+          <div class="field">
+            <label for="reward-name">Nombre</label>
+            <input id="reward-name" name="rewardName" [(ngModel)]="rewardForm.name" required maxlength="80" placeholder="Ej.: Crédito de $5.000" />
+          </div>
+          <div class="field">
+            <label for="reward-cost">Costo en puntos</label>
+            <input id="reward-cost" type="number" name="rewardCost" [(ngModel)]="rewardForm.pointsCost"
+              min="1" step="1" required />
+          </div>
+          <div class="field">
+            <label for="reward-type">Tipo</label>
+            <select id="reward-type" name="rewardType" [(ngModel)]="rewardForm.rewardType" required>
+              @for (type of rewardTypes; track type.value) {
+                <option [ngValue]="type.value">{{ type.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label for="reward-value">Valor</label>
+            <input id="reward-value" type="number" name="rewardValue" [(ngModel)]="rewardForm.rewardValue"
+              min="0" step="0.01" required />
+            <p class="field-hint">En crédito, es el importe a acreditar en ARS.</p>
+          </div>
+          <div class="field field-wide">
+            <label for="reward-description">Descripción</label>
+            <input id="reward-description" name="rewardDescription" [(ngModel)]="rewardForm.description"
+              maxlength="160" placeholder="Detalle que ve el cliente" />
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <label class="checkbox-label">
+            <input type="checkbox" name="rewardActive" [(ngModel)]="rewardForm.active" />
+            <span>Premio activo</span>
+          </label>
+          <div class="form-buttons">
+            @if (editingRewardId !== null) {
+              <button type="button" class="secondary-button" (click)="resetRewardForm()" [disabled]="saving() !== ''">Cancelar</button>
+            }
+            <button type="submit" class="primary-button" [disabled]="rewardNgForm.invalid || saving() !== ''">
+              {{ saving() === 'reward' ? 'Guardando…' : editingRewardId === null ? 'Agregar premio' : 'Guardar premio' }}
+            </button>
+          </div>
+        </div>
+      </form>
+
+      @if (rewards().length === 0) {
+        <p class="empty-state">Todavía no hay premios configurados.</p>
+      } @else {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Premio</th>
+                <th scope="col">Puntos</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Valor</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (reward of rewards(); track reward.id) {
+                <tr>
+                  <td>
+                    <strong>{{ reward.name }}</strong>
+                    @if (reward.description) { <small>{{ reward.description }}</small> }
+                  </td>
+                  <td>{{ reward.pointsCost }}</td>
+                  <td>{{ rewardTypeLabel(reward.rewardType) }}</td>
+                  <td>{{ reward.rewardType === 'credit' ? formatPrice(reward.rewardValue) : (reward.rewardValue || '—') }}</td>
+                  <td><span class="status" [class.inactive]="!reward.active">{{ reward.active ? 'Activo' : 'Inactivo' }}</span></td>
+                  <td class="actions">
+                    <button type="button" class="text-button" (click)="editReward(reward)">Editar</button>
+                    <button type="button" class="text-button" [disabled]="saving() !== ''" (click)="toggleReward(reward)">
+                      {{ reward.active ? 'Desactivar' : 'Activar' }}
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  }
+</section>

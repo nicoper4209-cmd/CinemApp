@@ -10,11 +10,11 @@ Estado de referencia del código actual. **Implementado** indica que hay una rut
 | RF-06, RF-21 | `src/app/components/admin/showtimes/`; `src/app/services/showtime.ts`; RPC `schedule_showtimes` | Programación recurrente y listado de próximas funciones con sala asignada; probar conflictos contra Supabase. |
 | RF-07 | `src/app/components/booking-confirmation/`; modelos de compra; `jspdf`, `qrcode` | Implementado; validar contenido del QR y PDF. |
 | RF-08; HU-03 | `src/app/components/staff/`; `src/app/services/staff.ts`; RPC `validate_ticket`, `deliver_candy` | Implementado; probar escaneo y códigos reales. |
-| RF-09, RF-11, RF-28 | `src/app/components/booking-summary/`; `src/app/services/booking.ts`; RPC `purchase_tickets`, `cancel_booking`, `eligible_coupons` | Compra y beneficios conectados; verificar cancelación y cupones según datos configurados. |
+| RF-09, RF-11, RF-28 | `src/app/components/booking-summary/`, `src/app/components/admin/promotions/`; `src/app/services/booking.ts`, `admin-promotions.ts`; RPC `purchase_tickets`, `cancel_booking`, `eligible_coupons` | Compra, cancelación y cupones conectados; el admin gestiona códigos, porcentaje, edad mínima y vigencia. Verificar reglas con datos reales. |
 | RF-10, RF-26; RNF-20 | `src/app/services/pricing.ts`, `booking.ts`; RPC `purchase_tickets` | Estimación cliente y decisión final en servidor. |
 | RF-12, RF-16 | `src/app/components/candy-shop/`, `src/app/components/admin/candy/`; `src/app/services/candy.ts`, `candy-cart.ts`; Storage `candy`; RPC `purchase_tickets`, `deliver_candy` | Tienda y CRUD admin de categorías/productos con imágenes, combos y destacados; probar permisos/RLS y compra real. |
 | RF-13; RF-15 favoritos | `src/app/components/movie-detail/`, `my-movies/`; `src/app/services/favorites.ts`; vistas `movie_reviews`, `movie_ratings` | Implementado; verificar permisos y persistencia. |
-| RF-14; RF-09 | `src/app/components/account/`; `src/app/services/account.ts`; RPC de saldo y canje | Implementado; verificar movimientos y reglas con datos reales. |
+| RF-14; RF-09 | `src/app/components/account/`, `src/app/components/admin/promotions/`; `src/app/services/account.ts`, `admin-promotions.ts`; RPC de saldo y canje | Saldo, movimientos y canje; el admin administra premios por puntos. Verificar reglas con datos reales. |
 | RF-17, RF-20; RNF-04, RNF-05, RNF-12 | `src/app/guards/`, `src/app/services/auth.ts`, `src/app/components/auth/`; RLS del esquema SQL | Implementado; los roles se resuelven en base de datos, no desde Angular. |
 | RF-18, RF-19; RF-24 | Esquema SQL: reportes, auditoría y `send_premiere_alerts` | **Pendiente de verificar** la interfaz administrativa, exportaciones y gráficos. |
 | RF-22, RF-23; RNF-19 | `src/app/services/notifications.ts`, `src/app/components/notification-settings/`, `supabase/functions/send-notifications/`; cola SQL | Suscripción y envío implementados; requiere VAPID, scheduler y prueba desplegada. |
@@ -23,6 +23,7 @@ Estado de referencia del código actual. **Implementado** indica que hay una rut
 | RN-05, RN-06; HU-05 | RPC `cancel_booking`, `redeem_reward`; `src/app/components/account/` | Reglas en RPC; verificar política de crédito y ventana de cancelación. |
 | RNF-01, RNF-02, RNF-03 | Componentes standalone, validaciones y bloqueos de butacas | Revisión de accesibilidad, rendimiento y concurrencia pendiente. |
 | RNF-06, RNF-07, RNF-08, RNF-09, RNF-10, RNF-11 | Backups/hosting; triggers, RLS, Storage y Realtime del esquema; servicios Angular | Infraestructura y pruebas finales pendientes; documentar backups al desplegar. |
+| RNF-08 | `src/app/components/admin/config/`; `src/app/services/admin-config.ts`; tablas `rooms`, `formats`, `pricing_config`, `app_settings` | Panel para precios, formatos, salas y parámetros; las salas y formatos se desactivan en lugar de borrarse. Aplicar `20261103_admin_config_grants.sql` y probar el guardado real. |
 | RNF-13, RNF-14, RNF-15 | Angular 22 standalone, Signals y control flow moderno | Cumplido por estructura y código actuales. |
 | RNF-21, RNF-22, RNF-23 | `README.md`, configuración de Angular y Supabase | README presente; deploy y configuración de variables deben verificarse antes de la entrega. |
 
